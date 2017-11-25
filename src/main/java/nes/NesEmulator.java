@@ -18,7 +18,7 @@ public class NesEmulator {
         PPU ppu = new PPU(nesData.characterRom, nesData.mirroring);
         _6502 cpu = new _6502(ppu, nesData.programRom);
 
-        startScreen(ppu);
+        startScreen(ppu, cpu);
         cpu.start();
     }
 
@@ -32,12 +32,12 @@ public class NesEmulator {
         return new FileLoader().load(in);
     }
 
-    private void startScreen(PPU ppu) {
+    private void startScreen(PPU ppu, _6502 cpu) {
         //新しいフレーム(Window)を作成
         JFrame mainFrame = new JFrame();
 
         //Canvasクラスを継承したGameMainクラスのインスタンスを作成
-        Window window = new Window(ppu);
+        Window window = new Window(ppu, cpu);
 
         //フレームのタイトルを設定
         mainFrame.setTitle("NesEmulator");

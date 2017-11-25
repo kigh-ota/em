@@ -3,6 +3,7 @@ package nes.screen;
 import common.BinaryUtil;
 import nes.ppu.Mirroring;
 import nes.ppu.PPU;
+import nes.cpu._6502;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
@@ -11,6 +12,7 @@ import static nes.ppu.Mirroring.VERTICAL;
 
 public class Window extends Canvas implements Runnable {
     private final PPU ppu;
+    private final _6502 cpu;
 
     //ゲームのメインループスレッド
     Thread gameLoop;
@@ -104,8 +106,9 @@ public class Window extends Canvas implements Runnable {
             new Color(0, 0, 0),
     };
 
-    public Window(PPU ppu){
+    public Window(PPU ppu, _6502 cpu){
         this.ppu = ppu;
+        this.cpu = cpu;
 
         setPreferredSize(new Dimension(WIDTH, HEIGHT));
     }
@@ -190,11 +193,37 @@ public class Window extends Canvas implements Runnable {
                         MAIN_WIDTH + 1,
                         MAIN_HEIGHT + 1);
 
+                // show fps
+                frames++;
+                g.setColor(Color.WHITE);
+                g.fillRect(300, 0, 100, 20);
+                g.setColor(Color.BLACK);
+                g.drawString(String.format("fps=%d;%d", updateFps(), cpu.getCycles()), 300, 20);
+
                 Thread.sleep(1/60*1000);    //1/60秒スリープ
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    private long frames = 0;
+    private Long previousTime = null;
+    private long previousFrames = 0;
+    private int fps = 0;
+
+    private int updateFps() {
+        if (previousTime == null) {
+            previousTime = System.nanoTime();
+        }
+        long now = System.nanoTime();
+        long window = now - previousTime;
+        if (window >= 1000000000) {
+            fps = (int)((frames - previousFrames) * 1000000000 / window);
+            previousFrames = frames;
+            previousTime = now;
+        }
+        return fps;
     }
 
     private void drawTile(byte[] data, int x0, int y0, Graphics g) {

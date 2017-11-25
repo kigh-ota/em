@@ -1,6 +1,7 @@
 package nes.cpu;
 
 import common.*;
+import lombok.Getter;
 import nes.ppu.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -29,8 +30,13 @@ public class _6502 {
         this.programRom = programRom;
     }
 
+    @Getter
+    private long cycles = 0;
+
     public void start() {
         while (true) {
+            cycles++;
+
             System.out.print(String.format("%04x ", regPC.get() * 1));
             byte code = getCode();
             Operation op = Operation.of(code);
