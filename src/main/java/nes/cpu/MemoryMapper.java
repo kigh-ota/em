@@ -5,7 +5,7 @@ import lombok.RequiredArgsConstructor;
 import nes.ppu.PPU;
 
 @RequiredArgsConstructor
-public class MemoryMapper {
+class MemoryMapper {
     /**
      * https://wiki.nesdev.com/w/index.php/CPU_memory_map
      *
@@ -22,22 +22,38 @@ public class MemoryMapper {
      *     $6000-$7FFF Battery Backed Save/Work RAM
      *     $8000-$FFFF Program ROM
      */
-    public static final int PROGRAM_OFFSET = 0x8000;
+    static final int PROGRAM_OFFSET = 0x8000;
 
     private final _6502 cpu;
     private final PPU ppu;
 
     byte get(int address) {
         checkAddress(address);
-        return at(address).get();
+        MemoryByte ppuRegister = getPpuRegister(address);
+        if (ppuRegister != null) {
+            return ppuRegister.get();
+        }
+        if (address >= PROGRAM_OFFSET && address < 0x10000) {
+            return cpu.programRom.get(address - PROGRAM_OFFSET);
+        }
+        throw new IllegalArgumentException();
     }
 
     void set(byte value, int address) {
         checkAddress(address);
-        at(address).set(value);
+        MemoryByte ppuRegister = getPpuRegister(address);
+        if (ppuRegister != null) {
+            ppuRegister.set(value);
+            return;
+        }
+
+        if (address >= PROGRAM_OFFSET && address < 0x10000) {
+            throw new IllegalArgumentException("Cannot write to program ROM");
+        }
+        throw new IllegalArgumentException();
     }
 
-    private MemoryByte at(int address) {
+    private MemoryByte getPpuRegister(int address) {
         switch (address) {
             case 0x2000:
                 return ppu.regPPUCTRL;
@@ -56,10 +72,7 @@ public class MemoryMapper {
             case 0x2007:
                 return ppu.regPPUDATA;
         }
-        if (address >= PROGRAM_OFFSET && address < 0x10000) {
-            return cpu.programRom.at(address - PROGRAM_OFFSET);
-        }
-        throw new IllegalArgumentException();
+        return null;
     }
 
     private static void checkAddress(int address) {

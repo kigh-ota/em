@@ -1,4 +1,4 @@
-package screen;
+package nes.screen;
 
 import common.BinaryUtil;
 import nes.ppu.Mirroring;
@@ -144,7 +144,7 @@ public class Window extends Canvas implements Runnable {
                 for (int p = 0; p < 4; p++) {
                     for (int i = 0; i < 4; i++) {
                         int offset = (i != 0) ? p * 4 + i : 0;
-                        Color color = palette[ppu.paletteRam.at(offset).get()];
+                        Color color = palette[ppu.paletteRam.get(offset)];
                         g.setColor(color);
                         int x = PALETTE_OFFSET_X + i * 4;
                         int y = PALETTE_OFFSET_Y + p * 4;
@@ -158,7 +158,7 @@ public class Window extends Canvas implements Runnable {
                 for (int i = 0; i < CELL_NUM_X * CELL_NUM_Y; i++) {
                     int cellX = i % CELL_NUM_X;
                     int cellY = i / CELL_NUM_X;
-                    byte[] character = ppu.getCharacter(0 /* FIXME use register */, Byte.toUnsignedInt(ppu.nametables.at(i).get()));
+                    byte[] character = ppu.getCharacter(0 /* FIXME use register */, Byte.toUnsignedInt(ppu.nametables.get(i)));
                     int x0 = MAIN_OFFSET_X + TILE_SIZE * cellX;
                     int y0 = MAIN_OFFSET_Y + TILE_SIZE * cellY;
                     drawTile(character, x0, y0, g); // TODO use palette
@@ -172,7 +172,7 @@ public class Window extends Canvas implements Runnable {
                 for (int i = 0; i < CELL_NUM_X * CELL_NUM_Y; i++) {
                     int cellX = i % CELL_NUM_X;
                     int cellY = i / CELL_NUM_X;
-                    byte[] character = ppu.getCharacter(1 /* FIXME use register */, Byte.toUnsignedInt(ppu.nametables.at(i).get()));
+                    byte[] character = ppu.getCharacter(1 /* FIXME use register */, Byte.toUnsignedInt(ppu.nametables.get(i)));
                     int x0 = MAIN_OFFSET_X + MAIN_WIDTH + TILE_SIZE * cellX;
                     int y0 = MAIN_OFFSET_Y + MAIN_HEIGHT + TILE_SIZE * cellY;
                     drawTile(character, x0, y0, g); // TODO use palette
@@ -215,8 +215,8 @@ public class Window extends Canvas implements Runnable {
             for (int offsetX = 0; offsetX < TILE_SIZE; offsetX++) {
                 int color = (BinaryUtil.getBit(data[offsetY], 7 - offsetX) ? 1 : 0)
                         + (BinaryUtil.getBit(data[offsetY + 8], 7 - offsetX) ? 1 : 0) * 2;
-                // attribute table
-                g.setColor(color);
+                // TODO use attribute table
+//                g.setColor(color);
                 g.drawLine(x0 + offsetX, y0 + offsetY, x0 + offsetX, y0 + offsetY);
             }
         }
@@ -224,6 +224,6 @@ public class Window extends Canvas implements Runnable {
 
     private Color getPaletteColor(int p, int i) {
         int offset = (i != 0) ? p * 4 + i : 0;
-        return palette[ppu.paletteRam.at(offset).get()];
+        return palette[ppu.paletteRam.get(offset)];
     }
 }

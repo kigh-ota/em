@@ -16,8 +16,8 @@ import common.ByteRegister;
  |+-------- Emphasize green*
  +--------- Emphasize blue*
  */
-public class MaskRegister extends ByteRegister {
-    public MaskRegister(byte value) {
+class MaskRegister extends ByteRegister {
+    MaskRegister(byte value) {
         super(value);
     }
 }

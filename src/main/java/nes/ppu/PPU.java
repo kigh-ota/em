@@ -17,10 +17,9 @@ import lombok.Getter;
  */
 public class PPU {
 
-    @Getter
     final MemoryMapper memoryMapper;
 
-    final ByteArrayMemory characterRom; // TODO make read-only
+    final ByteArrayMemory characterRom;
     public final ByteArrayMemory nametables;
     public final ByteArrayMemory paletteRam;
 

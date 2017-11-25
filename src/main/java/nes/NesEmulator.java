@@ -2,7 +2,7 @@ package nes;
 
 import nes.cpu._6502;
 import nes.ppu.PPU;
-import screen.Window;
+import nes.screen.Window;
 
 import javax.swing.*;
 import java.io.FileInputStream;

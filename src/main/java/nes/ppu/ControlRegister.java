@@ -22,12 +22,12 @@ import common.ByteRegister;
  +--------- Generate an NMI at the start of the
  vertical blanking interval (0: off; 1: on)
  */
-public class ControlRegister extends ByteRegister {
-    public ControlRegister(byte value) {
+class ControlRegister extends ByteRegister {
+    ControlRegister(byte value) {
         super(value);
     }
 
-    public int addressIncrement() { // bit 2
+    int addressIncrement() { // bit 2
         return getBit(2) ? 32 : 1;
     }
 }

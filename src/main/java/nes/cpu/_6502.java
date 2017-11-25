@@ -13,16 +13,16 @@ public class _6502 {
     private static final int CODE_WIDTH = 8;
     private static final int RAM_SIZE= 2048;
 
-    final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
-    final MemoryByte regX = new ByteRegister((byte)0);    // X Index
-    final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
-    final MemoryByte regS = new ByteRegister((byte)0);    // Stack Pointer
-    final FlagRegister regP = new FlagRegister();
-    final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
+    private final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
+    private final MemoryByte regX = new ByteRegister((byte)0);    // X Index
+    private final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
+    private final MemoryByte regS = new ByteRegister((byte)0);    // Stack Pointer
+    private final FlagRegister regP = new FlagRegister();
+    private final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
 
-    final ByteArrayMemory programRom; // TODO make read-only
+    final ByteArrayMemory programRom;
 
-    final MemoryMapper memoryMapper;
+    private final MemoryMapper memoryMapper;
 
     public _6502(PPU ppu, ByteArrayMemory programRom) {
         memoryMapper = new MemoryMapper(this, ppu);

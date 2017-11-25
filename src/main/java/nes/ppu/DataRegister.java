@@ -2,10 +2,10 @@ package nes.ppu;
 
 import common.ByteRegister;
 
-public class DataRegister extends ByteRegister {
+class DataRegister extends ByteRegister {
     private final PPU ppu;
 
-    public DataRegister(PPU ppu) {
+    DataRegister(PPU ppu) {
         super((byte)0);
         this.ppu = ppu;
     }
@@ -13,14 +13,14 @@ public class DataRegister extends ByteRegister {
     @Override
     public void set(byte value) {
         int address = ppu.regPPUADDR.getAddress();
-        ppu.getMemoryMapper().set(value, address);
+        ppu.memoryMapper.set(value, address);
         ppu.regPPUADDR.incrementAddress();
     }
 
     @Override
     public byte get() {
         int address = ppu.regPPUADDR.getAddress();
-        byte value = ppu.getMemoryMapper().get(address);
+        byte value = ppu.memoryMapper.get(address);
         ppu.regPPUADDR.incrementAddress();
         return value;
     }
