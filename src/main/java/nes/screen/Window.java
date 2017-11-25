@@ -18,7 +18,7 @@ public class Window extends Canvas implements Runnable {
     BufferStrategy bstrategy;
 
     private static final int TILE_SIZE = 8;
-    private static final int TILE_NUM = 256;
+    private static final int NUM_PATTERNS = 256;
 
     private static final int CELL_NUM_X = 32;
     private static final int CELL_NUM_Y = 30;
@@ -32,12 +32,12 @@ public class Window extends Canvas implements Runnable {
     private static final int PALETTE_OFFSET_Y = 0;
 
     //画面サイズ
-    private static final int WIDTH = MAIN_WIDTH * 2; //2 * TILE_NUM * TILE_SIZE;
+    private static final int WIDTH = MAIN_WIDTH * 2; //2 * NUM_PATTERNS * TILE_SIZE;
     private static final int HEIGHT = 16 * TILE_SIZE + MAIN_HEIGHT * 2;
 
     // Palette (2C02)
     // https://wiki.nesdev.com/w/index.php/PPU_programmer_reference#Palettes
-    private static final Color[] palette = {
+    private static final Color[] PALETTE = {
             new Color(96, 96, 96),
             new Color(0, 32, 128),
             new Color(0, 0, 192),
@@ -132,54 +132,52 @@ public class Window extends Canvas implements Runnable {
 
                 // Pattern tables
                 for (int table = 0; table < 2; table++) {
-                    for (int i = 0; i < TILE_NUM; i++) {
-                        byte[] character = ppu.getCharacter(table, i);
-                        int tileX = i % 16;
-                        int tileY = i / 16;
-                        drawTile(character, table * TILE_SIZE * TILE_NUM + tileX * TILE_SIZE, tileY * TILE_SIZE, g);
+                    for (int pattern = 0; pattern < NUM_PATTERNS; pattern++) {
+                        byte[] character = ppu.getCharacterPattern(table, pattern);
+                        int tileX = pattern % 16;
+                        int tileY = pattern / 16;
+                        drawTile(character, table * TILE_SIZE * NUM_PATTERNS + tileX * TILE_SIZE, tileY * TILE_SIZE, g);
                     }
                 }
 
                 // Background Palette
-                for (int p = 0; p < 4; p++) {
+                for (int palette = 0; palette < 4; palette++) {
                     for (int i = 0; i < 4; i++) {
-                        int offset = (i != 0) ? p * 4 + i : 0;
-                        Color color = palette[ppu.paletteRam.get(offset)];
+                        Color color = PALETTE[ppu.getBackgroundColor(palette, i)];
                         g.setColor(color);
                         int x = PALETTE_OFFSET_X + i * 4;
-                        int y = PALETTE_OFFSET_Y + p * 4;
+                        int y = PALETTE_OFFSET_Y + palette * 4;
                         g.fillRect(x, y, 4, 4);
                     }
                 }
 
                 // Main: background
                 Mirroring mirroring = ppu.getMirroring();
-                // nametable 0
-                for (int i = 0; i < CELL_NUM_X * CELL_NUM_Y; i++) {
-                    int cellX = i % CELL_NUM_X;
-                    int cellY = i / CELL_NUM_X;
-                    byte[] character = ppu.getCharacter(0 /* FIXME use register */, Byte.toUnsignedInt(ppu.nametables.get(i)));
-                    int x0 = MAIN_OFFSET_X + TILE_SIZE * cellX;
-                    int y0 = MAIN_OFFSET_Y + TILE_SIZE * cellY;
-                    drawTile(character, x0, y0, g); // TODO use palette
-                    // mirror
-                    int mirrorX0 = mirroring == VERTICAL ? x0 : x0 + MAIN_WIDTH;
-                    int mirrorY0 = mirroring == VERTICAL ? y0 + MAIN_HEIGHT : y0;
-                    drawTile(character, mirrorX0, mirrorY0, g); // TODO use palette
-                }
+                int backgroundPatternTable = ppu.getBackgroundPatternTable();
+                for (int nameTable = 0; nameTable < 2; nameTable++) {
+                    int baseX = (nameTable == 0) ? MAIN_OFFSET_X : MAIN_OFFSET_X + MAIN_WIDTH;
+                    int baseY = (nameTable == 0) ? MAIN_OFFSET_Y : MAIN_OFFSET_Y + MAIN_HEIGHT;
+                    int baseMirrorX = (nameTable == 0) ?
+                            (mirroring == VERTICAL ? baseX : baseX + MAIN_WIDTH) :
+                            (mirroring == VERTICAL ? baseX : baseX - MAIN_WIDTH);
+                    int baseMirrorY = (nameTable == 0) ?
+                            (mirroring == VERTICAL ? baseY + MAIN_HEIGHT : baseY) :
+                            (mirroring == VERTICAL ? baseY - MAIN_HEIGHT : baseY);
 
-                // nametable 1
-                for (int i = 0; i < CELL_NUM_X * CELL_NUM_Y; i++) {
-                    int cellX = i % CELL_NUM_X;
-                    int cellY = i / CELL_NUM_X;
-                    byte[] character = ppu.getCharacter(1 /* FIXME use register */, Byte.toUnsignedInt(ppu.nametables.get(i)));
-                    int x0 = MAIN_OFFSET_X + MAIN_WIDTH + TILE_SIZE * cellX;
-                    int y0 = MAIN_OFFSET_Y + MAIN_HEIGHT + TILE_SIZE * cellY;
-                    drawTile(character, x0, y0, g); // TODO use palette
-                    // mirror
-                    int mirrorX0 = mirroring == VERTICAL ? x0 : x0 - MAIN_WIDTH;
-                    int mirrorY0 = mirroring == VERTICAL ? y0 - MAIN_HEIGHT : y0;
-                    drawTile(character, mirrorX0, mirrorY0, g); // TODO use palette
+                    for (int cell = 0; cell < CELL_NUM_X * CELL_NUM_Y; cell++) {
+                        int cellX = cell % CELL_NUM_X;
+                        int cellY = cell / CELL_NUM_X;
+                        byte[] character = ppu.getCharacterPattern(backgroundPatternTable, ppu.getCharacter(nameTable, cell));
+                        int palette = ppu.getPalette(nameTable, cell);
+
+                        int x0 = baseX + TILE_SIZE * cellX;
+                        int y0 = baseY + TILE_SIZE * cellY;
+                        drawTileWithPalette(character, x0, y0, palette, g);
+
+                        int mirrorX0 = baseMirrorX + TILE_SIZE * cellX;
+                        int mirrorY0 = baseMirrorY + TILE_SIZE * cellY;
+                        drawTileWithPalette(character, mirrorX0, mirrorY0, palette, g);
+                    }
                 }
 
                 // scroll position
@@ -210,20 +208,21 @@ public class Window extends Canvas implements Runnable {
         }
     }
 
-    private void drawTileWithPalette(byte[] data, int x0, int y0, Graphics g) {
+    /**
+     * @param data
+     * @param x0
+     * @param y0
+     * @param palette (palette) 0-3
+     * @param g
+     */
+    private void drawTileWithPalette(byte[] data, int x0, int y0, int palette, Graphics g) {
         for (int offsetY = 0; offsetY < TILE_SIZE; offsetY++) {
             for (int offsetX = 0; offsetX < TILE_SIZE; offsetX++) {
                 int color = (BinaryUtil.getBit(data[offsetY], 7 - offsetX) ? 1 : 0)
                         + (BinaryUtil.getBit(data[offsetY + 8], 7 - offsetX) ? 1 : 0) * 2;
-                // TODO use attribute table
-//                g.setColor(color);
+                g.setColor(PALETTE[ppu.getBackgroundColor(palette, color)]);
                 g.drawLine(x0 + offsetX, y0 + offsetY, x0 + offsetX, y0 + offsetY);
             }
         }
-    }
-
-    private Color getPaletteColor(int p, int i) {
-        int offset = (i != 0) ? p * 4 + i : 0;
-        return palette[ppu.paletteRam.get(offset)];
     }
 }

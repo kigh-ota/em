@@ -30,4 +30,8 @@ class ControlRegister extends ByteRegister {
     int addressIncrement() { // bit 2
         return getBit(2) ? 32 : 1;
     }
+
+    int getBackgroundPatternTable() {
+        return getBit(4) ? 1 : 0;
+    }
 }

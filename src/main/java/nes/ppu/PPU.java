@@ -20,8 +20,8 @@ public class PPU {
     final MemoryMapper memoryMapper;
 
     final ByteArrayMemory characterRom;
-    public final ByteArrayMemory nametables;
-    public final ByteArrayMemory paletteRam;
+    final ByteArrayMemory nametables;
+    final ByteArrayMemory paletteRam;
 
     // https://wiki.nesdev.com/w/index.php/PPU_registers
     public final ControlRegister regPPUCTRL = new ControlRegister((byte)0);
@@ -39,7 +39,7 @@ public class PPU {
     public PPU(ByteArrayMemory characterRom, Mirroring mirroring) {
         memoryMapper = new MemoryMapper(this);
         this.characterRom = characterRom;
-        nametables = new ByteArrayMemory(new byte[0x1000]);
+        nametables = new ByteArrayMemory(new byte[0x0800]);
         paletteRam = new ByteArrayMemory(new byte[0x20]);
 
         regPPUADDR = new AddressRegister(this);
@@ -49,8 +49,53 @@ public class PPU {
         this.mirroring = mirroring;
     }
 
-    public byte[] getCharacter(int table, int i) {
+    public byte[] getCharacterPattern(int table, int i) {
         int from = table * 0x1000 + i * 0x10;
         return this.characterRom.getRange(from, from + 16);
+    }
+
+    private static final int ATTRIBUTE_TABLE_OFFSET = 0x3C0;
+
+    /**
+     * @param nameTable 0-3
+     * @param cell 0-959
+     * @return 0-3
+     */
+    public int getPalette(int nameTable, int cell) {
+        int base = nameTable * 0x400;
+        int cellRow = cell / 32; // 0-29
+        int cellCol = cell % 32; // 0-31
+        int attributeRow = cellRow / 4; // 0-7
+        int attributeCol = cellCol / 4; // 0-7
+        boolean isUpper = cellRow % 2 == 0;
+        boolean isLeft = cellCol % 2 == 0;
+
+        byte attribute = nametables.get(base + attributeRow * 8 + attributeCol);
+        int shift = (isUpper ? 0 : 4) + (isLeft ? 0 : 2);
+        return (Byte.toUnsignedInt(attribute) >> shift) & 4;
+    }
+
+    public int getBackgroundPatternTable() {
+        return regPPUCTRL.getBackgroundPatternTable();
+    }
+
+    /**
+     *
+     * @param nameTable 0-1
+     * @param cell 0-959
+     * @return 0-255
+     */
+    public int getCharacter(int nameTable, int cell) {
+        return Byte.toUnsignedInt(nametables.get(nameTable * 0x400 + cell));
+    }
+
+    /**
+     * @param palette 0-3
+     * @param i 0-3
+     * @return 0-63
+     */
+    public int getBackgroundColor(int palette, int i) {
+        int offset = (i != 0) ? palette * 4 + i : 0;
+        return paletteRam.get(offset);
     }
 }

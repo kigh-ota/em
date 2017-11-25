@@ -8,7 +8,7 @@ class MemoryMapper {
     private final PPU ppu;
 
     private static final int NAMETABLE_OFFSET = 0x2000;
-    private static final int NAMETABLE_RIGHT = 0x3000;
+    private static final int NAMETABLE_RIGHT = 0x2800;
     private static final int PALETTE_RAM_OFFSET = 0x3F00;
     private static final int PALETTE_RAM_RIGHT = 0x3F20;
 
@@ -19,8 +19,8 @@ class MemoryMapper {
      *   $2000-$23BF Nametable
      *   $23C0-$23FF Attribute table (coloring)
      * $2400-$27FF Nametable 1
-     * $2800-$2BFF Nametable 2
-     * $2C00-$2FFF Nametable 3
+     * ($2800-$2BFF Nametable 2)
+     * ($2C00-$2FFF Nametable 3)
      * $3000-$3EFF Mirrors of $2000-$2EFF
      * $3F00-$3F1F Palette RAM indices
      * $3F20-$3FFF Mirrors of $3F00-$3F1F
