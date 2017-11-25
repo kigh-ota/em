@@ -33,7 +33,9 @@ class MemoryMapper {
         if (ppuRegister != null) {
             return ppuRegister.get();
         }
-        if (address >= PROGRAM_OFFSET && address < 0x10000) {
+        if (address < 0x800) {
+            return cpu.ram.get(address);
+        } else if (address >= PROGRAM_OFFSET && address < 0x10000) {
             return cpu.programRom.get(address - PROGRAM_OFFSET);
         }
         throw new IllegalArgumentException();
@@ -47,8 +49,13 @@ class MemoryMapper {
             return;
         }
 
-        if (address >= PROGRAM_OFFSET && address < 0x10000) {
+        if (address < 0x800) {
+            cpu.ram.set(value, address);
+            return;
+        } else if (address >= PROGRAM_OFFSET && address < 0x10000) {
             throw new IllegalArgumentException("Cannot write to program ROM");
+        } else if (address >= 0x4000 && address < 0x4018) {
+            return;
         }
         throw new IllegalArgumentException();
     }
@@ -78,12 +85,11 @@ class MemoryMapper {
     private static void checkAddress(int address) {
         if (address < 0) {
             throw new IllegalArgumentException("Negative address");
-        } else if (address < 0x2000) {
-            throw new IllegalArgumentException("Access to internal RAM");
         } else if (address >= 0x2008 && address < 0x4000) {
             throw new IllegalArgumentException("Mirror of PPU registers");
         } else if (address >= 0x4000 && address < 0x4018) {
-            throw new IllegalArgumentException("APU & I/O registers");
+            System.err.println("access to APU & I/O registers");
+//            throw new IllegalArgumentException("APU & I/O registers");
         } else if (address >= 0x4018 && address < PROGRAM_OFFSET) {
             throw new IllegalArgumentException();
         } else if (address >= 0x10000) {

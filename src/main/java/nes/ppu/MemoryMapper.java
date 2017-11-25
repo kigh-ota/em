@@ -10,7 +10,7 @@ class MemoryMapper {
     private static final int NAMETABLE_OFFSET = 0x2000;
     private static final int NAMETABLE_RIGHT = 0x2800;
     private static final int PALETTE_RAM_OFFSET = 0x3F00;
-    private static final int PALETTE_RAM_RIGHT = 0x3F20;
+    private static final int PALETTE_RAM_RIGHT = 0x4000;
 
     /**
      * $0000-$0FFF Pattern table 0 [left] (256 tiles, 16 bytes each)
@@ -23,7 +23,7 @@ class MemoryMapper {
      * ($2C00-$2FFF Nametable 3)
      * $3000-$3EFF Mirrors of $2000-$2EFF
      * $3F00-$3F1F Palette RAM indices
-     * $3F20-$3FFF Mirrors of $3F00-$3F1F
+     * $3F20-$3FFF Mirrors of $3F00-$3F1F TODO
      */
     MemoryMapper(PPU ppu) {
         this.ppu = ppu;

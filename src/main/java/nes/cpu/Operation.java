@@ -109,6 +109,13 @@ class Operation {
             case 0x91:
                 return getInstance(STA, INDIRECT_INDEXED_Y);
 
+            case 0x86:
+                return getInstance(STX, ZERO_PAGE);
+            case 0x96:
+                return getInstance(STX, ZERO_PAGE_Y);
+            case 0x8E:
+                return getInstance(STX, ABSOLUTE);
+
             case 0x9A:
                 return getInstance(TXS, IMPLICIT);
 
@@ -132,6 +139,26 @@ class Operation {
             case 0x11:
                 return getInstance(ORA, INDIRECT_INDEXED_Y);
 
+            case 0x00:
+                return getInstance(BRK, IMPLICIT);
+
+            case 0x24:
+                return getInstance(BIT, ZERO_PAGE);
+            case 0x2C:
+                return getInstance(BIT, ABSOLUTE);
+
+            case 0xAA:
+                return getInstance(TAX, IMPLICIT);
+
+            case 0xE0:
+                return getInstance(CPX, IMMEDIATE);
+            case 0xE4:
+                return getInstance(CPX, ZERO_PAGE);
+            case 0xEC:
+                return getInstance(CPX, ABSOLUTE);
+
+            case 0x90:
+                return getInstance(BCC, RELATIVE);
         }
         return null;
     }

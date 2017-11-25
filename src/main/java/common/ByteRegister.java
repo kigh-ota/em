@@ -1,5 +1,7 @@
 package common;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class ByteRegister implements MemoryByte {
     private byte value;
 
@@ -63,5 +65,15 @@ public class ByteRegister implements MemoryByte {
     @Override
     public boolean getBit(int bit) {
         return BinaryUtil.getBit(value, bit);
+    }
+
+    @Override
+    public void setBit(boolean flag, int bit) {
+        checkArgument(bit >= 0 && bit < 8);
+        if (flag) {
+            value |= (1 << bit);
+        } else {
+            value &= ~(1 << bit);
+        }
     }
 }

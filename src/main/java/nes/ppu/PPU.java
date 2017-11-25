@@ -26,7 +26,7 @@ public class PPU {
     // https://wiki.nesdev.com/w/index.php/PPU_registers
     public final ControlRegister regPPUCTRL = new ControlRegister((byte)0);
     public final MemoryByte regPPUMASK = new MaskRegister((byte)0);
-    public final MemoryByte regPPUSTATUS = new ByteRegister((byte)0);
+    public final MemoryByte regPPUSTATUS = new ByteRegister((byte)0b10000000 /* FIXME */);
     public final MemoryByte regOAMADDR = new ByteRegister((byte)0);
     public final MemoryByte regOAMDATA = new ByteRegister((byte)0);
     public final ScrollRegister regPPUSCROLL;

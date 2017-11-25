@@ -8,4 +8,5 @@ public interface MemoryByte extends ReadableByte, WritableByte {
     boolean add(byte addend);
     boolean subtract(byte subtrahend);
     boolean getBit(int bit);
+    void setBit(boolean value, int bit);
 }

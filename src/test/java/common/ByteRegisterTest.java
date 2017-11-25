@@ -38,4 +38,15 @@ class ByteRegisterTest {
         assertTrue(sut.subtract((byte)0b00000010));
         assertEquals((byte)0b11111111, sut.get());
     }
+
+    @Test
+    void setBitTest() {
+        ByteRegister sut = new ByteRegister((byte)0b00000001);
+        sut.setBit(true, 7);
+        assertEquals((byte)0b10000001, sut.get());
+        sut.setBit(false, 0);
+        assertEquals((byte)0b10000000, sut.get());
+        sut.setBit(false, 1);
+        assertEquals((byte)0b10000000, sut.get());
+    }
 }
