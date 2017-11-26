@@ -117,9 +117,9 @@ public class _6502 {
     }
 
     void push16(int value) {
-        memoryMapper.set((byte)((value >> 4) & 0b1111), getStackAddress());
+        memoryMapper.set((byte)((value >> 8) & 0b11111111), getStackAddress());
         regS.decrement();
-        memoryMapper.set((byte)(value & 0b1111), getStackAddress());
+        memoryMapper.set((byte)(value & 0b11111111), getStackAddress());
         regS.decrement();
     }
 
@@ -134,6 +134,11 @@ public class _6502 {
     private void pushP() {
         memoryMapper.set(regP.get(), getStackAddress());
         regS.decrement();
+    }
+
+    void pullP() {
+        regS.increment();
+        regP.set(memoryMapper.get(getStackAddress()));
     }
 
     void pushA() {

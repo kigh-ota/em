@@ -69,11 +69,6 @@ public class ByteRegister implements MemoryByte {
 
     @Override
     public void setBit(boolean flag, int bit) {
-        checkArgument(bit >= 0 && bit < 8);
-        if (flag) {
-            value |= (1 << bit);
-        } else {
-            value &= ~(1 << bit);
-        }
+        value = BinaryUtil.setBit(flag, value, bit);
     }
 }

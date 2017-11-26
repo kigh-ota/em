@@ -142,13 +142,16 @@ class Operation {
             case 0x00:
                 return getInstance(BRK, IMPLICIT);
 
+            case 0x40:
+                return getInstance(RTI, IMPLICIT);
+
             case 0x24:
                 return getInstance(BIT, ZERO_PAGE);
             case 0x2C:
                 return getInstance(BIT, ABSOLUTE);
 
             case 0xAA:
-                return getInstance(TAX, ACCUMULATOR);
+                return getInstance(TAX, IMPLICIT);
 
             case 0xE0:
                 return getInstance(CPX, IMMEDIATE);
@@ -176,6 +179,8 @@ class Operation {
 
             case 0x90:
                 return getInstance(BCC, RELATIVE);
+            case 0xF0:
+                return getInstance(BEQ, RELATIVE);
 
             case 0x48:
                 return getInstance(PHA, IMPLICIT);
@@ -189,7 +194,55 @@ class Operation {
             case 0x60:
                 return getInstance(RTS, IMPLICIT);
 
-            // TODO: AND
+            case 0x29:
+                return getInstance(AND, IMMEDIATE);
+            case 0x25:
+                return getInstance(AND, ZERO_PAGE);
+            case 0x35:
+                return getInstance(AND, ZERO_PAGE_X);
+            case 0x2D:
+                return getInstance(AND, ABSOLUTE);
+            case 0x3D:
+                return getInstance(AND, ABSOLUTE_X);
+            case 0x39:
+                return getInstance(AND, ABSOLUTE_Y);
+            case 0x21:
+                return getInstance(AND, INDEXED_INDIRECT_X);
+            case 0x31:
+                return getInstance(AND, INDIRECT_INDEXED_Y);
+
+            case 0x6A:
+                return getInstance(ROR, ACCUMULATOR);
+            case 0x66:
+                return getInstance(ROR, ZERO_PAGE);
+            case 0x76:
+                return getInstance(ROR, ZERO_PAGE_X);
+            case 0x6E:
+                return getInstance(ROR, ABSOLUTE);
+            case 0x7E:
+                return getInstance(ROR, ABSOLUTE_X);
+
+            case 0x2A:
+                return getInstance(ROL, ACCUMULATOR);
+            case 0x26:
+                return getInstance(ROL, ZERO_PAGE);
+            case 0x36:
+                return getInstance(ROL, ZERO_PAGE_X);
+            case 0x2E:
+                return getInstance(ROL, ABSOLUTE);
+            case 0x3E:
+                return getInstance(ROL, ABSOLUTE_X);
+
+            case 0x4A:
+                return getInstance(LSR, ACCUMULATOR);
+            case 0x46:
+                return getInstance(LSR, ZERO_PAGE);
+            case 0x56:
+                return getInstance(LSR, ZERO_PAGE_X);
+            case 0x4E:
+                return getInstance(LSR, ABSOLUTE);
+            case 0x5E:
+                return getInstance(LSR, ABSOLUTE_X);
         }
         return null;
     }

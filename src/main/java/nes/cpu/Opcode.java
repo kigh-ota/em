@@ -11,14 +11,76 @@ enum Opcode {
     ADC(true), // Add with Carry
     SBC(true), // Subtract with Carry
 
-    AND(true), // Logical AND
-    ORA(true), // Logical Inclusive OR
+    AND(true) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            byte result = (byte)(cpu.regA.get() & value);
+            cpu.regA.set(result);
+            cpu.setZeroFlag(result);
+            cpu.setNegativeFlag(result);
+        }
+    }, // Logical AND
+    ORA(true) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            byte result = (byte)(cpu.regA.get() | value);
+            cpu.regA.set(result);
+            cpu.setZeroFlag(result);
+            cpu.setNegativeFlag(result);
+        }
+    }, // Logical Inclusive OR
     EOR(true), // Exclusive OR
 
-    ASL(false), // Arithmetic Shift Left
-    LSR(false), // Logical Shift Right
-    ROL(false), // Rotate Left
-    ROR(false), // Rotate Right
+    ASL(true), // Arithmetic Shift Left
+    LSR(true) {
+        @Override
+        void execute(Integer address, Byte oldValue, _6502 cpu) {
+            byte newValue = BinaryUtil.setBit(false, (byte)(oldValue >> 1), 7);
+            if (address == null) {
+                // accumulator
+                cpu.regA.set(newValue);
+            } else {
+                // memory
+                cpu.memoryMapper.set(newValue, address);
+            }
+            cpu.regP.setCarry(BinaryUtil.getBit(oldValue, 0));
+            cpu.setZeroFlag(newValue);
+            cpu.setNegativeFlag(newValue);
+        }
+    }, // Logical Shift Right
+    ROL(true) {
+        @Override
+        void execute(Integer address, Byte oldValue, _6502 cpu) {
+            byte newValue = BinaryUtil.setBit(cpu.regP.isCarry(), (byte)(oldValue << 1), 0);
+            if (address == null) {
+                // accumulator
+                cpu.regA.set(newValue);
+            } else {
+                // memory
+                cpu.memoryMapper.set(newValue, address);
+            }
+            cpu.regP.setCarry(BinaryUtil.getBit(oldValue, 7));
+            cpu.setZeroFlag(newValue);
+            cpu.setNegativeFlag(newValue);
+
+        }
+    }, // Rotate Left
+    ROR(true) {
+        @Override
+        void execute(Integer address, Byte oldValue, _6502 cpu) {
+            byte newValue = BinaryUtil.setBit(cpu.regP.isCarry(), (byte)(oldValue >> 1), 7);
+            if (address == null) {
+                // accumulator
+                cpu.regA.set(newValue);
+            } else {
+                // memory
+                cpu.memoryMapper.set(newValue, address);
+            }
+            cpu.regP.setCarry(BinaryUtil.getBit(oldValue, 0));
+            cpu.setZeroFlag(newValue);
+            cpu.setNegativeFlag(newValue);
+        }
+    }, // Rotate Right
 
     BCC(false) {
         @Override
@@ -29,7 +91,14 @@ enum Opcode {
         }
     }, // Branch if Carry Clear
     BCS(false), // Branch if Carry Set
-    BEQ(false), // Branch if Equal
+    BEQ(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            if (cpu.regP.isZero()) {
+                cpu.regPC.set(address);
+            }
+        }
+    }, // Branch if Equal
     BMI(false), // Branch if Minus
     BNE(false) {
         @Override
@@ -90,7 +159,13 @@ enum Opcode {
             cpu.handleBRK();
         }
     }, // Force Interrupt
-    RTI(false), // Return from Interrupt
+    RTI(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            cpu.pullP();
+            cpu.regPC.set(cpu.pull16());
+        }
+    }, // Return from Interrupt
 
     CMP(true) {
         @Override
@@ -197,9 +272,10 @@ enum Opcode {
     TAX(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
-            cpu.regX.set(value);
-            cpu.setZeroFlag(value);
-            cpu.setNegativeFlag(value);
+            byte a = cpu.regA.get();
+            cpu.regX.set(a);
+            cpu.setZeroFlag(a);
+            cpu.setNegativeFlag(a);
         }
     }, // Transfer Accumulator to X
     TAY(false), // Transfer Accumulator to Y

@@ -24,6 +24,15 @@ public class BinaryUtil {
         return (value & (1 << bit)) != 0;
     }
 
+    public static byte setBit(boolean flag, byte value, int bit) {
+        checkArgument(bit >= 0 && bit < 8);
+        if (flag) {
+            return value |= (1 << bit);
+        } else {
+            return value &= ~(1 << bit);
+        }
+    }
+
     public static Pair<Byte, Boolean> add(byte augend, byte addend) {
         int value = Byte.toUnsignedInt(augend) + Byte.toUnsignedInt(addend);
         boolean carry = value > 255;
