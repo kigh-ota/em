@@ -25,7 +25,7 @@ public class _6502 {
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;
 
-    private final MemoryMapper memoryMapper;
+    final MemoryMapper memoryMapper;
 
     public _6502(PPU ppu, ByteArrayMemory programRom) {
         memoryMapper = new MemoryMapper(this, ppu);
@@ -82,129 +82,100 @@ public class _6502 {
     }
 
     private void executeInstruction(Operation op, Byte operand1, Byte operand2) {
+        Integer address = op.getAddressingMode().getAddress(operand1, operand2, this);
         Byte value = null;
-        Integer address = null;
+        switch (op.getAddressingMode()) {
+            case IMMEDIATE:
+                value = operand1;
+                break;
+            case ZERO_PAGE:
+            case ZERO_PAGE_X:
+            case ZERO_PAGE_Y:
+            case ABSOLUTE:
+            case ABSOLUTE_X:
+            case ABSOLUTE_Y:
+            case INDIRECT:
+            case INDEXED_INDIRECT_X:
+            case INDIRECT_INDEXED_Y:
+                if (op.getOpcode().needsValue) {
+                    value = memoryMapper.get(address);
+                }
+                break;
+            case IMPLICIT:
+            case ACCUMULATOR:
+            case RELATIVE:
+                break;
+            default:
+                throw new IllegalArgumentException();
+        }
+        if (address != null) {
+            System.out.print(String.format("  address=$%04x\n", address));
+        }
+        if (value != null) {
+            System.out.print(String.format("  value=$%02x\n", value));
+        }
+
         switch (op.getOpcode()) {
             case SEI:
                 regP.setInterruptDisable(true);
                 break;
             case LDX:
-                if (op.getAddressingMode() == IMMEDIATE) {
-                    value = operand1;
-                } else if (op.getAddressingMode() == ZERO_PAGE) {
-                    address = getAddress(operand1, (byte)0);
-                    value = memoryMapper.get(address);
-                } else {
-                    throw new IllegalArgumentException();
-                }
                 regX.set(value);
                 setZeroFlag(value);
                 setNegativeFlag(value);
                 break;
             case LDY:
-                if (op.getAddressingMode() == IMMEDIATE) {
-                    regY.set(operand1);
-                    setZeroFlag(operand1);
-                    setNegativeFlag(operand1);
-                } else {
-                    throw new IllegalArgumentException();
-                }
+                regY.set(value);
+                setZeroFlag(value);
+                setNegativeFlag(value);
                 break;
             case TXS:
                 regS.set(regX.get());
                 break;
             case LDA:
-                switch (op.getAddressingMode()) {
-                    case IMMEDIATE:
-                        value = operand1;
-                        break;
-                    case ABSOLUTE:
-                        value = memoryMapper.get(getAddress(operand1, operand2));
-                        break;
-                    case ABSOLUTE_X:
-                        value = memoryMapper.get(getAddress(operand1, operand2) + Byte.toUnsignedInt(regX.get()));
-                        break;
-                }
-                checkNotNull(value);
                 regA.set(value);
                 setZeroFlag(value);
                 setNegativeFlag(value);
                 break;
             case STA:
-                if (op.getAddressingMode() == ABSOLUTE) {
-                    address = getAddress(operand1, operand2);
-                } else if (op.getAddressingMode() == ZERO_PAGE_X) {
-                    address = getAddress(regX.get(), (byte) 0);
-                } else if (op.getAddressingMode() == ABSOLUTE_X) {
-                    address = getAddress(operand1, operand2) + Byte.toUnsignedInt(regX.get());
-                } else {
-                    throw new IllegalArgumentException();
-                }
                 memoryMapper.set(regA.get(), address);
                 break;
-
             case STX:
-                if (op.getAddressingMode() == ABSOLUTE) {
-                    address = getAddress(operand1, operand2);
-                    memoryMapper.set(regX.get(), address);
-                } else {
-                    throw new IllegalArgumentException();
-                }
+                memoryMapper.set(regX.get(), address);
                 break;
             case INX:
-                if (op.getAddressingMode() != IMPLICIT) {
-                    throw new IllegalArgumentException();
-                }
                 incrementRegister(regX);
-
                 break;
             case INY:
-                if (op.getAddressingMode() != IMPLICIT) {
-                    throw new IllegalArgumentException();
-                }
                 incrementRegister(regY);
                 break;
             case DEX:
-                if (op.getAddressingMode() != IMPLICIT) {
-                    throw new IllegalArgumentException();
-                }
                 decrementRegister(regX);
                 break;
             case DEY:
-                if (op.getAddressingMode() != IMPLICIT) {
-                    throw new IllegalArgumentException();
-                }
                 decrementRegister(regY);
                 break;
             case BNE:
-                checkArgument(op.getAddressingMode() == RELATIVE);
                 if (!regP.isZero()) {
                     regPC.set(regPC.get() + operand1);
                 }
                 break;
             case BPL:
-                checkArgument(op.getAddressingMode() == RELATIVE);
                 if (!regP.isNegative()) {
                     regPC.set(regPC.get() + operand1);
                 }
                 break;
             case BCC:
-                checkArgument(op.getAddressingMode() == RELATIVE);
                 if (!regP.isCarry()) {
                     regPC.set(regPC.get() + operand1);
                 }
                 break;
 
             case JMP:
-                if (op.getAddressingMode() != ABSOLUTE) {
-                    throw new IllegalArgumentException();
+                if (address == regPC.get() - 3) {
+                    throw new RuntimeException("Explicit infinite loop"); // FIXME
                 }
-                int newAddress = getAddress(operand1, operand2);
-                if (newAddress == regPC.get() - 3) {
-                    // FIXME stop if explicit infinite loop
-                    throw new RuntimeException("Explicit infinite loop");
-                }
-                regPC.set(newAddress);
+                regPC.set(address);
                 break;
 
             case CLD:
@@ -228,14 +199,6 @@ public class _6502 {
                 break;
 
             case BIT:
-                if (op.getAddressingMode() == ZERO_PAGE) {
-                    address = getAddress(operand1, (byte)0);
-                } else if (op.getAddressingMode() == ABSOLUTE) {
-                    address = getAddress(operand1, operand2);
-                } else {
-                    throw new IllegalArgumentException();
-                }
-                value = memoryMapper.get(address);
                 byte masked = (byte)(Byte.toUnsignedInt(value) & Byte.toUnsignedInt(regA.get()));
                 setZeroFlag(masked);
                 regP.setOverflow(BinaryUtil.getBit(value, 6));
@@ -243,7 +206,6 @@ public class _6502 {
                 break;
 
             case TAX:
-                checkArgument(op.getAddressingMode() == IMPLICIT);
                 value = regA.get();
                 regX.set(value);
                 setZeroFlag(value);
@@ -256,9 +218,9 @@ public class _6502 {
                 } else {
                     throw new IllegalArgumentException();
                 }
-                value = (byte)(Byte.toUnsignedInt(regX.get()) - Byte.toUnsignedInt(value));
-                setZeroFlag(value);
-                setNegativeFlag(value);
+                byte diff = (byte)(Byte.toUnsignedInt(regX.get()) - Byte.toUnsignedInt(value));
+                setZeroFlag(diff);
+                setNegativeFlag(diff);
                 regP.setCarry(Byte.toUnsignedInt(regX.get()) >= Byte.toUnsignedInt(value));
                 break;
 
@@ -296,6 +258,16 @@ public class _6502 {
     }
 
     static public int getAddress(byte lower, byte upper) {
-        return (Byte.toUnsignedInt(upper) << 8) + Byte.toUnsignedInt(lower);
+        return BinaryUtil.getAddress(lower, upper);
+    }
+
+    byte getX() {
+        return regX.get();
+    }
+    byte getY() {
+        return regX.get();
+    }
+    int getPC() {
+        return regPC.get();
     }
 }

@@ -29,4 +29,8 @@ public class BinaryUtil {
         boolean carry = value > 255;
         return Tuples.pair((byte)(value % 256), carry);
     }
+
+    public static int getAddress(byte lower, byte upper) {
+        return (Byte.toUnsignedInt(upper) << 8) + Byte.toUnsignedInt(lower);
+    }
 }

@@ -13,8 +13,8 @@ import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
 public class NesEmulator {
     public void start() {
-//        NesData nesData = loadRom(System.getProperty("user.home") + "/sample1.nes");
-        NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
+        NesData nesData = loadRom(System.getProperty("user.home") + "/sample1.nes");
+//        NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
 
         PPU ppu = new PPU(nesData.characterRom, nesData.mirroring);
         _6502 cpu = new _6502(ppu, nesData.programRom);

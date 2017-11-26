@@ -1,82 +1,82 @@
 package nes.cpu;
 
+import lombok.RequiredArgsConstructor;
+
 // @see http://obelisk.me.uk/6502/reference.html
 // @see http://pgate1.at-ninja.jp/NES_on_FPGA/nes_cpu.htm
+@RequiredArgsConstructor
 enum Opcode {
-    ADC, // Add with Carry
-    SBC, // Subtract with Carry
+    ADC(true), // Add with Carry
+    SBC(true), // Subtract with Carry
 
-    AND, // Logical AND
-    ORA, // Logical Inclusive OR
-    EOR, // Exclusive OR
+    AND(true), // Logical AND
+    ORA(true), // Logical Inclusive OR
+    EOR(true), // Exclusive OR
 
-    ASL, // Arithmetic Shift Left
-    LSR, // Logical Shift Right
-    ROL, // Rotate Left
-    ROR, // Rotate Right
+    ASL(false), // Arithmetic Shift Left
+    LSR(false), // Logical Shift Right
+    ROL(false), // Rotate Left
+    ROR(false), // Rotate Right
 
-    BCC, // Branch if Carry Clear
-    BCS, // Branch if Carry Set
-    BEQ, // Branch if Equal
-    BMI, // Branch if Minus
-    BNE, // Branch if Not Equal
-    BPL, // Branch if Positive
-    BVC, // Branch if Overflow Clear
-    BVS, // Branch if Overflow Set
+    BCC(false), // Branch if Carry Clear
+    BCS(false), // Branch if Carry Set
+    BEQ(false), // Branch if Equal
+    BMI(false), // Branch if Minus
+    BNE(false), // Branch if Not Equal
+    BPL(false), // Branch if Positive
+    BVC(false), // Branch if Overflow Clear
+    BVS(false), // Branch if Overflow Set
 
-    BIT, // Bit Test
+    BIT(true), // Bit Test
 
-    JMP, // Jump
-    JSR, // Jump to Subroutine
-    RTS, // Return from Subroutine
+    JMP(false), // Jump
+    JSR(false), // Jump to Subroutine
+    RTS(false), // Return from Subroutine
 
-    BRK, // Force Interrupt
-    RTI, // Return from Interrupt
+    BRK(false), // Force Interrupt
+    RTI(false), // Return from Interrupt
 
-    CMP, // Compare
-    CPX, // Compare X RegisterImpl
-    CPY, // Compare Y RegisterImpl
+    CMP(true), // Compare
+    CPX(true), // Compare X Register
+    CPY(true), // Compare Y Register
 
-    INC, // Increment Memory
-    INX, // Increment X RegisterImpl
-    INY, // Increment Y RegisterImpl
-    DEC, // Decrement Memory
-    DEX, // Decrement X RegisterImpl
-    DEY, // Decrement Y RegisterImpl
+    INC(false), // Increment Memory
+    INX(false), // Increment X Register
+    INY(false), // Increment Y Register
+    DEC(false), // Decrement Memory
+    DEX(false), // Decrement X Register
+    DEY(false), // Decrement Y Register
 
-    SEC, // Set Carry Flag
-    CLC, // Clear Carry Flag
-    SED, // Set Decimal Flag
-    CLD, // Clear Decimal Mode
-    SEI { // Set Interrupt Disable
-//        @Override
-//        void execute(_6502 cpu) {
-//            cpu.regP.setInterruptDisable(true);
-//        }
-    },
-    CLI, // Clear Interrupt Disable
-    CLV, // Clear Overflow Flag
+    SEC(false), // Set Carry Flag
+    CLC(false), // Clear Carry Flag
+    SED(false), // Set Decimal Flag
+    CLD(false), // Clear Decimal Mode
+    SEI(false), // Set Interrupt Disable
+    CLI(false), // Clear Interrupt Disable
+    CLV(false), // Clear Overflow Flag
 
-    LDA, // Load Accumulator
-    LDX, // Load X RegisterImpl
-    LDY, // Load Y RegisterImpl
-    STA, // Store Accumulator
-    STX, // Store X RegisterImpl
-    STY, // Store Y RegisterImpl
+    LDA(true), // Load Accumulator
+    LDX(true), // Load X Register
+    LDY(true), // Load Y Register
+    STA(false), // Store Accumulator
+    STX(false), // Store X Register
+    STY(false), // Store Y Register
 
-    TAX, // Transfer Accumulator to X
-    TAY, // Transfer Accumulator to Y
-    TSX, // Transfer Stack Pointer to X
-    TXA, // Transfer X to Accumulator
-    TXS, // Transfer X to Stack Pointer
-    TYA, // Transfer Y to Accumulator
+    TAX(false), // Transfer Accumulator to X
+    TAY(false), // Transfer Accumulator to Y
+    TSX(false), // Transfer Stack Pointer to X
+    TXA(false), // Transfer X to Accumulator
+    TYA(false), // Transfer Y to Accumulator
+    TXS(false), // Transfer X to Stack Pointer
 
-    PHA, // Push Accumulator
-    PLA, // Pull Accumulator
-    PHP, // Push Processor Status
-    PLP, // Pull Processor Status
+    PHA(false), // Push Accumulator
+    PLA(false), // Pull Accumulator
+    PHP(false), // Push Processor Status
+    PLP(false), // Pull Processor Status
 
-    NOP, // No Operation
+    NOP(false); // No Operation
 
 //    abstract void execute(_6502 cpu);
+
+    final boolean needsValue;
 }
