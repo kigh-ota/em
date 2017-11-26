@@ -233,6 +233,7 @@ public class _6502 {
         reg.increment();
         setZeroFlag(reg);
         setNegativeFlag(reg);
+        System.out.println(String.format("  Result value=%02x", reg.get()));
     }
 
     private void decrementRegister(MemoryByte reg) {
