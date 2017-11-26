@@ -148,7 +148,7 @@ class Operation {
                 return getInstance(BIT, ABSOLUTE);
 
             case 0xAA:
-                return getInstance(TAX, IMPLICIT);
+                return getInstance(TAX, ACCUMULATOR);
 
             case 0xE0:
                 return getInstance(CPX, IMMEDIATE);
@@ -176,6 +176,18 @@ class Operation {
 
             case 0x90:
                 return getInstance(BCC, RELATIVE);
+
+            case 0x48:
+                return getInstance(PHA, IMPLICIT);
+
+            case 0x68:
+                return getInstance(PLA, IMPLICIT);
+
+            case 0x20:
+                return getInstance(JSR, ABSOLUTE);
+
+            case 0x60:
+                return getInstance(RTS, IMPLICIT);
         }
         return null;
     }

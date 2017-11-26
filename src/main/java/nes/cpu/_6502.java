@@ -19,12 +19,12 @@ public class _6502 {
     private static final int IRQ_BRK_VECTOR_ADDRESS = 0xFFFE;
 
     // https://wiki.nesdev.com/w/index.php/CPU_power_up_state
-    private final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
-    private final MemoryByte regX = new ByteRegister((byte)0);    // X Index
-    private final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
-    private final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
-    private final FlagRegister regP = new FlagRegister((byte)0x34);
-    private final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
+    final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
+    final MemoryByte regX = new ByteRegister((byte)0);    // X Index
+    final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
+    final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
+    final FlagRegister regP = new FlagRegister((byte)0x34);
+    final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
 
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;
@@ -100,17 +100,54 @@ public class _6502 {
         regPC.set(getAddress(memoryMapper.get(NMI_VECTOR_ADDRESS), memoryMapper.get(NMI_VECTOR_ADDRESS + 1)));
     }
 
+    void handleBRK() {
+        System.out.println("*** BRK ***");
+        pushPC();
+        regP.setBreakCommand(true);
+        pushP();
+        regP.setInterruptDisable(true);
+        regPC.set(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
+    }
+
     private void pushPC() {
-        int pc = regPC.get();
-        memoryMapper.set((byte)((pc >> 4) & 0b1111), 0x0100 + Byte.toUnsignedInt(regS.get()));
+        push16(regPC.get());
+    }
+
+    void push16(int value) {
+        memoryMapper.set((byte)((value >> 4) & 0b1111), getStackAddress());
         regS.decrement();
-        memoryMapper.set((byte)(pc & 0b1111), 0x0100 + Byte.toUnsignedInt(regS.get()));
+        memoryMapper.set((byte)(value & 0b1111), getStackAddress());
         regS.decrement();
     }
 
+    int pull16() {
+        regS.increment();
+        byte lower = memoryMapper.get(getStackAddress());
+        regS.increment();
+        byte upper = memoryMapper.get(getStackAddress());
+        return getAddress(lower, upper);
+    }
+
     private void pushP() {
-        memoryMapper.set(regP.get(), 0x0100 + Byte.toUnsignedInt(regS.get()));
+        memoryMapper.set(regP.get(), getStackAddress());
         regS.decrement();
+    }
+
+    void pushA() {
+        memoryMapper.set(regA.get(), getStackAddress());
+        regS.decrement();
+    }
+
+    void pullA() {
+        regS.increment();
+        byte value = memoryMapper.get(getStackAddress());
+        regA.set(value);
+        setZeroFlag(value);
+        setNegativeFlag(value);
+    }
+
+    private int getStackAddress() {
+        return 0x0100 + Byte.toUnsignedInt(regS.get());
     }
 
     private byte getCode() {
@@ -139,8 +176,10 @@ public class _6502 {
                     value = memoryMapper.get(address);
                 }
                 break;
-            case IMPLICIT:
             case ACCUMULATOR:
+                value = regA.get();
+                break;
+            case IMPLICIT:
             case RELATIVE:
                 break;
             default:
@@ -152,147 +191,22 @@ public class _6502 {
         if (value != null) {
             System.out.print(String.format("  value=$%02x\n", value));
         }
-
-        switch (op.getOpcode()) {
-            case SEI:
-                regP.setInterruptDisable(true);
-                break;
-            case LDX:
-                regX.set(value);
-                setZeroFlag(value);
-                setNegativeFlag(value);
-                break;
-            case LDY:
-                regY.set(value);
-                setZeroFlag(value);
-                setNegativeFlag(value);
-                break;
-            case TXS:
-                regS.set(regX.get());
-                break;
-            case LDA:
-                regA.set(value);
-                setZeroFlag(value);
-                setNegativeFlag(value);
-                break;
-            case STA:
-                memoryMapper.set(regA.get(), address);
-                break;
-            case STX:
-                memoryMapper.set(regX.get(), address);
-                break;
-            case INX:
-                incrementRegister(regX);
-                break;
-            case INY:
-                incrementRegister(regY);
-                break;
-            case DEX:
-                decrementRegister(regX);
-                break;
-            case DEY:
-                decrementRegister(regY);
-                break;
-            case BNE:
-                if (!regP.isZero()) {
-                    regPC.set(regPC.get() + operand1);
-                }
-                break;
-            case BPL:
-                if (!regP.isNegative()) {
-                    regPC.set(regPC.get() + operand1);
-                }
-                break;
-            case BCC:
-                if (!regP.isCarry()) {
-                    regPC.set(regPC.get() + operand1);
-                }
-                break;
-
-            case JMP:
-//                if (address == regPC.get() - 3) {
-//                    throw new RuntimeException("Explicit infinite loop"); // FIXME
-//                }
-                regPC.set(address);
-                break;
-
-            case CLD:
-                regP.setDecimal(false);
-                break;
-            case SED:
-                regP.setDecimal(true);
-                break;
-
-            case BRK:
-                int pc = regPC.get();
-                pushPC();
-                regP.setBreakCommand(true);
-                pushP();
-                regP.setInterruptDisable(true);
-                regPC.set(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
-                break;
-
-            case BIT:
-                byte masked = (byte)(Byte.toUnsignedInt(value) & Byte.toUnsignedInt(regA.get()));
-                setZeroFlag(masked);
-                regP.setOverflow(BinaryUtil.getBit(value, 6));
-                setNegativeFlag(value);
-                break;
-
-            case TAX:
-                value = regA.get();
-                regX.set(value);
-                setZeroFlag(value);
-                setNegativeFlag(value);
-                break;
-
-            case CPX:
-                compare(regX.get(), value);
-                break;
-
-            case CMP:
-                compare(regX.get(), value);
-                break;
-
-            default:
-                throw new IllegalArgumentException("Unsupported operation");
-        }
+        op.getOpcode().execute(address, value, this);
     }
 
-    private void compare(byte minuend, byte subtrahend) {
-        byte diff = (byte)(Byte.toUnsignedInt(minuend) - Byte.toUnsignedInt(subtrahend));
-        setZeroFlag(diff);
-        setNegativeFlag(diff);
-        regP.setCarry(Byte.toUnsignedInt(minuend) >= Byte.toUnsignedInt(subtrahend));
-    }
-
-    private void incrementRegister(MemoryByte reg) {
-        reg.increment();
-        setZeroFlag(reg);
-        setNegativeFlag(reg);
-        System.out.println(String.format("  Result value=%02x", reg.get()));
-    }
-
-    private void decrementRegister(MemoryByte reg) {
-        reg.decrement();
-        setZeroFlag(reg);
-        setNegativeFlag(reg);
-        System.out.println(String.format("  Result value=%02x", reg.get()));
-    }
-
-    private void setZeroFlag(MemoryByte reg) {
+    void setZeroFlag(MemoryByte reg) {
         regP.setZero(reg.get() == 0);
     }
 
-    private void setZeroFlag(byte v) {
+    void setZeroFlag(byte v) {
         regP.setZero(v == 0);
     }
 
-    private void setNegativeFlag(MemoryByte reg) {
+    void setNegativeFlag(MemoryByte reg) {
         regP.setNegative(reg.getBit(7));
     }
 
-    private void setNegativeFlag(byte v) {
+    void setNegativeFlag(byte v) {
         regP.setNegative(BinaryUtil.getBit(v, 7));
     }
 
