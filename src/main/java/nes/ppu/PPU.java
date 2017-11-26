@@ -17,6 +17,9 @@ import lombok.Getter;
  */
 public class PPU {
 
+    static final int PALETTE_RAM_SIZE = 0x20;
+    static final int NAMETABLE_MEMORY_SIZE = 0x800;
+
     final MemoryMapper memoryMapper;
 
     final ByteArrayMemory characterRom;
@@ -39,8 +42,8 @@ public class PPU {
     public PPU(ByteArrayMemory characterRom, Mirroring mirroring) {
         memoryMapper = new MemoryMapper(this);
         this.characterRom = characterRom;
-        nametables = new ByteArrayMemory(new byte[0x0800]);
-        paletteRam = new ByteArrayMemory(new byte[0x20]);
+        nametables = new ByteArrayMemory(new byte[NAMETABLE_MEMORY_SIZE]);
+        paletteRam = new ByteArrayMemory(new byte[PALETTE_RAM_SIZE]);
 
         regPPUSTATUS = new StatusRegister(this);
         regPPUSCROLL = new ScrollRegister(this);

@@ -1,16 +1,19 @@
 package nes.ppu;
 
-import common.MemoryByte;
+import common.ByteArrayMemory;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static nes.ppu.PPU.NAMETABLE_MEMORY_SIZE;
+import static nes.ppu.PPU.PALETTE_RAM_SIZE;
 
 class MemoryMapper {
     private final PPU ppu;
 
     private static final int NAMETABLE_OFFSET = 0x2000;
-    private static final int NAMETABLE_RIGHT = 0x2800;
     private static final int PALETTE_RAM_OFFSET = 0x3F00;
-    private static final int PALETTE_RAM_RIGHT = 0x4000;
+    private static final int SIZE = 0x4000;
 
     /**
      * $0000-$0FFF Pattern table 0 [left] (256 tiles, 16 bytes each)
@@ -19,8 +22,8 @@ class MemoryMapper {
      *   $2000-$23BF Nametable
      *   $23C0-$23FF Attribute table (coloring)
      * $2400-$27FF Nametable 1
-     * ($2800-$2BFF Nametable 2)
-     * ($2C00-$2FFF Nametable 3)
+     * $2800-$2BFF Nametable 2 (mirror of Nametable 0)
+     * $2C00-$2FFF Nametable 3 (mirror of Nametable 1)
      * $3000-$3EFF Mirrors of $2000-$2EFF
      * $3F00-$3F1F Palette RAM indices
      * $3F20-$3FFF Mirrors of $3F00-$3F1F
@@ -31,27 +34,35 @@ class MemoryMapper {
 
     byte get(int address) {
         System.out.println(String.format("    get PPU $%04x", address));
-        if (address < NAMETABLE_OFFSET) {
-            // pattern tables
-            return ppu.characterRom.get(address);
-        } else if (address < NAMETABLE_RIGHT) {
-            return ppu.nametables.get(address - NAMETABLE_OFFSET);
-        } else if (address >= PALETTE_RAM_OFFSET && address < PALETTE_RAM_RIGHT) {
-            return ppu.paletteRam.get(address - PALETTE_RAM_OFFSET);
-        }
-        throw new IllegalArgumentException();
+        Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
+        ByteArrayMemory memory = memoryOffsetPair.getOne();
+        int offset = memoryOffsetPair.getTwo();
+        return memory.get(offset);
     }
 
     void set(byte value, int address) {
         System.out.println(String.format("    set PPU $%04x=%02x", address, value));
-        if (address < NAMETABLE_OFFSET) {
-            throw new IllegalArgumentException("Cannot write to pattern tables");
-        } else if (address < NAMETABLE_RIGHT) {
-            ppu.nametables.set(value, address - NAMETABLE_OFFSET);
-        } else if (address >= PALETTE_RAM_OFFSET && address < PALETTE_RAM_RIGHT) {
-            ppu.paletteRam.set(value, address - PALETTE_RAM_OFFSET);
-        } else {
-            throw new IllegalArgumentException();
+        Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
+        ByteArrayMemory memory = memoryOffsetPair.getOne();
+        int offset = memoryOffsetPair.getTwo();
+        if (memory == ppu.characterRom) {
+          throw new IllegalArgumentException("Cannot write to pattern tables");
         }
+        memory.set(value, offset);
+    }
+
+    /**
+     * @param address
+     * @return (memory, offset)
+     */
+    private Pair<ByteArrayMemory, Integer> getMemory(int address) {
+        if (address < NAMETABLE_OFFSET) {
+            return Tuples.pair(ppu.characterRom, address);
+        } else if (address < PALETTE_RAM_OFFSET) {
+            return Tuples.pair(ppu.nametables, (address - NAMETABLE_OFFSET) % NAMETABLE_MEMORY_SIZE);
+        } else if (address < SIZE) {
+            return Tuples.pair(ppu.paletteRam, (address - PALETTE_RAM_OFFSET) % PALETTE_RAM_SIZE);
+        }
+        throw new IllegalArgumentException();
     }
 }
