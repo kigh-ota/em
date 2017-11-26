@@ -157,6 +157,23 @@ class Operation {
             case 0xEC:
                 return getInstance(CPX, ABSOLUTE);
 
+            case 0xC9:
+                return getInstance(CMP, IMMEDIATE);
+            case 0xC5:
+                return getInstance(CMP, ZERO_PAGE);
+            case 0xD5:
+                return getInstance(CMP, ZERO_PAGE_X);
+            case 0xCD:
+                return getInstance(CMP, ABSOLUTE);
+            case 0xDD:
+                return getInstance(CMP, ABSOLUTE_X);
+            case 0xD9:
+                return getInstance(CMP, ABSOLUTE_Y);
+            case 0xC1:
+                return getInstance(CMP, INDEXED_INDIRECT_X);
+            case 0xD1:
+                return getInstance(CMP, INDIRECT_INDEXED_Y);
+
             case 0x90:
                 return getInstance(BCC, RELATIVE);
         }

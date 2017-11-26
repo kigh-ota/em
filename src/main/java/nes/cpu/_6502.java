@@ -247,20 +247,23 @@ public class _6502 {
                 break;
 
             case CPX:
-                if (op.getAddressingMode() == IMMEDIATE) {
-                    value = operand1;
-                } else {
-                    throw new IllegalArgumentException();
-                }
-                byte diff = (byte)(Byte.toUnsignedInt(regX.get()) - Byte.toUnsignedInt(value));
-                setZeroFlag(diff);
-                setNegativeFlag(diff);
-                regP.setCarry(Byte.toUnsignedInt(regX.get()) >= Byte.toUnsignedInt(value));
+                compare(regX.get(), value);
+                break;
+
+            case CMP:
+                compare(regX.get(), value);
                 break;
 
             default:
                 throw new IllegalArgumentException("Unsupported operation");
         }
+    }
+
+    private void compare(byte minuend, byte subtrahend) {
+        byte diff = (byte)(Byte.toUnsignedInt(minuend) - Byte.toUnsignedInt(subtrahend));
+        setZeroFlag(diff);
+        setNegativeFlag(diff);
+        regP.setCarry(Byte.toUnsignedInt(minuend) >= Byte.toUnsignedInt(subtrahend));
     }
 
     private void incrementRegister(MemoryByte reg) {
