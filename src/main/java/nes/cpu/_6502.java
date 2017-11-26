@@ -26,6 +26,9 @@ public class _6502 {
     final FlagRegister regP = new FlagRegister((byte)0x34);
     final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
 
+    final MemoryByte regJOY1 = new ByteRegister((byte)0); // $4016
+    final MemoryByte regJOY2 = new ByteRegister((byte)0); // $4017
+
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;
 

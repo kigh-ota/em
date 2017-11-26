@@ -90,6 +90,10 @@ class MemoryMapper {
                 return Tuples.pair(ppu.regPPUADDR, WO);
             case 0x2007:
                 return Tuples.pair(ppu.regPPUDATA, RW);
+            case 0x4016:
+                return Tuples.pair(cpu.regJOY1, RW);
+            case 0x4017:
+                return Tuples.pair(cpu.regJOY2, RW);
         }
         return null;
     }

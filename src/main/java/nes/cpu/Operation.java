@@ -188,6 +188,8 @@ class Operation {
 
             case 0x60:
                 return getInstance(RTS, IMPLICIT);
+
+            // TODO: AND
         }
         return null;
     }
