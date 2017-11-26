@@ -3,6 +3,10 @@ package nes.cpu;
 import common.MemoryByte;
 import lombok.RequiredArgsConstructor;
 import nes.ppu.PPU;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
+
+import static nes.cpu.MemoryMapper.Permission.*;
 
 @RequiredArgsConstructor
 class MemoryMapper {
@@ -29,9 +33,12 @@ class MemoryMapper {
 
     byte get(int address) {
         checkAddress(address);
-        MemoryByte ppuRegister = getPpuRegister(address);
+        Pair<MemoryByte, Permission> ppuRegister = getPpuRegister(address);
         if (ppuRegister != null) {
-            return ppuRegister.get();
+            if (ppuRegister.getTwo() == WO) {
+                throw new IllegalArgumentException("not readable register");
+            }
+            return ppuRegister.getOne().get();
         }
         if (address < 0x800) {
             return cpu.ram.get(address);
@@ -43,9 +50,12 @@ class MemoryMapper {
 
     void set(byte value, int address) {
         checkAddress(address);
-        MemoryByte ppuRegister = getPpuRegister(address);
+        Pair<MemoryByte, Permission> ppuRegister = getPpuRegister(address);
         if (ppuRegister != null) {
-            ppuRegister.set(value);
+            if (ppuRegister.getTwo() == RO) {
+                throw new IllegalArgumentException("not writable register");
+            }
+            ppuRegister.getOne().set(value);
             return;
         }
 
@@ -60,24 +70,26 @@ class MemoryMapper {
         throw new IllegalArgumentException();
     }
 
-    private MemoryByte getPpuRegister(int address) {
+    enum Permission {RO, WO, RW}
+
+    private Pair<MemoryByte, Permission> getPpuRegister(int address) {
         switch (address) {
             case 0x2000:
-                return ppu.regPPUCTRL;
+                return Tuples.pair(ppu.regPPUCTRL, WO);
             case 0x2001:
-                return ppu.regPPUMASK;
+                return Tuples.pair(ppu.regPPUMASK, WO);
             case 0x2002:
-                return ppu.regPPUSTATUS;
+                return Tuples.pair(ppu.regPPUSTATUS, RO);
             case 0x2003:
-                return ppu.regOAMADDR;
+                return Tuples.pair(ppu.regOAMADDR, WO);
             case 0x2004:
-                return ppu.regOAMDATA;
+                return Tuples.pair(ppu.regOAMDATA, RW);
             case 0x2005:
-                return ppu.regPPUSCROLL;
+                return Tuples.pair(ppu.regPPUSCROLL, WO);
             case 0x2006:
-                return ppu.regPPUADDR;
+                return Tuples.pair(ppu.regPPUADDR, WO);
             case 0x2007:
-                return ppu.regPPUDATA;
+                return Tuples.pair(ppu.regPPUDATA, RW);
         }
         return null;
     }
