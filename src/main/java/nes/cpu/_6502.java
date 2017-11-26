@@ -14,6 +14,10 @@ public class _6502 {
     private static final int CODE_WIDTH = 8;
     private static final int RAM_SIZE = 2048;
 
+    private static final int NMI_VECTOR_ADDRESS = 0xFFFA;
+    private static final int RESET_VECTOR_ADDRESS = 0xFFFC;
+    private static final int IRQ_BRK_VECTOR_ADDRESS = 0xFFFE;
+
     // https://wiki.nesdev.com/w/index.php/CPU_power_up_state
     private final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
     private final MemoryByte regX = new ByteRegister((byte)0);    // X Index
@@ -27,10 +31,13 @@ public class _6502 {
 
     final MemoryMapper memoryMapper;
 
+    private boolean flagNMI;
+
     public _6502(PPU ppu, ByteArrayMemory programRom) {
         memoryMapper = new MemoryMapper(this, ppu);
         this.programRom = programRom;
         this.ram = new ByteArrayMemory(new byte[0x800]);
+        flagNMI = false;
     }
 
     @Getter
@@ -41,6 +48,10 @@ public class _6502 {
 
         while (true) {
             cycles++;
+
+            if (flagNMI) {
+                handleNMI();
+            }
 
             System.out.print(String.format("%04x ", regPC.get() * 1));
             byte code = getCode();
@@ -73,6 +84,33 @@ public class _6502 {
                     throw new IllegalStateException();
             }
         }
+    }
+
+    public void reserveNMI() {
+        flagNMI = true;
+    }
+
+    private void handleNMI() {
+        flagNMI = false;
+        System.out.println("*** NMI ***");
+        pushPC();
+        regP.setBreakCommand(false);
+        pushP();
+        regP.setInterruptDisable(true);
+        regPC.set(getAddress(memoryMapper.get(NMI_VECTOR_ADDRESS), memoryMapper.get(NMI_VECTOR_ADDRESS + 1)));
+    }
+
+    private void pushPC() {
+        int pc = regPC.get();
+        memoryMapper.set((byte)((pc >> 4) & 0b1111), 0x0100 + Byte.toUnsignedInt(regS.get()));
+        regS.decrement();
+        memoryMapper.set((byte)(pc & 0b1111), 0x0100 + Byte.toUnsignedInt(regS.get()));
+        regS.decrement();
+    }
+
+    private void pushP() {
+        memoryMapper.set(regP.get(), 0x0100 + Byte.toUnsignedInt(regS.get()));
+        regS.decrement();
     }
 
     private byte getCode() {
@@ -172,9 +210,9 @@ public class _6502 {
                 break;
 
             case JMP:
-                if (address == regPC.get() - 3) {
-                    throw new RuntimeException("Explicit infinite loop"); // FIXME
-                }
+//                if (address == regPC.get() - 3) {
+//                    throw new RuntimeException("Explicit infinite loop"); // FIXME
+//                }
                 regPC.set(address);
                 break;
 
@@ -187,15 +225,11 @@ public class _6502 {
 
             case BRK:
                 int pc = regPC.get();
-                memoryMapper.set((byte)((pc >> 4) & 0b1111), 0x0100 + regS.get());
-                regS.decrement();
-                memoryMapper.set((byte)(pc & 0b1111), 0x0100 + regS.get());
-                regS.decrement();
+                pushPC();
                 regP.setBreakCommand(true);
-                memoryMapper.set(regP.get(), regS.get());
-                regS.decrement();
+                pushP();
                 regP.setInterruptDisable(true);
-                regPC.set(getAddress(memoryMapper.get(0xFFFE), memoryMapper.get(0xFFFF)));
+                regPC.set(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
                 break;
 
             case BIT:

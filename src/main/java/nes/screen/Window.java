@@ -200,7 +200,12 @@ public class Window extends Canvas implements Runnable {
                 g.setColor(Color.BLACK);
                 g.drawString(String.format("fps=%d;%d", updateFps(), cpu.getCycles()), 300, 20);
 
+                ppu.regPPUSTATUS.setVblankBit(true);
+                if (ppu.regPPUCTRL.getBit(7)) {
+                    cpu.reserveNMI();
+                }
                 Thread.sleep(1/60*1000);    //1/60秒スリープ
+                ppu.regPPUSTATUS.setVblankBit(false);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }

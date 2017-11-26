@@ -27,9 +27,9 @@ public class PPU {
     final ByteArrayMemory paletteRam;
 
     // https://wiki.nesdev.com/w/index.php/PPU_registers
-    public final ControlRegister regPPUCTRL = new ControlRegister((byte)0);
+    public final ControlRegister regPPUCTRL; // $2000
     public final MemoryByte regPPUMASK = new MaskRegister((byte)0);
-    public final MemoryByte regPPUSTATUS; // $2002
+    public final StatusRegister regPPUSTATUS; // $2002
     public final MemoryByte regOAMADDR = new ByteRegister((byte)0);
     public final MemoryByte regOAMDATA = new ByteRegister((byte)0);
     public final ScrollRegister regPPUSCROLL; // $2005
@@ -45,6 +45,7 @@ public class PPU {
         nametables = new ByteArrayMemory(new byte[NAMETABLE_MEMORY_SIZE]);
         paletteRam = new ByteArrayMemory(new byte[PALETTE_RAM_SIZE]);
 
+        regPPUCTRL = new ControlRegister();
         regPPUSTATUS = new StatusRegister(this);
         regPPUSCROLL = new ScrollRegister(this);
         regPPUADDR = new AddressRegister(this);

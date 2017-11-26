@@ -6,7 +6,7 @@ public class StatusRegister extends ByteRegister {
     final private PPU ppu;
 
     StatusRegister(PPU ppu) {
-        super((byte)0b10000000 /* FIXME */);
+        super((byte)0);
         this.ppu = ppu;
     }
 
@@ -15,5 +15,9 @@ public class StatusRegister extends ByteRegister {
         ppu.regPPUADDR.resetLatch();
         ppu.regPPUSCROLL.resetLatch();
         return super.get();
+    }
+
+    public void setVblankBit(boolean flag) {
+        setBit(flag, 7);
     }
 }
