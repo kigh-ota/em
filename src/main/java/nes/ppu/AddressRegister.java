@@ -15,7 +15,7 @@ class AddressRegister extends ByteRegister {
     AddressRegister(PPU ppu) {
         super((byte)0);
         this.ppu = ppu;
-        next = Latch.UPPER;
+        resetLatch();
         address = 0;
     }
 
@@ -32,5 +32,9 @@ class AddressRegister extends ByteRegister {
 
     void incrementAddress() {
         address += ppu.regPPUCTRL.addressIncrement();
+    }
+
+    void resetLatch() {
+        next = Latch.UPPER;
     }
 }

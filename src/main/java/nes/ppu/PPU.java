@@ -26,12 +26,12 @@ public class PPU {
     // https://wiki.nesdev.com/w/index.php/PPU_registers
     public final ControlRegister regPPUCTRL = new ControlRegister((byte)0);
     public final MemoryByte regPPUMASK = new MaskRegister((byte)0);
-    public final MemoryByte regPPUSTATUS = new ByteRegister((byte)0b10000000 /* FIXME */);
+    public final MemoryByte regPPUSTATUS; // $2002
     public final MemoryByte regOAMADDR = new ByteRegister((byte)0);
     public final MemoryByte regOAMDATA = new ByteRegister((byte)0);
-    public final ScrollRegister regPPUSCROLL;
-    public final AddressRegister regPPUADDR;
-    public final MemoryByte regPPUDATA;
+    public final ScrollRegister regPPUSCROLL; // $2005
+    public final AddressRegister regPPUADDR; // $2006
+    public final MemoryByte regPPUDATA; // $2007
 
     @Getter
     private final Mirroring mirroring;
@@ -42,8 +42,9 @@ public class PPU {
         nametables = new ByteArrayMemory(new byte[0x0800]);
         paletteRam = new ByteArrayMemory(new byte[0x20]);
 
-        regPPUADDR = new AddressRegister(this);
+        regPPUSTATUS = new StatusRegister(this);
         regPPUSCROLL = new ScrollRegister(this);
+        regPPUADDR = new AddressRegister(this);
         regPPUDATA = new DataRegister(this);
 
         this.mirroring = mirroring;

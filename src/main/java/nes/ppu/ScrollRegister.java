@@ -13,10 +13,10 @@ public class ScrollRegister extends ByteRegister {
     @Getter private int x;
     @Getter private int y;
 
-    public ScrollRegister(PPU ppu) {
+    ScrollRegister(PPU ppu) {
         super((byte)0);
         this.ppu = ppu;
-        next = Latch.X;
+        resetLatch();
         x = 0;
         y = 0;
     }
@@ -30,5 +30,9 @@ public class ScrollRegister extends ByteRegister {
             y = Byte.toUnsignedInt(value);
             next = Latch.X;
         }
+    }
+
+    void resetLatch() {
+        next = Latch.X;
     }
 }
