@@ -5,9 +5,6 @@ package nes.cpu;
 import com.google.common.base.Preconditions;
 import common.BinaryUtil;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-
 enum AddressingMode {
     IMPLICIT(0),
     ACCUMULATOR(0),
@@ -87,9 +84,12 @@ enum AddressingMode {
     INDIRECT_INDEXED_Y(1) {
         @Override
         Integer getAddress(Byte operand1, Byte operand2, _6502 cpu) {
-            throw new UnsupportedOperationException();
+            validateOperands(operand1, operand2);
+            byte lower = cpu.memoryMapper.get(BinaryUtil.getAddress(operand1, (byte)0));
+            byte upper = cpu.memoryMapper.get(BinaryUtil.getAddress(BinaryUtil.add(operand1, (byte)1).getOne(), (byte)0));
+            return BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.getY());
         }
-    }; // (LOWER) => (value at $00:LOWER)+Y ??
+    }; // (LOWER) => value at((value at $00:LOWER)+Y)
 
     final int addressBytes;
 

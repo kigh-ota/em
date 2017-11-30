@@ -118,6 +118,8 @@ class Operation {
 
             case 0x9A:
                 return getInstance(TXS, IMPLICIT);
+            case 0x8A:
+                return getInstance(TXA, IMPLICIT);
 
             case 0xD8:
                 return getInstance(CLD, IMPLICIT);
@@ -159,6 +161,13 @@ class Operation {
                 return getInstance(CPX, ZERO_PAGE);
             case 0xEC:
                 return getInstance(CPX, ABSOLUTE);
+
+            case 0xC0:
+                return getInstance(CPY, IMMEDIATE);
+            case 0xC4:
+                return getInstance(CPY, ZERO_PAGE);
+            case 0xCC:
+                return getInstance(CPY, ABSOLUTE);
 
             case 0xC9:
                 return getInstance(CMP, IMMEDIATE);
@@ -243,6 +252,9 @@ class Operation {
                 return getInstance(LSR, ABSOLUTE);
             case 0x5E:
                 return getInstance(LSR, ABSOLUTE_X);
+
+            case 0xB0:
+                return getInstance(BCS, RELATIVE);
         }
         return null;
     }

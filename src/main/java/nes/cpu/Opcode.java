@@ -90,7 +90,14 @@ enum Opcode {
             }
         }
     }, // Branch if Carry Clear
-    BCS(false), // Branch if Carry Set
+    BCS(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            if (cpu.regP.isCarry()) {
+                cpu.regPC.set(address);
+            }
+        }
+    }, // Branch if Carry Set
     BEQ(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
@@ -179,7 +186,12 @@ enum Opcode {
             compare(cpu.regX.get(), value, cpu);
         }
     }, // Compare X Register
-    CPY(true), // Compare Y Register
+    CPY(true) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            compare(cpu.regY.get(), value, cpu);
+        }
+    }, // Compare Y Register
 
     INC(false), // Increment Memory
     INX(false) {
@@ -280,7 +292,15 @@ enum Opcode {
     }, // Transfer Accumulator to X
     TAY(false), // Transfer Accumulator to Y
     TSX(false), // Transfer Stack Pointer to X
-    TXA(false), // Transfer X to Accumulator
+    TXA(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            byte x = cpu.regX.get();
+            cpu.regA.set(x);
+            cpu.setZeroFlag(x);
+            cpu.setNegativeFlag(x);
+        }
+    }, // Transfer X to Accumulator
     TYA(false), // Transfer Y to Accumulator
     TXS(false) {
         @Override
