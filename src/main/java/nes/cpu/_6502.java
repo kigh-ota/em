@@ -2,11 +2,8 @@ package nes.cpu;
 
 import common.*;
 import lombok.Getter;
-import nes.ppu.*;
+import nes.ppu.PPU;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
-import static nes.cpu.AddressingMode.*;
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
 
 // http://hp.vector.co.jp/authors/VA042397/nes/index.html
@@ -26,6 +23,7 @@ public class _6502 {
     final FlagRegister regP = new FlagRegister((byte)0x34);
     final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
 
+    final OAMDMARegister regOAMDMA;
     final MemoryByte regJOY1 = new ByteRegister((byte)0); // $4016
     final MemoryByte regJOY2 = new ByteRegister((byte)0); // $4017
 
@@ -40,6 +38,7 @@ public class _6502 {
         memoryMapper = new MemoryMapper(this, ppu);
         this.programRom = programRom;
         this.ram = new ByteArrayMemory(new byte[0x800]);
+        this.regOAMDMA = new OAMDMARegister(this, ppu);
         flagNMI = false;
     }
 

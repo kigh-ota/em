@@ -5,6 +5,8 @@ import common.ByteRegister;
 import common.MemoryByte;
 import lombok.Getter;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 /**
  * http://hp.vector.co.jp/authors/VA042397/nes/ppu.html
  * ネームテーブルで設定された情報を使って、パターンテーブルからキャラクタを貼り付ける
@@ -18,6 +20,7 @@ import lombok.Getter;
 public class PPU {
 
     static final int PALETTE_RAM_SIZE = 0x20;
+    public static final int OAM_SIZE = 0x100;
     static final int NAMETABLE_MEMORY_SIZE = 0x800;
 
     final MemoryMapper memoryMapper;
@@ -25,13 +28,14 @@ public class PPU {
     final ByteArrayMemory characterRom;
     final ByteArrayMemory nametables;
     final ByteArrayMemory paletteRam;
+    public final ObjectAttributeMemory oam = new ObjectAttributeMemory();
 
     // https://wiki.nesdev.com/w/index.php/PPU_registers
     public final ControlRegister regPPUCTRL; // $2000
     public final MemoryByte regPPUMASK = new MaskRegister((byte)0);
     public final StatusRegister regPPUSTATUS; // $2002
     public final MemoryByte regOAMADDR = new ByteRegister((byte)0);
-    public final MemoryByte regOAMDATA = new ByteRegister((byte)0);
+    public final MemoryByte regOAMDATA = new ByteRegister((byte)0); // TODO implement
     public final ScrollRegister regPPUSCROLL; // $2005
     public final AddressRegister regPPUADDR; // $2006
     public final MemoryByte regPPUDATA; // $2007
@@ -84,6 +88,10 @@ public class PPU {
         return regPPUCTRL.getBackgroundPatternTable();
     }
 
+    public int getSpritePatternTable() {
+        return regPPUCTRL.getSpritePatternTable();
+    }
+
     /**
      *
      * @param nameTable 0-1
@@ -95,11 +103,13 @@ public class PPU {
     }
 
     /**
-     * @param palette 0-3
+     * @param palette 0-7
      * @param i 0-3
      * @return 0-63
      */
-    public int getBackgroundColor(int palette, int i) {
+    public int getColor(int palette, int i) {
+        checkArgument(palette >= 0 && palette < 8);
+        checkArgument(i >= 0 && i < 4);
         int offset = (i != 0) ? palette * 4 + i : 0;
         return paletteRam.get(offset);
     }

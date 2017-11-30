@@ -34,4 +34,12 @@ public class ControlRegister extends ByteRegister {
     int getBackgroundPatternTable() {
         return getBit(4) ? 1 : 0;
     }
+
+    int getSpritePatternTable() { return getBit(3) ? 1 : 0; }
+
+    public enum SpriteSize { EIGHT_BY_EIGHT, EIGHT_BY_SIXTEEN };
+
+    public SpriteSize getSpriteSize() {
+        return getBit(5) ? SpriteSize.EIGHT_BY_SIXTEEN : SpriteSize.EIGHT_BY_EIGHT;
+    }
 }
