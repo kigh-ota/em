@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 // @see http://obelisk.me.uk/6502/reference.html
 // @see http://pgate1.at-ninja.jp/NES_on_FPGA/nes_cpu.htm
 @RequiredArgsConstructor
-enum Opcode {
+enum Op {
     ADC(true), // Add with Carry
     SBC(true), // Subtract with Carry
 
@@ -331,7 +331,7 @@ enum Opcode {
     final boolean needsValue;
 
     void execute(Integer address, Byte value, _6502 cpu) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(this.toString());
     };
 
     void store(byte value, int address, _6502 cpu) {

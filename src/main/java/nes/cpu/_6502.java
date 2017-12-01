@@ -15,6 +15,8 @@ public class _6502 {
     private static final int RESET_VECTOR_ADDRESS = 0xFFFC;
     private static final int IRQ_BRK_VECTOR_ADDRESS = 0xFFFE;
 
+    private final OperationFactory operationFactory;
+
     // https://wiki.nesdev.com/w/index.php/CPU_power_up_state
     final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
     final MemoryByte regX = new ByteRegister((byte)0);    // X Index
@@ -35,6 +37,7 @@ public class _6502 {
     private boolean flagNMI;
 
     public _6502(PPU ppu, ByteArrayMemory programRom) {
+        operationFactory = new OperationFactory();
         memoryMapper = new MemoryMapper(this, ppu);
         this.programRom = programRom;
         this.ram = new ByteArrayMemory(new byte[0x800]);
@@ -57,11 +60,11 @@ public class _6502 {
 
             System.out.print(String.format("%04x ", regPC.get() * 1));
             byte code = getCode();
-            Operation op = Operation.of(code);
+            Operation op = operationFactory.get(code);
             if (op == null) {
                 System.out.print(BinaryUtil.toBinaryString(code, CODE_WIDTH) + "\n");
             }
-            System.out.print(op.getOpcode().toString());
+            System.out.print(op.getOp().toString());
             System.out.print(" " + op.getAddressingMode().toString());
             switch (op.getAddressingMode().addressBytes) {
                 case 0:
@@ -179,7 +182,7 @@ public class _6502 {
             case INDIRECT:
             case INDEXED_INDIRECT_X:
             case INDIRECT_INDEXED_Y:
-                if (op.getOpcode().needsValue) {
+                if (op.getOp().needsValue) {
                     value = memoryMapper.get(address);
                 }
                 break;
@@ -198,7 +201,7 @@ public class _6502 {
         if (value != null) {
             System.out.print(String.format("  value=$%02x\n", value));
         }
-        op.getOpcode().execute(address, value, this);
+        op.getOp().execute(address, value, this);
     }
 
     void setZeroFlag(MemoryByte reg) {
