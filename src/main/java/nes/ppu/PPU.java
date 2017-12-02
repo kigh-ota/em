@@ -113,4 +113,8 @@ public class PPU {
         int offset = (i != 0) ? palette * 4 + i : 0;
         return paletteRam.get(offset);
     }
+
+    public boolean isCharacterRomAvailable() {
+        return characterRom != null;
+    }
 }

@@ -43,7 +43,7 @@ public class FileLoader {
             return false;
         }
 
-        programRomSize = data[4] * 0x4000;
+        programRomSize = data[4];
         characterRomSize = data[5] * 0x2000;
         flag6 = data[6];
         flag7 = data[7];
@@ -62,9 +62,20 @@ public class FileLoader {
     private NesData parseData(byte[] data) {
         NesData nesData = new NesData(flag6);
         int cursor = HEADER_LENGTH;
-        nesData.programRom = new ByteArrayMemory(Arrays.copyOfRange(data, cursor, cursor + programRomSize));
-        cursor += programRomSize;
-        nesData.characterRom = new ByteArrayMemory(Arrays.copyOfRange(data, cursor, cursor + characterRomSize));
+        if (programRomSize == 2) {
+            nesData.programRom = new ByteArrayMemory(Arrays.copyOfRange(data, cursor, cursor + 0x8000));
+        } else if (programRomSize == 1) {
+            nesData.programRom = new ByteArrayMemory(new byte[0x8000]);
+            for (int i = 0; i < 0x8000; i++) {
+                nesData.programRom.set(data[cursor + (i % 0x4000)], i);
+            }
+        } else {
+            throw new IllegalStateException();
+        }
+        cursor += 0x8000;
+        if (characterRomSize > 0) {
+            nesData.characterRom = new ByteArrayMemory(Arrays.copyOfRange(data, cursor, cursor + characterRomSize));
+        }
         return nesData;
     }
 }

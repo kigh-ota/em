@@ -87,14 +87,19 @@ public class _6502 {
             }
             System.out.print(op.getOp().toString());
             System.out.print(" " + op.getAddressingMode().toString());
+
+            String regString = String.format(" [A=%02x S=%02x]", regA.get(), regS.get());
+
             switch (op.getAddressingMode().addressBytes) {
                 case 0:
+                    System.out.print(regString);
                     System.out.print("\n");
                     executeInstruction(op, null, null);
                     continue;
                 case 1:
                     byte operand = getCode();
                     System.out.print(String.format(" %02x", operand));
+                    System.out.print(regString);
                     System.out.print("\n");
                     executeInstruction(op, operand, null);
                     continue;
@@ -103,6 +108,7 @@ public class _6502 {
                     byte operand2 = getCode();
                     System.out.print(String.format(" %02x", operand2));
                     System.out.print(String.format(" %02x", operand1));
+                    System.out.print(regString);
                     System.out.print("\n");
                     executeInstruction(op, operand1, operand2);
                     continue;

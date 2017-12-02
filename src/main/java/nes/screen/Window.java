@@ -136,77 +136,21 @@ public class Window extends Canvas implements Runnable {
             try {
                 Graphics g = this.getGraphics();
 
-                // Pattern tables
-                for (int table = 0; table < 2; table++) {
-                    for (int pattern = 0; pattern < NUM_PATTERNS; pattern++) {
-                        byte[] character = ppu.getCharacterPattern(table, pattern);
-                        int tileX = pattern % 16;
-                        int tileY = pattern / 16;
-                        drawTile(character, table * TILE_SIZE * NUM_PATTERNS + tileX * TILE_SIZE, tileY * TILE_SIZE, g);
-                    }
+                if (ppu.isCharacterRomAvailable()) {
+                    drawPatternTables(g);
                 }
 
-                // Background Palette
-                for (int palette = 0; palette < 4; palette++) {
-                    for (int i = 0; i < 4; i++) {
-                        Color color = PALETTE[ppu.getColor(palette, i)];
-                        g.setColor(color);
-                        int x = PALETTE_OFFSET_X + i * 4;
-                        int y = PALETTE_OFFSET_Y + palette * 4;
-                        g.fillRect(x, y, 4, 4);
-                    }
+                drawBackgroundPalette(g);
+
+                final int scrollX = ppu.regPPUSCROLL.getX();
+                final int scrollY = ppu.regPPUSCROLL.getY();
+
+                if (ppu.isCharacterRomAvailable()) {
+                    drawBackground(g);
+                    drawSprites(scrollX, scrollY, g);
                 }
 
-                // Main: background
-                Mirroring mirroring = ppu.getMirroring();
-                int backgroundPatternTable = ppu.getBackgroundPatternTable();
-                for (int nameTable = 0; nameTable < 2; nameTable++) {
-                    int baseX = (nameTable == 0) ? MAIN_OFFSET_X : MAIN_OFFSET_X + MAIN_WIDTH;
-                    int baseY = (nameTable == 0) ? MAIN_OFFSET_Y : MAIN_OFFSET_Y + MAIN_HEIGHT;
-                    int baseMirrorX = (nameTable == 0) ?
-                            (mirroring == VERTICAL ? baseX : baseX + MAIN_WIDTH) :
-                            (mirroring == VERTICAL ? baseX : baseX - MAIN_WIDTH);
-                    int baseMirrorY = (nameTable == 0) ?
-                            (mirroring == VERTICAL ? baseY + MAIN_HEIGHT : baseY) :
-                            (mirroring == VERTICAL ? baseY - MAIN_HEIGHT : baseY);
-
-                    for (int cell = 0; cell < CELL_NUM_X * CELL_NUM_Y; cell++) {
-                        int cellX = cell % CELL_NUM_X;
-                        int cellY = cell / CELL_NUM_X;
-                        byte[] character = ppu.getCharacterPattern(backgroundPatternTable, ppu.getCharacter(nameTable, cell));
-                        int palette = ppu.getPalette(nameTable, cell);
-
-                        int x0 = baseX + TILE_SIZE * cellX;
-                        int y0 = baseY + TILE_SIZE * cellY;
-                        drawTileWithPalette(character, x0, y0, palette, g);
-
-                        int mirrorX0 = baseMirrorX + TILE_SIZE * cellX;
-                        int mirrorY0 = baseMirrorY + TILE_SIZE * cellY;
-                        drawTileWithPalette(character, mirrorX0, mirrorY0, palette, g);
-                    }
-                }
-
-                int scrollX = ppu.regPPUSCROLL.getX();
-                int scrollY = ppu.regPPUSCROLL.getY();
-
-                // Sprites
-                int spritePatternTable = ppu.getSpritePatternTable();
-                checkArgument(ppu.regPPUCTRL.getSpriteSize() == ControlRegister.SpriteSize.EIGHT_BY_EIGHT);
-                for (int n = 63; n >= 0; n--) {
-                    Sprite sprite = ppu.oam.getSprite(n);
-                    byte[] character = ppu.getCharacterPattern(spritePatternTable, sprite.getTileIndex());// TODO 8x16 sprite
-                    int x = MAIN_OFFSET_X + scrollX + sprite.getX();
-                    int y = MAIN_OFFSET_Y + scrollY + sprite.getY();
-                    drawTileWithPalette(character, x, y, sprite.getAttributes().getPalette(), g);
-                }
-
-                // scroll position
-                g.setColor(Color.YELLOW);
-                g.drawRect(
-                        MAIN_OFFSET_X + scrollX - 1,
-                        MAIN_OFFSET_Y + scrollY - 1,
-                        MAIN_WIDTH + 1,
-                        MAIN_HEIGHT + 1);
+                drawScrollPositionRect(scrollX, scrollY, g);
 
                 // show fps
                 frames++;
@@ -225,6 +169,82 @@ public class Window extends Canvas implements Runnable {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void drawPatternTables(Graphics g) {
+        for (int table = 0; table < 2; table++) {
+            for (int pattern = 0; pattern < NUM_PATTERNS; pattern++) {
+                byte[] character = ppu.getCharacterPattern(table, pattern);
+                int tileX = pattern % 16;
+                int tileY = pattern / 16;
+                drawTile(character, table * TILE_SIZE * NUM_PATTERNS + tileX * TILE_SIZE, tileY * TILE_SIZE, g);
+            }
+        }
+    }
+
+    private void drawBackgroundPalette(Graphics g) {
+        for (int palette = 0; palette < 4; palette++) {
+            for (int i = 0; i < 4; i++) {
+                Color color = PALETTE[ppu.getColor(palette, i)];
+                g.setColor(color);
+                int x = PALETTE_OFFSET_X + i * 4;
+                int y = PALETTE_OFFSET_Y + palette * 4;
+                g.fillRect(x, y, 4, 4);
+            }
+        }
+    }
+
+    private void drawBackground(Graphics g) {
+        // Main: background
+        Mirroring mirroring = ppu.getMirroring();
+        int backgroundPatternTable = ppu.getBackgroundPatternTable();
+        for (int nameTable = 0; nameTable < 2; nameTable++) {
+            int baseX = (nameTable == 0) ? MAIN_OFFSET_X : MAIN_OFFSET_X + MAIN_WIDTH;
+            int baseY = (nameTable == 0) ? MAIN_OFFSET_Y : MAIN_OFFSET_Y + MAIN_HEIGHT;
+            int baseMirrorX = (nameTable == 0) ?
+                    (mirroring == VERTICAL ? baseX : baseX + MAIN_WIDTH) :
+                    (mirroring == VERTICAL ? baseX : baseX - MAIN_WIDTH);
+            int baseMirrorY = (nameTable == 0) ?
+                    (mirroring == VERTICAL ? baseY + MAIN_HEIGHT : baseY) :
+                    (mirroring == VERTICAL ? baseY - MAIN_HEIGHT : baseY);
+
+            for (int cell = 0; cell < CELL_NUM_X * CELL_NUM_Y; cell++) {
+                int cellX = cell % CELL_NUM_X;
+                int cellY = cell / CELL_NUM_X;
+                byte[] character = ppu.getCharacterPattern(backgroundPatternTable, ppu.getCharacter(nameTable, cell));
+                int palette = ppu.getPalette(nameTable, cell);
+
+                int x0 = baseX + TILE_SIZE * cellX;
+                int y0 = baseY + TILE_SIZE * cellY;
+                drawTileWithPalette(character, x0, y0, palette, g);
+
+                int mirrorX0 = baseMirrorX + TILE_SIZE * cellX;
+                int mirrorY0 = baseMirrorY + TILE_SIZE * cellY;
+                drawTileWithPalette(character, mirrorX0, mirrorY0, palette, g);
+            }
+        }
+    }
+
+    void drawSprites(int scrollX, int scrollY, Graphics g) {
+        int spritePatternTable = ppu.getSpritePatternTable();
+        checkArgument(ppu.regPPUCTRL.getSpriteSize() == ControlRegister.SpriteSize.EIGHT_BY_EIGHT);
+        for (int n = 63; n >= 0; n--) {
+            Sprite sprite = ppu.oam.getSprite(n);
+            byte[] character = ppu.getCharacterPattern(spritePatternTable, sprite.getTileIndex());// TODO 8x16 sprite
+            int x = MAIN_OFFSET_X + scrollX + sprite.getX();
+            int y = MAIN_OFFSET_Y + scrollY + sprite.getY();
+            drawTileWithPalette(character, x, y, sprite.getAttributes().getPalette(), g);
+        }
+    }
+
+    void drawScrollPositionRect(int scrollX, int scrollY, Graphics g) {
+        // scroll position
+        g.setColor(Color.YELLOW);
+        g.drawRect(
+                MAIN_OFFSET_X + scrollX - 1,
+                MAIN_OFFSET_Y + scrollY - 1,
+                MAIN_WIDTH + 1,
+                MAIN_HEIGHT + 1);
     }
 
     private long frames = 0;
