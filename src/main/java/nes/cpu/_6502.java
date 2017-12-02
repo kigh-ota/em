@@ -25,7 +25,28 @@ public class _6502 {
     final FlagRegister regP = new FlagRegister((byte)0x34);
     final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
 
-    final OAMDMARegister regOAMDMA;
+    final MemoryByte regSQ1_VOL = new ByteRegister((byte)0); // $4000
+    final MemoryByte regSQ1_SWEEP = new ByteRegister((byte)0); // $4001
+    final MemoryByte regSQ1_LO = new ByteRegister((byte)0); // $4002
+    final MemoryByte regSQ1_HI = new ByteRegister((byte)0); // $4003
+    final MemoryByte regSQ2_VOL= new ByteRegister((byte)0); // $4004
+    final MemoryByte regSQ2_SWEEP = new ByteRegister((byte)0); // $4005
+    final MemoryByte regSQ2_LO = new ByteRegister((byte)0); // $4006
+    final MemoryByte regSQ2_HI = new ByteRegister((byte)0); // $4007
+    final MemoryByte regTRI_LINEAR = new ByteRegister((byte)0); // $4008
+    final MemoryByte regUNUSED1 = new ByteRegister((byte)0); // $4009
+    final MemoryByte regTRI_LO = new ByteRegister((byte)0); // $400A
+    final MemoryByte regTRI_HI = new ByteRegister((byte)0); // $400B
+    final MemoryByte regNOISE_VOL = new ByteRegister((byte)0); // $400C
+    final MemoryByte regUNUSED2 = new ByteRegister((byte)0); // $400D
+    final MemoryByte regNOISE_LO = new ByteRegister((byte)0); // $400E
+    final MemoryByte regNOISE_HI = new ByteRegister((byte)0); // $400F
+    final MemoryByte regDMC_FREQ = new ByteRegister((byte)0); // $4010
+    final MemoryByte regDMC_RAW = new ByteRegister((byte)0); // $4011
+    final MemoryByte regDMC_START = new ByteRegister((byte)0); // $4012
+    final MemoryByte regDMC_LEN = new ByteRegister((byte)0); // $4013
+    final OAMDMARegister regOAMDMA; // $4014
+    final MemoryByte regSND_CHN = new ByteRegister((byte)0); // $4015
     final MemoryByte regJOY1 = new ByteRegister((byte)0); // $4016
     final MemoryByte regJOY2 = new ByteRegister((byte)0); // $4017
 

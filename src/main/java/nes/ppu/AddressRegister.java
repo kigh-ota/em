@@ -30,6 +30,16 @@ class AddressRegister extends ByteRegister {
         }
     }
 
+    @Override
+    public boolean increment() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean decrement() {
+        throw new UnsupportedOperationException();
+    }
+
     void incrementAddress() {
         address += ppu.regPPUCTRL.addressIncrement();
     }

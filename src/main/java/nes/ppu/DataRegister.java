@@ -24,4 +24,14 @@ class DataRegister extends ByteRegister {
         ppu.regPPUADDR.incrementAddress();
         return value;
     }
+
+    @Override
+    public boolean increment() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean decrement() {
+        throw new UnsupportedOperationException();
+    }
 }

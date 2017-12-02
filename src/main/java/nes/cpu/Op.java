@@ -1,6 +1,7 @@
 package nes.cpu;
 
 import common.BinaryUtil;
+import common.ByteArrayMemory;
 import common.MemoryByte;
 import lombok.RequiredArgsConstructor;
 
@@ -193,30 +194,40 @@ enum Op {
         }
     }, // Compare Y Register
 
-    INC(false), // Increment Memory
+    INC(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            incrementMemory(address, cpu);
+        }
+    }, // Increment Memory
     INX(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
-            increment(cpu.regX, cpu);
+            incrementRegister(cpu.regX, cpu);
         }
     }, // Increment X Register
     INY(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
-            increment(cpu.regY, cpu);
+            incrementRegister(cpu.regY, cpu);
         }
     }, // Increment Y Register
-    DEC(false), // Decrement Memory
+    DEC(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            decrementMemory(address, cpu);
+        }
+    }, // Decrement Memory
     DEX(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
-            decrement(cpu.regX, cpu);
+            decrementRegister(cpu.regX, cpu);
         }
     }, // Decrement X Register
     DEY(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
-            decrement(cpu.regY, cpu);
+            decrementRegister(cpu.regY, cpu);
         }
     }, // Decrement Y Register
 
@@ -338,18 +349,30 @@ enum Op {
         cpu.memoryMapper.set(value, address);
     }
 
-    void increment(MemoryByte reg, _6502 cpu) {
+    void incrementRegister(MemoryByte reg, _6502 cpu) {
         reg.increment();
         cpu.setZeroFlag(reg);
         cpu.setNegativeFlag(reg);
         System.out.println(String.format("  Result value=%02x", reg.get()));
     }
 
-    void decrement(MemoryByte reg, _6502 cpu) {
+    void decrementRegister(MemoryByte reg, _6502 cpu) {
         reg.decrement();
         cpu.setZeroFlag(reg);
         cpu.setNegativeFlag(reg);
         System.out.println(String.format("  Result value=%02x", reg.get()));
+    }
+
+    void incrementMemory(int address, _6502 cpu) {
+        byte value = cpu.memoryMapper.increment(address);
+        cpu.setZeroFlag(value);
+        cpu.setNegativeFlag(value);
+    }
+
+    void decrementMemory(int address, _6502 cpu) {
+        byte value = cpu.memoryMapper.decrement(address);
+        cpu.setZeroFlag(value);
+        cpu.setNegativeFlag(value);
     }
 
     void compare(byte minuend, byte subtrahend, _6502 cpu) {

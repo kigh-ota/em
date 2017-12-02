@@ -39,6 +39,12 @@ public class BinaryUtil {
         return Tuples.pair((byte)(value % 256), carry);
     }
 
+    public static Pair<Byte, Boolean> subtract(byte minuend, byte subtrahend) {
+        int value = Byte.toUnsignedInt(minuend) - Byte.toUnsignedInt(subtrahend);
+        boolean carry = value < 0;
+        return Tuples.pair((byte)(value % 256), carry);
+    }
+
     public static int getAddress(byte lower, byte upper) {
         return (Byte.toUnsignedInt(upper) << 8) + Byte.toUnsignedInt(lower);
     }

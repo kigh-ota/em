@@ -20,4 +20,14 @@ public class StatusRegister extends ByteRegister {
     public void setVblankBit(boolean flag) {
         setBit(flag, 7);
     }
+
+    @Override
+    public boolean increment() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean decrement() {
+        throw new UnsupportedOperationException();
+    }
 }
