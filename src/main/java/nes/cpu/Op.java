@@ -10,7 +10,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 enum Op {
     ADC(true), // Add with Carry
-    SBC(true), // Subtract with Carry
+    SBC(true) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            int resultInt = Byte.toUnsignedInt(cpu.regA.get()) - Byte.toUnsignedInt(value) - (cpu.regP.isCarry() ? 0 : 1);
+            boolean overflow = resultInt < -128 || resultInt > 127;
+            cpu.regP.setOverflow(overflow);
+            cpu.regP.setCarry(!overflow);
+            byte result = (byte)resultInt;
+            cpu.regA.set(result);
+            cpu.setZeroFlag(result);
+            cpu.setNegativeFlag(result);
+        }
+    }, // Subtract with Carry
 
     AND(true) {
         @Override
@@ -30,9 +42,30 @@ enum Op {
             cpu.setNegativeFlag(result);
         }
     }, // Logical Inclusive OR
-    EOR(true), // Exclusive OR
+    EOR(true) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            byte result = (byte)(cpu.regA.get() ^ value);
+            cpu.regA.set(result);
+            cpu.setZeroFlag(result);
+            cpu.setNegativeFlag(result);
+        }
+    }, // Exclusive OR
 
-    ASL(true), // Arithmetic Shift Left
+    ASL(true) {
+        @Override
+        void execute(Integer address, Byte oldValue, _6502 cpu) {
+            byte newValue = (byte)(oldValue << 1);
+            if (address == null) {
+                cpu.regA.set(newValue);
+            } else {
+                cpu.memoryMapper.set(newValue, address);
+            }
+            cpu.regP.setCarry(BinaryUtil.getBit(oldValue, 0));
+            cpu.setZeroFlag(newValue);
+            cpu.setNegativeFlag(newValue);
+        }
+    }, // Arithmetic Shift Left
     LSR(true) {
         @Override
         void execute(Integer address, Byte oldValue, _6502 cpu) {
@@ -231,8 +264,18 @@ enum Op {
         }
     }, // Decrement Y Register
 
-    SEC(false), // Set Carry Flag
-    CLC(false), // Clear Carry Flag
+    SEC(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            cpu.regP.setCarry(true);
+        }
+    }, // Set Carry Flag
+    CLC(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            cpu.regP.setCarry(false);
+        }
+    }, // Clear Carry Flag
     SED(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
@@ -301,7 +344,15 @@ enum Op {
             cpu.setNegativeFlag(a);
         }
     }, // Transfer Accumulator to X
-    TAY(false), // Transfer Accumulator to Y
+    TAY(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            byte a = cpu.regA.get();
+            cpu.regY.set(a);
+            cpu.setZeroFlag(a);
+            cpu.setNegativeFlag(a);
+        }
+    }, // Transfer Accumulator to Y
     TSX(false), // Transfer Stack Pointer to X
     TXA(false) {
         @Override
