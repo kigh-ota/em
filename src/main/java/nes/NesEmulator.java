@@ -15,7 +15,7 @@ public class NesEmulator {
     public void start() {
 //        NesData nesData = loadRom(System.getProperty("user.home") + "/sample1.nes");
 //        NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
-        NesData nesData = loadRom(System.getProperty("user.home") + "/cpu_dummy_reads.nes");
+        NesData nesData = loadRom(System.getProperty("user.home") + "/sprite_ram.nes");
 
         PPU ppu = new PPU(nesData.characterRom, nesData.mirroring);
         _6502 cpu = new _6502(ppu, nesData.programRom);

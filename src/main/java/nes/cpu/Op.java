@@ -9,7 +9,19 @@ import lombok.RequiredArgsConstructor;
 // @see http://pgate1.at-ninja.jp/NES_on_FPGA/nes_cpu.htm
 @RequiredArgsConstructor
 enum Op {
-    ADC(true), // Add with Carry
+    ADC(true) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            int resultInt = Byte.toUnsignedInt(cpu.regA.get()) + Byte.toUnsignedInt(value) + (cpu.regP.isCarry() ? 1 : 0);
+            boolean overflow = resultInt < -128 || resultInt > 127;
+            cpu.regP.setOverflow(overflow);
+            cpu.regP.setCarry(overflow);
+            byte result = (byte)resultInt;
+            cpu.regA.set(result);
+            cpu.setZeroFlag(result);
+            cpu.setNegativeFlag(result);
+        }
+    }, // Add with Carry
     SBC(true) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
@@ -140,7 +152,14 @@ enum Op {
             }
         }
     }, // Branch if Equal
-    BMI(false), // Branch if Minus
+    BMI(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            if (cpu.regP.isNegative()) {
+                cpu.regPC.set(address);
+            }
+        }
+    }, // Branch if Minus
     BNE(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
@@ -295,7 +314,12 @@ enum Op {
         }
     }, // Set Interrupt Disable
     CLI(false), // Clear Interrupt Disable
-    CLV(false), // Clear Overflow Flag
+    CLV(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            cpu.regP.setOverflow(false);
+        }
+    }, // Clear Overflow Flag
 
     LDA(true) {
         @Override
@@ -353,7 +377,15 @@ enum Op {
             cpu.setNegativeFlag(a);
         }
     }, // Transfer Accumulator to Y
-    TSX(false), // Transfer Stack Pointer to X
+    TSX(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            byte s = cpu.regS.get();
+            cpu.regX.set(s);
+            cpu.setZeroFlag(s);
+            cpu.setNegativeFlag(s);
+        }
+    }, // Transfer Stack Pointer to X
     TXA(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
@@ -363,7 +395,15 @@ enum Op {
             cpu.setNegativeFlag(x);
         }
     }, // Transfer X to Accumulator
-    TYA(false), // Transfer Y to Accumulator
+    TYA(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            byte x = cpu.regY.get();
+            cpu.regA.set(x);
+            cpu.setZeroFlag(x);
+            cpu.setNegativeFlag(x);
+        }
+    }, // Transfer Y to Accumulator
     TXS(false) {
         @Override
         void execute(Integer address, Byte value, _6502 cpu) {
@@ -384,9 +424,18 @@ enum Op {
         }
     }, // Pull Accumulator
     PHP(false), // Push Processor Status
-    PLP(false), // Pull Processor Status
+    PLP(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+            cpu.pullP();
+        }
+    }, // Pull Processor Status
 
-    NOP(false); // No Operation
+    NOP(false) {
+        @Override
+        void execute(Integer address, Byte value, _6502 cpu) {
+        }
+    }; // No Operation
 
 //    abstract void execute(_6502 cpu);
 
