@@ -132,9 +132,13 @@ public class Window extends Canvas implements Runnable {
 
     @Override
     public void run() {
+        Image buffer = createImage(WIDTH, HEIGHT);
+        Graphics gMain = this.getGraphics();
         while (true) {
             try {
-                Graphics g = this.getGraphics();
+                Graphics g = buffer.getGraphics();
+
+                g.clearRect(0, 0, WIDTH, HEIGHT);
 
                 if (ppu.isCharacterRomAvailable()) {
                     drawPatternTables(g);
@@ -158,6 +162,9 @@ public class Window extends Canvas implements Runnable {
                 g.fillRect(300, 0, 100, 20);
                 g.setColor(Color.BLACK);
                 g.drawString(String.format("fps=%d;%d", updateFps(), cpu.getCyclesSynchronized()), 300, 20);
+
+                // flush buffer
+                gMain.drawImage(buffer, 0, 0, this);
 
                 ppu.regPPUSTATUS.setVblankBit(true);
                 if (ppu.regPPUCTRL.getBit(7)) {
