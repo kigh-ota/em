@@ -1,7 +1,6 @@
 package nes.cpu;
 
 import common.*;
-import lombok.Getter;
 import nes.ppu.PPU;
 
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
@@ -66,11 +65,15 @@ public class CPU implements Runnable {
         flagNMI = false;
     }
 
-    @Getter
-    private long cycles = 0;
+    private long cycles;
+
+    synchronized public long getCyclesSynchronized() {
+        return cycles;
+    }
 
     @Override
     public void run() {
+        cycles = 0L;
         regPC.set(getAddress(memoryMapper.get(0xFFFC), memoryMapper.get(0xFFFD)));
 
         while (true) {

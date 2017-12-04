@@ -4,8 +4,11 @@ import common.ByteArrayMemory;
 import common.ByteRegister;
 import common.MemoryByte;
 import lombok.Getter;
+import lombok.Setter;
+import nes.cpu.CPU;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * http://hp.vector.co.jp/authors/VA042397/nes/ppu.html
@@ -18,6 +21,11 @@ import static com.google.common.base.Preconditions.checkArgument;
  * パターンテーブル：キャラクタパターンを保存
  */
 public class PPU implements Runnable {
+
+    private long cycles;
+
+    @Setter
+    private CPU cpu;
 
     static final int PALETTE_RAM_SIZE = 0x20;
     public static final int OAM_SIZE = 0x100;
@@ -60,7 +68,22 @@ public class PPU implements Runnable {
 
     @Override
     public void run() {
+        checkNotNull(cpu);
 
+        cycles = 0L;
+
+        while (true) {
+            if (shouldWaitCpu()) {
+                continue;
+            }
+
+            cycles++;
+        }
+    }
+
+    private boolean shouldWaitCpu() {
+        long cpuCycles = cpu.getCyclesSynchronized();
+        return this.cycles >= cpuCycles * 3;
     }
 
     public byte[] getCharacterPattern(int table, int i) {

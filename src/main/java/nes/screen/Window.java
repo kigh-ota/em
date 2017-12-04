@@ -157,7 +157,7 @@ public class Window extends Canvas implements Runnable {
                 g.setColor(Color.WHITE);
                 g.fillRect(300, 0, 100, 20);
                 g.setColor(Color.BLACK);
-                g.drawString(String.format("fps=%d;%d", updateFps(), cpu.getCycles()), 300, 20);
+                g.drawString(String.format("fps=%d;%d", updateFps(), cpu.getCyclesSynchronized()), 300, 20);
 
                 ppu.regPPUSTATUS.setVblankBit(true);
                 if (ppu.regPPUCTRL.getBit(7)) {
