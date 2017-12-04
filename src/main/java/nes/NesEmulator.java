@@ -21,7 +21,8 @@ public class NesEmulator {
         CPU cpu = new CPU(ppu, nesData.programRom);
 
         startScreen(ppu, cpu);
-        cpu.start();
+        new Thread(ppu).start();
+        new Thread(cpu).start();
     }
 
     private NesData loadRom(String romFileName) {

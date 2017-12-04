@@ -17,7 +17,7 @@ import static com.google.common.base.Preconditions.checkArgument;
  *
  * パターンテーブル：キャラクタパターンを保存
  */
-public class PPU {
+public class PPU implements Runnable {
 
     static final int PALETTE_RAM_SIZE = 0x20;
     public static final int OAM_SIZE = 0x100;
@@ -56,6 +56,11 @@ public class PPU {
         regPPUDATA = new DataRegister(this);
 
         this.mirroring = mirroring;
+    }
+
+    @Override
+    public void run() {
+
     }
 
     public byte[] getCharacterPattern(int table, int i) {
@@ -117,4 +122,5 @@ public class PPU {
     public boolean isCharacterRomAvailable() {
         return characterRom != null;
     }
+
 }

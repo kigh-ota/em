@@ -7,7 +7,7 @@ import nes.ppu.PPU;
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
 
 // http://hp.vector.co.jp/authors/VA042397/nes/index.html
-public class CPU {
+public class CPU implements Runnable {
     private static final int CODE_WIDTH = 8;
     private static final int RAM_SIZE = 2048;
 
@@ -69,7 +69,8 @@ public class CPU {
     @Getter
     private long cycles = 0;
 
-    public void start() {
+    @Override
+    public void run() {
         regPC.set(getAddress(memoryMapper.get(0xFFFC), memoryMapper.get(0xFFFD)));
 
         while (true) {
