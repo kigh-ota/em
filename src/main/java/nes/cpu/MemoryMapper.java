@@ -1,7 +1,6 @@
 package nes.cpu;
 
 import common.ByteArrayMemory;
-import common.ByteRegister;
 import common.MemoryByte;
 import lombok.RequiredArgsConstructor;
 import nes.ppu.PPU;
@@ -51,7 +50,7 @@ class MemoryMapper {
         throw new IllegalArgumentException("address out of range");
     }
 
-    private final _6502 cpu;
+    private final CPU cpu;
     private final PPU ppu;
 
     byte get(int address) {

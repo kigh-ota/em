@@ -7,7 +7,7 @@ import nes.ppu.PPU;
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
 
 // http://hp.vector.co.jp/authors/VA042397/nes/index.html
-public class _6502 {
+public class CPU {
     private static final int CODE_WIDTH = 8;
     private static final int RAM_SIZE = 2048;
 
@@ -57,7 +57,7 @@ public class _6502 {
 
     private boolean flagNMI;
 
-    public _6502(PPU ppu, ByteArrayMemory programRom) {
+    public CPU(PPU ppu, ByteArrayMemory programRom) {
         operationFactory = new OperationFactory();
         memoryMapper = new MemoryMapper(this, ppu);
         this.programRom = programRom;

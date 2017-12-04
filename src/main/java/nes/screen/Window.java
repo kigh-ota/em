@@ -1,7 +1,7 @@
 package nes.screen;
 
 import common.BinaryUtil;
-import nes.cpu._6502;
+import nes.cpu.CPU;
 import nes.ppu.ControlRegister;
 import nes.ppu.Mirroring;
 import nes.ppu.PPU;
@@ -15,7 +15,7 @@ import static nes.ppu.Mirroring.VERTICAL;
 
 public class Window extends Canvas implements Runnable {
     private final PPU ppu;
-    private final _6502 cpu;
+    private final CPU cpu;
 
     //ゲームのメインループスレッド
     Thread gameLoop;
@@ -109,7 +109,7 @@ public class Window extends Canvas implements Runnable {
             new Color(0, 0, 0),
     };
 
-    public Window(PPU ppu, _6502 cpu){
+    public Window(PPU ppu, CPU cpu){
         this.ppu = ppu;
         this.cpu = cpu;
 
