@@ -6,6 +6,7 @@ import common.MemoryByte;
 import lombok.Getter;
 import lombok.Setter;
 import nes.cpu.CPU;
+import nes.screen.MainScreen;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -26,6 +27,8 @@ public class PPU implements Runnable {
 
     @Setter
     private CPU cpu;
+
+    private MainScreen mainScreen;
 
     static final int PALETTE_RAM_SIZE = 0x20;
     public static final int OAM_SIZE = 0x100;
@@ -51,7 +54,7 @@ public class PPU implements Runnable {
     @Getter
     private final Mirroring mirroring;
 
-    public PPU(ByteArrayMemory characterRom, Mirroring mirroring) {
+    public PPU(ByteArrayMemory characterRom, Mirroring mirroring, MainScreen mainScreen) {
         memoryMapper = new MemoryMapper(this);
         this.characterRom = characterRom;
         nametables = new ByteArrayMemory(new byte[NAMETABLE_MEMORY_SIZE]);
@@ -64,10 +67,15 @@ public class PPU implements Runnable {
         regPPUDATA = new DataRegister(this);
 
         this.mirroring = mirroring;
+
+        this.mainScreen = mainScreen;
     }
 
     @Override
     public void run() {
+        checkNotNull(mainScreen);
+        mainScreen.init();
+
         checkNotNull(cpu);
 
         cycles = 0L;
@@ -76,6 +84,8 @@ public class PPU implements Runnable {
             if (shouldWaitCpu()) {
                 continue;
             }
+
+            // TODO draw single dot
 
             cycles++;
         }

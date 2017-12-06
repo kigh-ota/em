@@ -2,6 +2,8 @@ package nes;
 
 import nes.cpu.CPU;
 import nes.ppu.PPU;
+import nes.screen.MainScreen;
+import nes.screen.MainScreenImpl;
 import nes.screen.Window;
 
 import javax.swing.*;
@@ -17,7 +19,9 @@ public class NesEmulator {
 //        NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
 //        NesData nesData = loadRom(System.getProperty("user.home") + "/sprite_ram.nes");
 
-        PPU ppu = new PPU(nesData.characterRom, nesData.mirroring);
+        MainScreen mainScreen = new MainScreenImpl();
+
+        PPU ppu = new PPU(nesData.characterRom, nesData.mirroring, mainScreen);
         CPU cpu = new CPU(ppu, nesData.programRom);
         ppu.setCpu(cpu);
 
@@ -36,6 +40,7 @@ public class NesEmulator {
         return new FileLoader().load(in);
     }
 
+    // TODO separate main and informational window
     private void startScreen(PPU ppu, CPU cpu) {
         //新しいフレーム(Window)を作成
         JFrame mainFrame = new JFrame();
