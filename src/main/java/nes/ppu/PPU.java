@@ -11,6 +11,8 @@ import nes.screen.MainScreen;
 import nes.screen.MainScreenData;
 
 import java.awt.*;
+import java.util.Optional;
+import java.util.stream.IntStream;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -96,26 +98,43 @@ public class PPU implements Runnable {
             // TODO NEXT draw dot by dot
 //            cycles++;
 
-            // TODO draw a frame
             MainScreenData data = new MainScreenData();
             if (isCharacterRomAvailable()) {
                 final int scrollX = regPPUSCROLL.getX();
                 final int scrollY = regPPUSCROLL.getY();
-                for (int y0 = 0; y0 < HEIGHT; y0++) {
-                    final int y = y0 + scrollY;
-                    for (int x0 = 0; x0 < WIDTH; x0++) {
-                        final int x = x0 + scrollX;
-                        // get background at (x, y)
-                        data.set(getBackgroundColor(x, y), x0, y0);
-                        // get sprite at (x, y) if exists
-                    }
-                }
+                IntStream.range(0, HEIGHT).forEach(y -> {
+                    IntStream.range(0, WIDTH).forEach(x -> {
+
+                        Color c = findTopSprite(x, y).map(sprite -> {
+                            int spritePatternTable = getSpritePatternTable();
+                            byte[] pattern = getCharacterPattern(spritePatternTable, sprite.getTileIndex());
+                            int color = getColorInPattern(x - sprite.getX(), y - sprite.getY(), pattern);
+                            int colorIndex = getColorIndex(sprite.getAttributes().getPalette(), color);
+                            return Palette.get(colorIndex);
+                        }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));
+
+                        data.set(c, x, y);
+                    });
+                });
             }
 
             mainScreen.refresh(data);
             cycles += (frames % 2 == 0) ? 262 * 341 : 262 * 341 - 1;
             frames++;
         }
+    }
+
+    private Optional<Sprite> findTopSprite(int x, int y) {
+        checkArgument(x >= 0 && x < WIDTH);
+        checkArgument(y >= 0 && y < HEIGHT);
+        checkArgument(regPPUCTRL.getSpriteSize() == ControlRegister.SpriteSize.EIGHT_BY_EIGHT); // TODO 8x16 sprite
+        for (int i = 0; i < 64; i++) {
+            Sprite sprite = oam.getSprite(i);
+            if (x >= sprite.getX() && x < sprite.getX() + 8 && y >= sprite.getY() && y < sprite.getY() + 8) {
+                return Optional.of(sprite);
+            }
+        }
+        return Optional.empty();
     }
 
     private boolean shouldWaitCpu() {
@@ -191,8 +210,8 @@ public class PPU implements Runnable {
     private int getCell(int x, int y) {
         checkArgument(x >= 0 && x < WIDTH);
         checkArgument(y >= 0 && y < HEIGHT);
-        int cellY = y / 30;
-        int cellX = x / 32;
+        int cellY = y / 8;
+        int cellX = x / 8;
         return cellY * 32 + cellX;
     }
 
