@@ -452,14 +452,12 @@ enum Op {
         reg.increment();
         cpu.setZeroFlag(reg);
         cpu.setNegativeFlag(reg);
-        System.out.println(String.format("  Result value=%02x", reg.get()));
     }
 
     void decrementRegister(MemoryByte reg, CPU cpu) {
         reg.decrement();
         cpu.setZeroFlag(reg);
         cpu.setNegativeFlag(reg);
-        System.out.println(String.format("  Result value=%02x", reg.get()));
     }
 
     void incrementMemory(int address, CPU cpu) {

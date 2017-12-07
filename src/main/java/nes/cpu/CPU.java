@@ -1,11 +1,13 @@
 package nes.cpu;
 
 import common.*;
+import lombok.extern.slf4j.Slf4j;
 import nes.ppu.PPU;
 
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
 
 // http://hp.vector.co.jp/authors/VA042397/nes/index.html
+@Slf4j
 public class CPU implements Runnable {
     private static final int CODE_WIDTH = 8;
     private static final int RAM_SIZE = 2048;
@@ -81,39 +83,31 @@ public class CPU implements Runnable {
                 handleNMI();
             }
 
-            System.out.print(String.format("%04x ", regPC.get() * 1));
             byte code = getCode();
             Operation op = operationFactory.get(code);
             if (op == null) {
-                System.out.print(BinaryUtil.toBinaryString(code, CODE_WIDTH) + "\n");
+                log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
             }
-            System.out.print(op.getOp().toString());
-            System.out.print(" " + op.getAddressingMode().toString());
+            log.debug("PC={} op={}({}) [A={} S={}] cycle={}", Integer.toHexString(regPC.get()), op.getOp().toString(), op.getAddressingMode().toString(),
+                    Integer.toHexString(Byte.toUnsignedInt(regA.get())), Integer.toHexString(Byte.toUnsignedInt(regS.get())), cycles);
 
             cycles += op.getCycles();
 
-            String regString = String.format(" [A=%02x S=%02x] cycle=%d", regA.get(), regS.get(), cycles);
-
             switch (op.getAddressingMode().addressBytes) {
                 case 0:
-                    System.out.print(regString);
-                    System.out.print("\n");
                     executeInstruction(op, null, null);
                     continue;
                 case 1:
                     byte operand = getCode();
-                    System.out.print(String.format(" %02x", operand));
-                    System.out.print(regString);
-                    System.out.print("\n");
+                    log.debug(" operand={}", Integer.toHexString(Byte.toUnsignedInt(operand)));
                     executeInstruction(op, operand, null);
                     continue;
                 case 2:
                     byte operand1 = getCode();
                     byte operand2 = getCode();
-                    System.out.print(String.format(" %02x", operand2));
-                    System.out.print(String.format(" %02x", operand1));
-                    System.out.print(regString);
-                    System.out.print("\n");
+                    log.debug(" operand={} {}",
+                            Integer.toHexString(Byte.toUnsignedInt(operand2)),
+                            Integer.toHexString(Byte.toUnsignedInt(operand1)));
                     executeInstruction(op, operand1, operand2);
                     continue;
                 default:
@@ -129,7 +123,7 @@ public class CPU implements Runnable {
     // TODO cycles?
     private void handleNMI() {
         flagNMI = false;
-        System.out.println("*** NMI ***");
+        log.info("*** NMI ***");
         pushPC();
         regP.setBreakCommand(false);
         pushP();
@@ -138,7 +132,7 @@ public class CPU implements Runnable {
     }
 
     void handleBRK() {
-        System.out.println("*** BRK ***");
+        log.info("*** BRK ***");
         pushPC();
         regP.setBreakCommand(true);
         pushP();
@@ -228,10 +222,10 @@ public class CPU implements Runnable {
                 throw new IllegalArgumentException();
         }
         if (address != null) {
-            System.out.print(String.format("  address=$%04x\n", address));
+            log.debug("  address=${}", Integer.toHexString(address));
         }
         if (value != null) {
-            System.out.print(String.format("  value=$%02x\n", value));
+            log.debug("  value=${}", Integer.toHexString(Byte.toUnsignedInt(value)));
         }
         op.getOp().execute(address, value, this);
     }

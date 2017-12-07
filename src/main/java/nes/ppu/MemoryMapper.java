@@ -1,6 +1,7 @@
 package nes.ppu;
 
 import common.ByteArrayMemory;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 
@@ -8,6 +9,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static nes.ppu.PPU.NAMETABLE_MEMORY_SIZE;
 import static nes.ppu.PPU.PALETTE_RAM_SIZE;
 
+@Slf4j
 class MemoryMapper {
     private final PPU ppu;
 
@@ -33,7 +35,7 @@ class MemoryMapper {
     }
 
     byte get(int address) {
-        System.out.println(String.format("    get PPU $%04x", address));
+        log.debug("Get: PPU ${}", Integer.toHexString(address));
         Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
         ByteArrayMemory memory = memoryOffsetPair.getOne();
         int offset = memoryOffsetPair.getTwo();
@@ -41,7 +43,7 @@ class MemoryMapper {
     }
 
     void set(byte value, int address) {
-        System.out.println(String.format("    set PPU $%04x=%02x", address, value));
+        log.debug("Set PPU ${}={}", Integer.toHexString(address), Integer.toHexString(Byte.toUnsignedInt(value)));
         Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
         ByteArrayMemory memory = memoryOffsetPair.getOne();
         int offset = memoryOffsetPair.getTwo();

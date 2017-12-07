@@ -3,6 +3,7 @@ package nes.cpu;
 import common.ByteArrayMemory;
 import common.MemoryByte;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import nes.ppu.PPU;
 import org.eclipse.collections.api.tuple.Pair;
 
@@ -12,6 +13,7 @@ import static nes.cpu.MemoryMapper.Type.REGISTER;
 import static org.eclipse.collections.impl.tuple.Tuples.pair;
 
 @RequiredArgsConstructor
+@Slf4j
 class MemoryMapper {
     /**
      * https://wiki.nesdev.com/w/index.php/CPU_memory_map
@@ -40,7 +42,7 @@ class MemoryMapper {
         } else if (address >= 0x2000 && address < 0x4000) {
             return REGISTER;
         } else if (address >= 0x4000 && address < 0x4018) {
-            System.err.println("access to APU & I/O registers");
+            log.info("access to APU & I/O registers");
             return REGISTER;
         } else if (address >= 0x4018 && address < 0x4020) {
             throw new IllegalArgumentException("APU and I/O functionality that is normally disabled");
