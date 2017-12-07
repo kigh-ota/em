@@ -77,8 +77,6 @@ public class CPU implements Runnable {
         regPC.set(getAddress(memoryMapper.get(0xFFFC), memoryMapper.get(0xFFFD)));
 
         while (true) {
-            cycles++;
-
             if (flagNMI) {
                 handleNMI();
             }
@@ -92,7 +90,9 @@ public class CPU implements Runnable {
             System.out.print(op.getOp().toString());
             System.out.print(" " + op.getAddressingMode().toString());
 
-            String regString = String.format(" [A=%02x S=%02x]", regA.get(), regS.get());
+            cycles += op.getCycles();
+
+            String regString = String.format(" [A=%02x S=%02x] cycle=%d", regA.get(), regS.get(), cycles);
 
             switch (op.getAddressingMode().addressBytes) {
                 case 0:
@@ -126,6 +126,7 @@ public class CPU implements Runnable {
         flagNMI = true;
     }
 
+    // TODO cycles?
     private void handleNMI() {
         flagNMI = false;
         System.out.println("*** NMI ***");
