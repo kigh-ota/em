@@ -192,7 +192,7 @@ public class Window extends Canvas implements Runnable {
     private void drawBackgroundPalette(Graphics g) {
         for (int palette = 0; palette < 4; palette++) {
             for (int i = 0; i < 4; i++) {
-                Color color = PALETTE[ppu.getColor(palette, i)];
+                Color color = PALETTE[ppu.getColorIndex(palette, i)];
                 g.setColor(color);
                 int x = PALETTE_OFFSET_X + i * 4;
                 int y = PALETTE_OFFSET_Y + palette * 4;
@@ -296,7 +296,7 @@ public class Window extends Canvas implements Runnable {
             for (int offsetX = 0; offsetX < TILE_SIZE; offsetX++) {
                 int color = (BinaryUtil.getBit(data[offsetY], 7 - offsetX) ? 1 : 0)
                         + (BinaryUtil.getBit(data[offsetY + 8], 7 - offsetX) ? 1 : 0) * 2;
-                g.setColor(PALETTE[ppu.getColor(palette, color)]);
+                g.setColor(PALETTE[ppu.getColorIndex(palette, color)]);
                 g.drawLine(x0 + offsetX, y0 + offsetY, x0 + offsetX, y0 + offsetY);
             }
         }

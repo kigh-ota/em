@@ -2,7 +2,7 @@ package nes.screen;
 
 public interface MainScreen {
     public static final int WIDTH = 256;
-    public static final int HEIGHT = 224;
+    public static final int HEIGHT = 240;
 
     void init();
 

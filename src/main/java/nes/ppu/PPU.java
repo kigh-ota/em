@@ -1,5 +1,6 @@
 package nes.ppu;
 
+import common.BinaryUtil;
 import common.ByteArrayMemory;
 import common.ByteRegister;
 import common.MemoryByte;
@@ -7,9 +8,14 @@ import lombok.Getter;
 import lombok.Setter;
 import nes.cpu.CPU;
 import nes.screen.MainScreen;
+import nes.screen.MainScreenData;
+
+import java.awt.*;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static nes.screen.MainScreen.HEIGHT;
+import static nes.screen.MainScreen.WIDTH;
 
 /**
  * http://hp.vector.co.jp/authors/VA042397/nes/ppu.html
@@ -24,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class PPU implements Runnable {
 
     private long cycles;
+    private long frames;
 
     @Setter
     private CPU cpu;
@@ -79,15 +86,35 @@ public class PPU implements Runnable {
         checkNotNull(cpu);
 
         cycles = 0L;
+        frames = 0L;
 
         while (true) {
             if (shouldWaitCpu()) {
                 continue;
             }
 
-            // TODO draw single dot
+            // TODO NEXT draw dot by dot
+//            cycles++;
 
-            cycles++;
+            // TODO draw a frame
+            MainScreenData data = new MainScreenData();
+            if (isCharacterRomAvailable()) {
+                final int scrollX = regPPUSCROLL.getX();
+                final int scrollY = regPPUSCROLL.getY();
+                for (int y0 = 0; y0 < HEIGHT; y0++) {
+                    final int y = y0 + scrollY;
+                    for (int x0 = 0; x0 < WIDTH; x0++) {
+                        final int x = x0 + scrollX;
+                        // get background at (x, y)
+                        data.set(getBackgroundColor(x, y), x0, y0);
+                        // get sprite at (x, y) if exists
+                    }
+                }
+            }
+
+            mainScreen.refresh(data);
+            cycles += (frames % 2 == 0) ? 262 * 341 : 262 * 341 - 1;
+            frames++;
         }
     }
 
@@ -97,8 +124,76 @@ public class PPU implements Runnable {
     }
 
     public byte[] getCharacterPattern(int table, int i) {
+        checkArgument(table >= 0 && table < 2);
+        checkArgument(i >= 0 && i < 256);
         int from = table * 0x1000 + i * 0x10;
         return this.characterRom.getRange(from, from + 16);
+    }
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @return 0 or 1
+     */
+    private int getScreen(int x, int y) {
+        checkArgument(x >= 0 && x < 2 * WIDTH);
+        checkArgument(y >= 0 && y < 2 * HEIGHT);
+        if (y < HEIGHT) {
+            if (x < WIDTH) {
+                return 0;
+            } else {
+                return mirroring == Mirroring.VERTICAL ? 1 : 0;
+            }
+        } else {
+            if (x < WIDTH) {
+                return mirroring == Mirroring.VERTICAL ? 0 : 1;
+            } else {
+                return 1;
+            }
+        }
+    }
+
+    private Color getBackgroundColor(int x, int y) {
+        checkArgument(x >= 0 && x < 2 * WIDTH);
+        checkArgument(y >= 0 && y < 2 * HEIGHT);
+        int screen = getScreen(x, y);
+        int cell = getCell(x % WIDTH, y % HEIGHT);
+        int character = getCharacter(screen, cell);
+        int bgPatternTable = getBackgroundPatternTable();
+        byte[] pattern = getCharacterPattern(bgPatternTable, character);
+        int palette = getPalette(screen, cell);
+        int color = getColorInPattern(x % 8, y % 8, pattern);
+        int colorIndex = getColorIndex(palette, color);
+        return Palette.get(colorIndex);
+    }
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @param pattern
+     * @return 0-3
+     */
+    private int getColorInPattern(int x, int y, byte[] pattern) {
+        checkArgument(x >= 0 && x < 8);
+        checkArgument(y >= 0 && y < 8);
+        return (BinaryUtil.getBit(pattern[y], 7 - x) ? 1 : 0)
+                + (BinaryUtil.getBit(pattern[y + 8], 7 - x) ? 1 : 0) * 2;
+    }
+
+    /**
+     *
+     * @param x
+     * @param y
+     * @return 0-959
+     */
+    private int getCell(int x, int y) {
+        checkArgument(x >= 0 && x < WIDTH);
+        checkArgument(y >= 0 && y < HEIGHT);
+        int cellY = y / 30;
+        int cellX = x / 32;
+        return cellY * 32 + cellX;
     }
 
     private static final int ATTRIBUTE_TABLE_OFFSET = 0x3C0;
@@ -137,6 +232,8 @@ public class PPU implements Runnable {
      * @return 0-255
      */
     public int getCharacter(int nameTable, int cell) {
+        checkArgument(nameTable == 0 || nameTable == 1);
+        checkArgument(cell >= 0 && cell < 960);
         return Byte.toUnsignedInt(nametables.get(nameTable * 0x400 + cell));
     }
 
@@ -145,7 +242,7 @@ public class PPU implements Runnable {
      * @param i 0-3
      * @return 0-63
      */
-    public int getColor(int palette, int i) {
+    public int getColorIndex(int palette, int i) {
         checkArgument(palette >= 0 && palette < 8);
         checkArgument(i >= 0 && i < 4);
         int offset = (i != 0) ? palette * 4 + i : 0;
