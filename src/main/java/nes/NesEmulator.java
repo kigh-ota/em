@@ -25,7 +25,7 @@ public class NesEmulator {
         CPU cpu = new CPU(ppu, nesData.programRom);
         ppu.setCpu(cpu);
 
-        startScreen(ppu, cpu);
+//        startScreen(ppu, cpu);
         new Thread(ppu).start();
         new Thread(cpu).start();
     }

@@ -89,38 +89,62 @@ public class PPU implements Runnable {
 
         cycles = 0L;
         frames = 0L;
+        int scanX = 0;
+        int scanY = 0;
 
         while (true) {
-            if (shouldWaitCpu()) {
-                continue;
-            }
 
             // TODO NEXT draw dot by dot
 //            cycles++;
 
-            MainScreenData data = new MainScreenData();
-            if (isCharacterRomAvailable()) {
-                final int scrollX = regPPUSCROLL.getX();
-                final int scrollY = regPPUSCROLL.getY();
-                IntStream.range(0, HEIGHT).forEach(y -> {
-                    IntStream.range(0, WIDTH).forEach(x -> {
-
-                        Color c = findTopSprite(x, y).map(sprite -> {
-                            int spritePatternTable = getSpritePatternTable();
-                            byte[] pattern = getCharacterPattern(spritePatternTable, sprite.getTileIndex());
-                            int color = getColorInPattern(x - sprite.getX(), y - sprite.getY(), pattern);
-                            int colorIndex = getColorIndex(sprite.getAttributes().getPalette(), color);
-                            return Palette.get(colorIndex);
-                        }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));
-
-                        data.set(c, x, y);
-                    });
-                });
+            if (shouldWaitCpu()) {
+                continue;
             }
 
-            mainScreen.refresh(data);
-            cycles += (frames % 2 == 0) ? 262 * 341 : 262 * 341 - 1;
-            frames++;
+            if (scanY == 0) {
+                MainScreenData data = new MainScreenData();
+                if (isCharacterRomAvailable()) {
+                    final int scrollX = regPPUSCROLL.getX();
+                    final int scrollY = regPPUSCROLL.getY();
+                    IntStream.range(0, HEIGHT).forEach(y -> {
+                        IntStream.range(0, WIDTH).forEach(x -> {
+
+                            Color c = findTopSprite(x, y).map(sprite -> {
+                                int spritePatternTable = getSpritePatternTable();
+                                byte[] pattern = getCharacterPattern(spritePatternTable, sprite.getTileIndex());
+                                int color = getColorInPattern(x - sprite.getX(), y - sprite.getY(), pattern);
+                                int colorIndex = getColorIndex(sprite.getAttributes().getPalette(), color);
+                                return Palette.get(colorIndex);
+                            }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));
+
+                            data.set(c, x, y);
+                        });
+                    });
+                }
+                mainScreen.refresh(data);
+                cycles += (frames % 2 == 0) ? HEIGHT * 341 : HEIGHT * 341 - 1;
+                scanY += HEIGHT;
+                frames++;
+            } else {
+                if (scanX == 1 && scanY == 241) {
+                    regPPUSTATUS.setVblankBit(true);
+                    if (regPPUCTRL.getBit(7)) {
+                        cpu.reserveNMI();
+                    }
+                } else if (scanX == 1 && scanY == 261) {
+                    regPPUSTATUS.setVblankBit(false);
+                }
+
+                cycles++;
+                scanX++;
+                if (scanX == 341) {
+                    scanY++;
+                    scanX = 0;
+                    if (scanY == 262) {
+                        scanY = 0;
+                    }
+                }
+            }
         }
     }
 

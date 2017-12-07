@@ -166,12 +166,12 @@ public class Window extends Canvas implements Runnable {
                 // flush buffer
                 gMain.drawImage(buffer, 0, 0, this);
 
-                ppu.regPPUSTATUS.setVblankBit(true);
-                if (ppu.regPPUCTRL.getBit(7)) {
-                    cpu.reserveNMI();
-                }
+//                ppu.regPPUSTATUS.setVblankBit(true);
+//                if (ppu.regPPUCTRL.getBit(7)) {
+//                    cpu.reserveNMI();
+//                }
                 Thread.sleep(1/10*1000);    //1/60秒スリープ
-                ppu.regPPUSTATUS.setVblankBit(false);
+//                ppu.regPPUSTATUS.setVblankBit(false);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
