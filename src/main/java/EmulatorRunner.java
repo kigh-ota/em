@@ -8,7 +8,7 @@ public class EmulatorRunner {
     public static void main(String args[]) {
         LoggerContext loggerContext = (LoggerContext)LoggerFactory.getILoggerFactory();
         Logger rootLogger = loggerContext.getLogger("nes");
-        rootLogger.setLevel(Level.DEBUG); // TODO switch by VM option
+        rootLogger.setLevel(Level.valueOf(System.getProperty("loglevel")));
 //        TD4Emulator td4Simulator = new TD4Emulator();
 //        td4Simulator.start(TD4Emulator.ClockType.FAST);
         new NesEmulator().start();
