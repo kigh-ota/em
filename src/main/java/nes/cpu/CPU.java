@@ -125,7 +125,7 @@ public class CPU implements Runnable {
     // TODO cycles?
     private void handleNMI() {
         flagNMI = false;
-        log.info("*** NMI ***");
+        log.debug("*** NMI ***");
         pushPC();
         regP.setBreakCommand(false);
         pushP();
@@ -134,7 +134,7 @@ public class CPU implements Runnable {
     }
 
     void handleBRK() {
-        log.info("*** BRK ***");
+        log.debug("*** BRK ***");
         pushPC();
         regP.setBreakCommand(true);
         pushP();

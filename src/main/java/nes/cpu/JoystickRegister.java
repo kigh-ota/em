@@ -50,6 +50,9 @@ public class JoystickRegister extends ByteRegister {
     }
 
     private Controller.Button nextReadNext() {
+        if (readNext == null) {
+            return null;
+        }
         switch (readNext) {
             case A:
                 return B;

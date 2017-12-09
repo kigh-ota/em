@@ -102,26 +102,8 @@ public class PPU implements Runnable {
             }
 
             if (scanY == 0) {
-                MainScreenData data = new MainScreenData();
-                if (isCharacterRomAvailable()) {
-                    final int scrollX = regPPUSCROLL.getX();
-                    final int scrollY = regPPUSCROLL.getY();
-                    IntStream.range(0, HEIGHT).forEach(y -> {
-                        IntStream.range(0, WIDTH).forEach(x -> {
+                drawFrame();
 
-                            Color c = findTopSprite(x, y).map(sprite -> {
-                                int spritePatternTable = getSpritePatternTable();
-                                byte[] pattern = getCharacterPattern(spritePatternTable, sprite.getTileIndex());
-                                int color = getColorInPattern(x - sprite.getX(), y - sprite.getY(), pattern);
-                                int colorIndex = getColorIndex(sprite.getAttributes().getPalette(), color);
-                                return Palette.get(colorIndex);
-                            }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));
-
-                            data.set(c, x, y);
-                        });
-                    });
-                }
-                mainScreen.refresh(data);
                 cycles += (frames % 2 == 0) ? HEIGHT * 341 : HEIGHT * 341 - 1;
                 scanY += HEIGHT;
                 frames++;
@@ -148,14 +130,43 @@ public class PPU implements Runnable {
         }
     }
 
-    private Optional<Sprite> findTopSprite(int x, int y) {
+    private void drawFrame() {
+        MainScreenData data = new MainScreenData();
+        if (isCharacterRomAvailable()) {
+            final int scrollX = regPPUSCROLL.getX();
+            final int scrollY = regPPUSCROLL.getY();
+            IntStream.range(0, HEIGHT).forEach(y -> {
+                setLineData(y, scrollX, scrollY, data);
+            });
+        }
+        mainScreen.refresh(data);
+    }
+
+    private void setLineData(int y, int scrollX, int scrollY, MainScreenData data) {
+        IntStream.range(0, WIDTH).forEach(x -> {
+            data.set(getColorAt(x, y, scrollX, scrollY), x, y);
+        });
+    }
+
+    private Color getColorAt(int x, int y, int scrollX, int scrollY) {
+        return findTopSpriteNumber(x, y).map(sprite -> {
+            int spritePatternTable = getSpritePatternTable();
+            byte[] pattern = getCharacterPattern(spritePatternTable, oam.getTileIndex(sprite));
+            int color = getColorInPattern(x - oam.getX(sprite), y - oam.getY(sprite), pattern);
+            int colorIndex = getColorIndex(oam.getPalette(sprite), color);
+            return Palette.get(colorIndex);
+        }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));
+    }
+
+    private Optional<Integer> findTopSpriteNumber(int x, int y) {
         checkArgument(x >= 0 && x < WIDTH);
         checkArgument(y >= 0 && y < HEIGHT);
         checkArgument(regPPUCTRL.getSpriteSize() == ControlRegister.SpriteSize.EIGHT_BY_EIGHT); // TODO 8x16 sprite
-        for (int i = 0; i < 64; i++) {
-            Sprite sprite = oam.getSprite(i);
-            if (x >= sprite.getX() && x < sprite.getX() + 8 && y >= sprite.getY() && y < sprite.getY() + 8) {
-                return Optional.of(sprite);
+        for (int n = 0; n < 64; n++) {
+            int spriteX = oam.getX(n);
+            int spriteY = oam.getY(n);
+            if (x >= spriteX && x < spriteX + 8 && y >= spriteY && y < spriteY + 8) {
+                return Optional.of(n);
             }
         }
         return Optional.empty();

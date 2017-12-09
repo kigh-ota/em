@@ -29,12 +29,18 @@ public class Controller extends KeyAdapter {
 
     @Override
     public void keyPressed(KeyEvent e) {
-        checkNotNull(pressed.replace(keyCodeToButton(e.getKeyCode()), true));
+        Button button = keyCodeToButton(e.getKeyCode());
+        if (button != null) {
+            pressed.replace(button, true);
+        }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        checkNotNull(pressed.replace(keyCodeToButton(e.getKeyCode()), false));
+           Button button = keyCodeToButton(e.getKeyCode());
+        if (button != null) {
+            pressed.replace(button, false);
+        }
     }
 
     private Button keyCodeToButton(int keyCode) {
@@ -56,7 +62,7 @@ public class Controller extends KeyAdapter {
             case VK_RIGHT:
                 return RIGHT;
         }
-        throw new IllegalArgumentException();
+        return null;
     }
 }
 
