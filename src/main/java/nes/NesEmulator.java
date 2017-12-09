@@ -19,11 +19,14 @@ public class NesEmulator {
         NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
 //        NesData nesData = loadRom(System.getProperty("user.home") + "/sprite_ram.nes");
 
-        MainScreen mainScreen = new MainScreenImpl();
+        Controller controller1 = new Controller();
+
+        MainScreen mainScreen = new MainScreenImpl(controller1);
 
         PPU ppu = new PPU(nesData.characterRom, nesData.mirroring, mainScreen);
-        CPU cpu = new CPU(ppu, nesData.programRom);
+        CPU cpu = new CPU(ppu, nesData.programRom, controller1);
         ppu.setCpu(cpu);
+
 
 //        startScreen(ppu, cpu);
         new Thread(ppu).start();

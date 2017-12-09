@@ -42,7 +42,7 @@ class MemoryMapper {
         } else if (address >= 0x2000 && address < 0x4000) {
             return REGISTER;
         } else if (address >= 0x4000 && address < 0x4018) {
-            log.info("access to APU & I/O registers");
+            log.debug("access to APU & I/O registers");
             return REGISTER;
         } else if (address >= 0x4018 && address < 0x4020) {
             throw new IllegalArgumentException("APU and I/O functionality that is normally disabled");

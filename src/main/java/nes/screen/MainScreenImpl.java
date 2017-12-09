@@ -1,10 +1,16 @@
 package nes.screen;
 
+import lombok.extern.slf4j.Slf4j;
+import nes.Controller;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 
+@Slf4j
 public class MainScreenImpl implements MainScreen {
 
     private static final String WINDOW_TITLE = "main";
@@ -12,6 +18,12 @@ public class MainScreenImpl implements MainScreen {
     private Canvas canvas;
     private Graphics gMain;
     private Image buffer;
+
+    private Controller controller;
+
+    public MainScreenImpl(Controller controller) {
+        this.controller = controller;
+    }
 
     @Override
     public void init() {
@@ -21,6 +33,8 @@ public class MainScreenImpl implements MainScreen {
         mainFrame.setResizable(false);
         canvas = new Canvas();
         canvas.setPreferredSize(new Dimension(WIDTH, HEIGHT));
+        canvas.addKeyListener(controller);
+
         mainFrame.getContentPane().add(canvas);
         mainFrame.pack();
         mainFrame.setLocationRelativeTo(null);

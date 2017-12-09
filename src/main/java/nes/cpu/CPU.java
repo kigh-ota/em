@@ -2,6 +2,7 @@ package nes.cpu;
 
 import common.*;
 import lombok.extern.slf4j.Slf4j;
+import nes.Controller;
 import nes.ppu.PPU;
 
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
@@ -48,7 +49,7 @@ public class CPU implements Runnable {
     final MemoryByte regDMC_LEN = new ByteRegister((byte)0); // $4013
     final OAMDMARegister regOAMDMA; // $4014
     final MemoryByte regSND_CHN = new ByteRegister((byte)0); // $4015
-    final MemoryByte regJOY1 = new ByteRegister((byte)0); // $4016
+    final MemoryByte regJOY1; // $4016
     final MemoryByte regJOY2 = new ByteRegister((byte)0); // $4017
 
     final ByteArrayMemory ram;
@@ -58,13 +59,14 @@ public class CPU implements Runnable {
 
     private boolean flagNMI;
 
-    public CPU(PPU ppu, ByteArrayMemory programRom) {
+    public CPU(PPU ppu, ByteArrayMemory programRom, Controller controller1) {
         operationFactory = new OperationFactory();
         memoryMapper = new MemoryMapper(this, ppu);
         this.programRom = programRom;
         this.ram = new ByteArrayMemory(new byte[0x800]);
         this.regOAMDMA = new OAMDMARegister(this, ppu);
         flagNMI = false;
+        regJOY1 = new JoystickRegister(controller1);
     }
 
     private long cycles;
