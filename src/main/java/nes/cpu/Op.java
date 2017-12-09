@@ -356,7 +356,12 @@ enum Op {
             store(cpu.regX.get(), address, cpu);
         }
     }, // Store X Register
-    STY(false), // Store Y Register
+    STY(false) {
+        @Override
+        void execute(Integer address, Byte value, CPU cpu) {
+            store(cpu.regY.get(), address, cpu);
+        }
+    }, // Store Y Register
 
     TAX(false) {
         @Override
