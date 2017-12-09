@@ -26,7 +26,7 @@ enum AddressingMode {
         @Override
         Integer getAddress(Byte operand1, Byte operand2, CPU cpu) {
             validateOperands(operand1, operand2);
-            byte lower = BinaryUtil.add(operand1, cpu.getX()).getOne(); // no carry
+            byte lower = BinaryUtil.add(operand1, cpu.regX.get()).getOne(); // no carry
             return BinaryUtil.getAddress(lower, (byte) 0);
         }
     },
@@ -34,7 +34,7 @@ enum AddressingMode {
         @Override
         Integer getAddress(Byte operand1, Byte operand2, CPU cpu) {
             validateOperands(operand1, operand2);
-            byte lower = BinaryUtil.add(operand1, cpu.getY()).getOne(); // no carry
+            byte lower = BinaryUtil.add(operand1, cpu.regY.get()).getOne(); // no carry
             return BinaryUtil.getAddress(lower, (byte) 0);
         }
     },
@@ -42,7 +42,7 @@ enum AddressingMode {
         @Override
         Integer getAddress(Byte operand1, Byte operand2, CPU cpu) {
             validateOperands(operand1, operand2);
-            return cpu.getPC() + operand1;
+            return cpu.regPC.get() + operand1;
         }
     },    // 8 bit offset (=> -126 to +129)
     ABSOLUTE(2) {
@@ -56,14 +56,14 @@ enum AddressingMode {
         @Override
         Integer getAddress(Byte lower, Byte upper, CPU cpu) {
             validateOperands(lower, upper);
-            return (BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.getX())) % 0x10000;
+            return (BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.regX.get())) % 0x10000;
         }
     },  // (LOWER,UPPER) => UPPER:LOWER+X
     ABSOLUTE_Y(2) {
         @Override
         Integer getAddress(Byte lower, Byte upper, CPU cpu) {
             validateOperands(lower, upper);
-            return (BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.getY())) % 0x10000;
+            return (BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.regY.get())) % 0x10000;
         }
     },
     INDIRECT(2) {
@@ -87,7 +87,7 @@ enum AddressingMode {
             validateOperands(operand1, operand2);
             byte lower = cpu.memoryMapper.get(BinaryUtil.getAddress(operand1, (byte)0));
             byte upper = cpu.memoryMapper.get(BinaryUtil.getAddress(BinaryUtil.add(operand1, (byte)1).getOne(), (byte)0));
-            return BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.getY());
+            return BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.regY.get());
         }
     }; // (LOWER) => value at((value at $00:LOWER)+Y)
 

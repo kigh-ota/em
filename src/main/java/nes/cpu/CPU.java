@@ -260,13 +260,4 @@ public class CPU implements Runnable {
         return BinaryUtil.getAddress(lower, upper);
     }
 
-    byte getX() {
-        return regX.get();
-    }
-    byte getY() {
-        return regY.get();
-    }
-    int getPC() {
-        return regPC.get();
-    }
 }
