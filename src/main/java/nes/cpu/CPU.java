@@ -1,13 +1,15 @@
 package nes.cpu;
 
 import common.*;
-import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
+import nes.Controller;
 import nes.ppu.PPU;
 
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
 
 // http://hp.vector.co.jp/authors/VA042397/nes/index.html
-public class _6502 {
+@Slf4j
+public class CPU implements Runnable {
     private static final int CODE_WIDTH = 8;
     private static final int RAM_SIZE = 2048;
 
@@ -47,7 +49,7 @@ public class _6502 {
     final MemoryByte regDMC_LEN = new ByteRegister((byte)0); // $4013
     final OAMDMARegister regOAMDMA; // $4014
     final MemoryByte regSND_CHN = new ByteRegister((byte)0); // $4015
-    final MemoryByte regJOY1 = new ByteRegister((byte)0); // $4016
+    final MemoryByte regJOY1; // $4016
     final MemoryByte regJOY2 = new ByteRegister((byte)0); // $4017
 
     final ByteArrayMemory ram;
@@ -57,59 +59,57 @@ public class _6502 {
 
     private boolean flagNMI;
 
-    public _6502(PPU ppu, ByteArrayMemory programRom) {
+    public CPU(PPU ppu, ByteArrayMemory programRom, Controller controller1) {
         operationFactory = new OperationFactory();
         memoryMapper = new MemoryMapper(this, ppu);
         this.programRom = programRom;
         this.ram = new ByteArrayMemory(new byte[0x800]);
         this.regOAMDMA = new OAMDMARegister(this, ppu);
         flagNMI = false;
+        regJOY1 = new JoystickRegister(controller1);
     }
 
-    @Getter
-    private long cycles = 0;
+    private long cycles;
 
-    public void start() {
+    synchronized public long getCyclesSynchronized() {
+        return cycles;
+    }
+
+    @Override
+    public void run() {
+        cycles = 0L;
         regPC.set(getAddress(memoryMapper.get(0xFFFC), memoryMapper.get(0xFFFD)));
 
         while (true) {
-            cycles++;
-
             if (flagNMI) {
                 handleNMI();
             }
 
-            System.out.print(String.format("%04x ", regPC.get() * 1));
             byte code = getCode();
             Operation op = operationFactory.get(code);
             if (op == null) {
-                System.out.print(BinaryUtil.toBinaryString(code, CODE_WIDTH) + "\n");
+                log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
             }
-            System.out.print(op.getOp().toString());
-            System.out.print(" " + op.getAddressingMode().toString());
+            log.debug("PC={} op={}({}) [A={} S={}] cycle={}", Integer.toHexString(regPC.get()), op.getOp().toString(), op.getAddressingMode().toString(),
+                    Integer.toHexString(Byte.toUnsignedInt(regA.get())), Integer.toHexString(Byte.toUnsignedInt(regS.get())), cycles);
 
-            String regString = String.format(" [A=%02x S=%02x]", regA.get(), regS.get());
+            cycles += op.getCycles();
 
             switch (op.getAddressingMode().addressBytes) {
                 case 0:
-                    System.out.print(regString);
-                    System.out.print("\n");
                     executeInstruction(op, null, null);
                     continue;
                 case 1:
                     byte operand = getCode();
-                    System.out.print(String.format(" %02x", operand));
-                    System.out.print(regString);
-                    System.out.print("\n");
+                    log.debug(" operand={}", Integer.toHexString(Byte.toUnsignedInt(operand)));
                     executeInstruction(op, operand, null);
                     continue;
                 case 2:
                     byte operand1 = getCode();
                     byte operand2 = getCode();
-                    System.out.print(String.format(" %02x", operand2));
-                    System.out.print(String.format(" %02x", operand1));
-                    System.out.print(regString);
-                    System.out.print("\n");
+                    log.debug(" operand={} {}",
+                            Integer.toHexString(Byte.toUnsignedInt(operand2)),
+                            Integer.toHexString(Byte.toUnsignedInt(operand1)));
                     executeInstruction(op, operand1, operand2);
                     continue;
                 default:
@@ -122,9 +122,10 @@ public class _6502 {
         flagNMI = true;
     }
 
+    // TODO cycles?
     private void handleNMI() {
         flagNMI = false;
-        System.out.println("*** NMI ***");
+        log.info("*** NMI ***");
         pushPC();
         regP.setBreakCommand(false);
         pushP();
@@ -133,7 +134,7 @@ public class _6502 {
     }
 
     void handleBRK() {
-        System.out.println("*** BRK ***");
+        log.info("*** BRK ***");
         pushPC();
         regP.setBreakCommand(true);
         pushP();
@@ -223,10 +224,10 @@ public class _6502 {
                 throw new IllegalArgumentException();
         }
         if (address != null) {
-            System.out.print(String.format("  address=$%04x\n", address));
+            log.debug("  address=${}", Integer.toHexString(address));
         }
         if (value != null) {
-            System.out.print(String.format("  value=$%02x\n", value));
+            log.debug("  value=${}", Integer.toHexString(Byte.toUnsignedInt(value)));
         }
         op.getOp().execute(address, value, this);
     }

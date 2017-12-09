@@ -1,7 +1,6 @@
 package nes.cpu;
 
 import common.BinaryUtil;
-import common.ByteArrayMemory;
 import common.MemoryByte;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +10,7 @@ import lombok.RequiredArgsConstructor;
 enum Op {
     ADC(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             int resultInt = Byte.toUnsignedInt(cpu.regA.get()) + Byte.toUnsignedInt(value) + (cpu.regP.isCarry() ? 1 : 0);
             boolean overflow = resultInt < -128 || resultInt > 127;
             cpu.regP.setOverflow(overflow);
@@ -24,7 +23,7 @@ enum Op {
     }, // Add with Carry
     SBC(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             int resultInt = Byte.toUnsignedInt(cpu.regA.get()) - Byte.toUnsignedInt(value) - (cpu.regP.isCarry() ? 0 : 1);
             boolean overflow = resultInt < -128 || resultInt > 127;
             cpu.regP.setOverflow(overflow);
@@ -38,7 +37,7 @@ enum Op {
 
     AND(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte result = (byte)(cpu.regA.get() & value);
             cpu.regA.set(result);
             cpu.setZeroFlag(result);
@@ -47,7 +46,7 @@ enum Op {
     }, // Logical AND
     ORA(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte result = (byte)(cpu.regA.get() | value);
             cpu.regA.set(result);
             cpu.setZeroFlag(result);
@@ -56,7 +55,7 @@ enum Op {
     }, // Logical Inclusive OR
     EOR(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte result = (byte)(cpu.regA.get() ^ value);
             cpu.regA.set(result);
             cpu.setZeroFlag(result);
@@ -66,7 +65,7 @@ enum Op {
 
     ASL(true) {
         @Override
-        void execute(Integer address, Byte oldValue, _6502 cpu) {
+        void execute(Integer address, Byte oldValue, CPU cpu) {
             byte newValue = (byte)(oldValue << 1);
             if (address == null) {
                 cpu.regA.set(newValue);
@@ -80,7 +79,7 @@ enum Op {
     }, // Arithmetic Shift Left
     LSR(true) {
         @Override
-        void execute(Integer address, Byte oldValue, _6502 cpu) {
+        void execute(Integer address, Byte oldValue, CPU cpu) {
             byte newValue = BinaryUtil.setBit(false, (byte)(oldValue >> 1), 7);
             if (address == null) {
                 // accumulator
@@ -96,7 +95,7 @@ enum Op {
     }, // Logical Shift Right
     ROL(true) {
         @Override
-        void execute(Integer address, Byte oldValue, _6502 cpu) {
+        void execute(Integer address, Byte oldValue, CPU cpu) {
             byte newValue = BinaryUtil.setBit(cpu.regP.isCarry(), (byte)(oldValue << 1), 0);
             if (address == null) {
                 // accumulator
@@ -113,7 +112,7 @@ enum Op {
     }, // Rotate Left
     ROR(true) {
         @Override
-        void execute(Integer address, Byte oldValue, _6502 cpu) {
+        void execute(Integer address, Byte oldValue, CPU cpu) {
             byte newValue = BinaryUtil.setBit(cpu.regP.isCarry(), (byte)(oldValue >> 1), 7);
             if (address == null) {
                 // accumulator
@@ -130,7 +129,7 @@ enum Op {
 
     BCC(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             if (!cpu.regP.isCarry()) {
                 cpu.regPC.set(address);
             }
@@ -138,7 +137,7 @@ enum Op {
     }, // Branch if Carry Clear
     BCS(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             if (cpu.regP.isCarry()) {
                 cpu.regPC.set(address);
             }
@@ -146,7 +145,7 @@ enum Op {
     }, // Branch if Carry Set
     BEQ(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             if (cpu.regP.isZero()) {
                 cpu.regPC.set(address);
             }
@@ -154,7 +153,7 @@ enum Op {
     }, // Branch if Equal
     BMI(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             if (cpu.regP.isNegative()) {
                 cpu.regPC.set(address);
             }
@@ -162,7 +161,7 @@ enum Op {
     }, // Branch if Minus
     BNE(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             if (!cpu.regP.isZero()) {
                 cpu.regPC.set(address);
             }
@@ -170,7 +169,7 @@ enum Op {
     }, // Branch if Not Equal
     BPL(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             if (!cpu.regP.isNegative()) {
                 cpu.regPC.set(address);
             }
@@ -182,7 +181,7 @@ enum Op {
 
     BIT(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte masked = (byte)(Byte.toUnsignedInt(value) & Byte.toUnsignedInt(cpu.regA.get()));
             cpu.setZeroFlag(masked);
             cpu.regP.setOverflow(BinaryUtil.getBit(value, 6));
@@ -192,7 +191,7 @@ enum Op {
 
     JMP(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
 //                if (address == regPC.get() - 3) {
 //                    throw new RuntimeException("Explicit infinite loop"); // FIXME
 //                }
@@ -201,27 +200,27 @@ enum Op {
     }, // Jump
     JSR(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.push16(cpu.regPC.get() - 1);
             cpu.regPC.set(address);
         }
     }, // Jump to Subroutine
     RTS(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regPC.set(cpu.pull16() + 1);
         }
     }, // Return from Subroutine
 
     BRK(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.handleBRK();
         }
     }, // Force Interrupt
     RTI(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.pullP();
             cpu.regPC.set(cpu.pull16());
         }
@@ -229,101 +228,101 @@ enum Op {
 
     CMP(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             compare(cpu.regA.get(), value, cpu);
         }
     }, // Compare
     CPX(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             compare(cpu.regX.get(), value, cpu);
         }
     }, // Compare X Register
     CPY(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             compare(cpu.regY.get(), value, cpu);
         }
     }, // Compare Y Register
 
     INC(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             incrementMemory(address, cpu);
         }
     }, // Increment Memory
     INX(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             incrementRegister(cpu.regX, cpu);
         }
     }, // Increment X Register
     INY(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             incrementRegister(cpu.regY, cpu);
         }
     }, // Increment Y Register
     DEC(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             decrementMemory(address, cpu);
         }
     }, // Decrement Memory
     DEX(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             decrementRegister(cpu.regX, cpu);
         }
     }, // Decrement X Register
     DEY(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             decrementRegister(cpu.regY, cpu);
         }
     }, // Decrement Y Register
 
     SEC(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regP.setCarry(true);
         }
     }, // Set Carry Flag
     CLC(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regP.setCarry(false);
         }
     }, // Clear Carry Flag
     SED(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regP.setDecimal(true);
         }
     }, // Set Decimal Flag
     CLD(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regP.setDecimal(false);
         }
     }, // Clear Decimal Mode
     SEI(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regP.setInterruptDisable(true);
         }
     }, // Set Interrupt Disable
     CLI(false), // Clear Interrupt Disable
     CLV(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regP.setOverflow(false);
         }
     }, // Clear Overflow Flag
 
     LDA(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regA.set(value);
             cpu.setZeroFlag(value);
             cpu.setNegativeFlag(value);
@@ -331,7 +330,7 @@ enum Op {
     }, // Load Accumulator
     LDX(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regX.set(value);
             cpu.setZeroFlag(value);
             cpu.setNegativeFlag(value);
@@ -339,7 +338,7 @@ enum Op {
     }, // Load X Register
     LDY(true) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regY.set(value);
             cpu.setZeroFlag(value);
             cpu.setNegativeFlag(value);
@@ -347,13 +346,13 @@ enum Op {
     }, // Load Y Register
     STA(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             store(cpu.regA.get(), address, cpu);
         }
     }, // Store Accumulator
     STX(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             store(cpu.regX.get(), address, cpu);
         }
     }, // Store X Register
@@ -361,7 +360,7 @@ enum Op {
 
     TAX(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte a = cpu.regA.get();
             cpu.regX.set(a);
             cpu.setZeroFlag(a);
@@ -370,7 +369,7 @@ enum Op {
     }, // Transfer Accumulator to X
     TAY(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte a = cpu.regA.get();
             cpu.regY.set(a);
             cpu.setZeroFlag(a);
@@ -379,7 +378,7 @@ enum Op {
     }, // Transfer Accumulator to Y
     TSX(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte s = cpu.regS.get();
             cpu.regX.set(s);
             cpu.setZeroFlag(s);
@@ -388,7 +387,7 @@ enum Op {
     }, // Transfer Stack Pointer to X
     TXA(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte x = cpu.regX.get();
             cpu.regA.set(x);
             cpu.setZeroFlag(x);
@@ -397,7 +396,7 @@ enum Op {
     }, // Transfer X to Accumulator
     TYA(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             byte x = cpu.regY.get();
             cpu.regA.set(x);
             cpu.setZeroFlag(x);
@@ -406,76 +405,74 @@ enum Op {
     }, // Transfer Y to Accumulator
     TXS(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.regS.set(cpu.regX.get());
         }
     }, // Transfer X to Stack Pointer
 
     PHA(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.pushA();
         }
     }, // Push Accumulator
     PLA(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.pullA();
         }
     }, // Pull Accumulator
     PHP(false), // Push Processor Status
     PLP(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
             cpu.pullP();
         }
     }, // Pull Processor Status
 
     NOP(false) {
         @Override
-        void execute(Integer address, Byte value, _6502 cpu) {
+        void execute(Integer address, Byte value, CPU cpu) {
         }
     }; // No Operation
 
-//    abstract void execute(_6502 cpu);
+//    abstract void execute(CPU cpu);
 
     final boolean needsValue;
 
-    void execute(Integer address, Byte value, _6502 cpu) {
+    void execute(Integer address, Byte value, CPU cpu) {
         throw new UnsupportedOperationException(this.toString());
     };
 
-    void store(byte value, int address, _6502 cpu) {
+    void store(byte value, int address, CPU cpu) {
         cpu.memoryMapper.set(value, address);
     }
 
-    void incrementRegister(MemoryByte reg, _6502 cpu) {
+    void incrementRegister(MemoryByte reg, CPU cpu) {
         reg.increment();
         cpu.setZeroFlag(reg);
         cpu.setNegativeFlag(reg);
-        System.out.println(String.format("  Result value=%02x", reg.get()));
     }
 
-    void decrementRegister(MemoryByte reg, _6502 cpu) {
+    void decrementRegister(MemoryByte reg, CPU cpu) {
         reg.decrement();
         cpu.setZeroFlag(reg);
         cpu.setNegativeFlag(reg);
-        System.out.println(String.format("  Result value=%02x", reg.get()));
     }
 
-    void incrementMemory(int address, _6502 cpu) {
+    void incrementMemory(int address, CPU cpu) {
         byte value = cpu.memoryMapper.increment(address);
         cpu.setZeroFlag(value);
         cpu.setNegativeFlag(value);
     }
 
-    void decrementMemory(int address, _6502 cpu) {
+    void decrementMemory(int address, CPU cpu) {
         byte value = cpu.memoryMapper.decrement(address);
         cpu.setZeroFlag(value);
         cpu.setNegativeFlag(value);
     }
 
-    void compare(byte minuend, byte subtrahend, _6502 cpu) {
+    void compare(byte minuend, byte subtrahend, CPU cpu) {
         byte diff = (byte)(Byte.toUnsignedInt(minuend) - Byte.toUnsignedInt(subtrahend));
         cpu.setZeroFlag(diff);
         cpu.setNegativeFlag(diff);

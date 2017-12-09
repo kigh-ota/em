@@ -1,7 +1,7 @@
 package nes.screen;
 
 import common.BinaryUtil;
-import nes.cpu._6502;
+import nes.cpu.CPU;
 import nes.ppu.ControlRegister;
 import nes.ppu.Mirroring;
 import nes.ppu.PPU;
@@ -15,7 +15,7 @@ import static nes.ppu.Mirroring.VERTICAL;
 
 public class Window extends Canvas implements Runnable {
     private final PPU ppu;
-    private final _6502 cpu;
+    private final CPU cpu;
 
     //ゲームのメインループスレッド
     Thread gameLoop;
@@ -109,7 +109,7 @@ public class Window extends Canvas implements Runnable {
             new Color(0, 0, 0),
     };
 
-    public Window(PPU ppu, _6502 cpu){
+    public Window(PPU ppu, CPU cpu){
         this.ppu = ppu;
         this.cpu = cpu;
 
@@ -132,9 +132,13 @@ public class Window extends Canvas implements Runnable {
 
     @Override
     public void run() {
+        Image buffer = createImage(WIDTH, HEIGHT);
+        Graphics gMain = this.getGraphics();
         while (true) {
             try {
-                Graphics g = this.getGraphics();
+                Graphics g = buffer.getGraphics();
+
+                g.clearRect(0, 0, WIDTH, HEIGHT);
 
                 if (ppu.isCharacterRomAvailable()) {
                     drawPatternTables(g);
@@ -157,14 +161,17 @@ public class Window extends Canvas implements Runnable {
                 g.setColor(Color.WHITE);
                 g.fillRect(300, 0, 100, 20);
                 g.setColor(Color.BLACK);
-                g.drawString(String.format("fps=%d;%d", updateFps(), cpu.getCycles()), 300, 20);
+                g.drawString(String.format("fps=%d;%d", updateFps(), cpu.getCyclesSynchronized()), 300, 20);
 
-                ppu.regPPUSTATUS.setVblankBit(true);
-                if (ppu.regPPUCTRL.getBit(7)) {
-                    cpu.reserveNMI();
-                }
+                // flush buffer
+                gMain.drawImage(buffer, 0, 0, this);
+
+//                ppu.regPPUSTATUS.setVblankBit(true);
+//                if (ppu.regPPUCTRL.getBit(7)) {
+//                    cpu.reserveNMI();
+//                }
                 Thread.sleep(1/10*1000);    //1/60秒スリープ
-                ppu.regPPUSTATUS.setVblankBit(false);
+//                ppu.regPPUSTATUS.setVblankBit(false);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -185,7 +192,7 @@ public class Window extends Canvas implements Runnable {
     private void drawBackgroundPalette(Graphics g) {
         for (int palette = 0; palette < 4; palette++) {
             for (int i = 0; i < 4; i++) {
-                Color color = PALETTE[ppu.getColor(palette, i)];
+                Color color = PALETTE[ppu.getColorIndex(palette, i)];
                 g.setColor(color);
                 int x = PALETTE_OFFSET_X + i * 4;
                 int y = PALETTE_OFFSET_Y + palette * 4;
@@ -289,7 +296,7 @@ public class Window extends Canvas implements Runnable {
             for (int offsetX = 0; offsetX < TILE_SIZE; offsetX++) {
                 int color = (BinaryUtil.getBit(data[offsetY], 7 - offsetX) ? 1 : 0)
                         + (BinaryUtil.getBit(data[offsetY + 8], 7 - offsetX) ? 1 : 0) * 2;
-                g.setColor(PALETTE[ppu.getColor(palette, color)]);
+                g.setColor(PALETTE[ppu.getColorIndex(palette, color)]);
                 g.drawLine(x0 + offsetX, y0 + offsetY, x0 + offsetX, y0 + offsetY);
             }
         }

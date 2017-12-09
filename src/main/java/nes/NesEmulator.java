@@ -1,7 +1,9 @@
 package nes;
 
-import nes.cpu._6502;
+import nes.cpu.CPU;
 import nes.ppu.PPU;
+import nes.screen.MainScreen;
+import nes.screen.MainScreenImpl;
 import nes.screen.Window;
 
 import javax.swing.*;
@@ -14,14 +16,21 @@ import static javax.swing.WindowConstants.EXIT_ON_CLOSE;
 public class NesEmulator {
     public void start() {
 //        NesData nesData = loadRom(System.getProperty("user.home") + "/sample1.nes");
-//        NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
-        NesData nesData = loadRom(System.getProperty("user.home") + "/sprite_ram.nes");
+        NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
+//        NesData nesData = loadRom(System.getProperty("user.home") + "/sprite_ram.nes");
 
-        PPU ppu = new PPU(nesData.characterRom, nesData.mirroring);
-        _6502 cpu = new _6502(ppu, nesData.programRom);
+        Controller controller1 = new Controller();
 
-        startScreen(ppu, cpu);
-        cpu.start();
+        MainScreen mainScreen = new MainScreenImpl(controller1);
+
+        PPU ppu = new PPU(nesData.characterRom, nesData.mirroring, mainScreen);
+        CPU cpu = new CPU(ppu, nesData.programRom, controller1);
+        ppu.setCpu(cpu);
+
+
+//        startScreen(ppu, cpu);
+        new Thread(ppu).start();
+        new Thread(cpu).start();
     }
 
     private NesData loadRom(String romFileName) {
@@ -34,7 +43,8 @@ public class NesEmulator {
         return new FileLoader().load(in);
     }
 
-    private void startScreen(PPU ppu, _6502 cpu) {
+    // TODO separate main and informational window
+    private void startScreen(PPU ppu, CPU cpu) {
         //新しいフレーム(Window)を作成
         JFrame mainFrame = new JFrame();
 
