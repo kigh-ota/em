@@ -1,12 +1,15 @@
 package nes;
 
+import common.BinaryUtil;
 import common.ByteArrayMemory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+@Slf4j
 public class FileLoader {
     public static final int HEADER_LENGTH = 16;
 
@@ -50,6 +53,14 @@ public class FileLoader {
         programRamSize = data[8] * 0x2000;
         flag9 = data[9];
         flag10 = data[10];
+
+        log.info("Size of PRG ROM (in 16 KB units) = {}", data[4]);
+        log.info("Size of CHR ROM (in 8 KB units) = {}", data[5]);
+        log.info("Flags 6 = {}", BinaryUtil.toBinaryString(data[6], 8));
+        log.info("Flags 7 = {}", BinaryUtil.toBinaryString(data[7], 8));
+        log.info("Size of PRG RAM (in 8 KB units) = {}", data[8]);
+        log.info("Flags 9 = {}", BinaryUtil.toBinaryString(data[9], 8));
+        log.info("Flags 10 = {}", BinaryUtil.toBinaryString(data[10], 8));
 
         boolean zeroFilled = IntStream.range(11, HEADER_LENGTH).allMatch(pos -> data[pos] == 0);
         return zeroFilled;

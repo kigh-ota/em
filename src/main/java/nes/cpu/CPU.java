@@ -90,8 +90,16 @@ public class CPU implements Runnable {
             if (op == null) {
                 log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
             }
-            log.debug("PC={} op={}({}) [A={} S={}] cycle={}", Integer.toHexString(regPC.get()), op.getOp().toString(), op.getAddressingMode().toString(),
-                    Integer.toHexString(Byte.toUnsignedInt(regA.get())), Integer.toHexString(Byte.toUnsignedInt(regS.get())), cycles);
+            log.debug("PC={} op={}({}) [X=${} Y=${} A=${} S=${} P={}] cycle={}",
+                    Integer.toHexString(regPC.get()),
+                    op.getOp().toString(),
+                    op.getAddressingMode().toString(),
+                    Integer.toHexString(Byte.toUnsignedInt(regX.get())),
+                    Integer.toHexString(Byte.toUnsignedInt(regY.get())),
+                    Integer.toHexString(Byte.toUnsignedInt(regA.get())),
+                    Integer.toHexString(Byte.toUnsignedInt(regS.get())),
+                    BinaryUtil.toBinaryString(regP.get(), 8),
+                    cycles);
 
             cycles += op.getCycles();
 
@@ -256,7 +264,7 @@ public class CPU implements Runnable {
         return regX.get();
     }
     byte getY() {
-        return regX.get();
+        return regY.get();
     }
     int getPC() {
         return regPC.get();
