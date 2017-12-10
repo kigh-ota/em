@@ -55,7 +55,7 @@ public class PPU implements Runnable {
     public final MaskRegister regPPUMASK = new MaskRegister((byte)0);
     public final StatusRegister regPPUSTATUS; // $2002
     public final MemoryByte regOAMADDR = new ByteRegister((byte)0);
-    public final MemoryByte regOAMDATA = new ByteRegister((byte)0); // TODO implement
+    public final MemoryByte regOAMDATA; // $2004
     public final ScrollRegister regPPUSCROLL; // $2005
     public final AddressRegister regPPUADDR; // $2006
     public final MemoryByte regPPUDATA; // $2007
@@ -68,9 +68,9 @@ public class PPU implements Runnable {
         this.characterRom = characterRom;
         nametables = new ByteArrayMemory(new byte[NAMETABLE_MEMORY_SIZE]);
         paletteRam = new ByteArrayMemory(new byte[PALETTE_RAM_SIZE]);
-
         regPPUCTRL = new ControlRegister();
         regPPUSTATUS = new StatusRegister(this);
+        regOAMDATA = new OAMDataRegister(oam, regOAMADDR);
         regPPUSCROLL = new ScrollRegister(this);
         regPPUADDR = new AddressRegister(this);
         regPPUDATA = new DataRegister(this);
