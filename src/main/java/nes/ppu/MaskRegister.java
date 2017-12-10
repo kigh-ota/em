@@ -20,4 +20,12 @@ class MaskRegister extends ByteRegister {
     MaskRegister(byte value) {
         super(value);
     }
+
+    boolean enableBackground() {
+        return getBit(3);
+    }
+
+    boolean enableSprites() {
+        return getBit(4);
+    }
 }

@@ -52,7 +52,7 @@ public class PPU implements Runnable {
 
     // https://wiki.nesdev.com/w/index.php/PPU_registers
     public final ControlRegister regPPUCTRL; // $2000
-    public final MemoryByte regPPUMASK = new MaskRegister((byte)0);
+    public final MaskRegister regPPUMASK = new MaskRegister((byte)0);
     public final StatusRegister regPPUSTATUS; // $2002
     public final MemoryByte regOAMADDR = new ByteRegister((byte)0);
     public final MemoryByte regOAMDATA = new ByteRegister((byte)0); // TODO implement
@@ -144,21 +144,26 @@ public class PPU implements Runnable {
 
     private void setLineData(int y, int scrollX, int scrollY, MainScreenData data) {
         IntStream.range(0, WIDTH).forEach(x -> {
-            data.set(getColorAt(x, y, scrollX, scrollY), x, y);
+            getColorAt(x, y, scrollX, scrollY).ifPresent(c -> {
+                data.set(c, x, y);
+            });
         });
     }
 
-    private Color getColorAt(int x, int y, int scrollX, int scrollY) {
+    private Optional<Color> getColorAt(int x, int y, int scrollX, int scrollY) {
         return findTopSpriteNumber(x, y).map(sprite -> {
             int spritePatternTable = getSpritePatternTable();
             byte[] pattern = getCharacterPattern(spritePatternTable, oam.getTileIndex(sprite));
             int color = getColorInPattern(x - oam.getX(sprite), y - oam.getY(sprite), pattern);
             int colorIndex = getColorIndex(oam.getPalette(sprite), color);
-            return Palette.get(colorIndex);
+            return Optional.of(Palette.get(colorIndex));
         }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));
     }
 
     private Optional<Integer> findTopSpriteNumber(int x, int y) {
+        if (!regPPUMASK.enableSprites()) {
+            return Optional.empty();
+        }
         checkArgument(x >= 0 && x < WIDTH);
         checkArgument(y >= 0 && y < HEIGHT);
         checkArgument(regPPUCTRL.getSpriteSize() == ControlRegister.SpriteSize.EIGHT_BY_EIGHT); // TODO 8x16 sprite
@@ -208,7 +213,10 @@ public class PPU implements Runnable {
         }
     }
 
-    private Color getBackgroundColor(int x, int y) {
+    private Optional<Color> getBackgroundColor(int x, int y) {
+        if (!regPPUMASK.enableBackground()) {
+            return Optional.empty();
+        }
         checkArgument(x >= 0 && x < 2 * WIDTH);
         checkArgument(y >= 0 && y < 2 * HEIGHT);
         int screen = getScreen(x, y);
@@ -219,7 +227,7 @@ public class PPU implements Runnable {
         int palette = getPalette(screen, cell);
         int color = getColorInPattern(x % 8, y % 8, pattern);
         int colorIndex = getColorIndex(palette, color);
-        return Palette.get(colorIndex);
+        return Optional.of(Palette.get(colorIndex));
     }
 
     /**

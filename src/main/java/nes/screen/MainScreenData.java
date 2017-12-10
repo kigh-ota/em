@@ -7,18 +7,26 @@ import static nes.screen.MainScreen.HEIGHT;
 import static nes.screen.MainScreen.WIDTH;
 
 public class MainScreenData {
-    private Color[] value = new Color[WIDTH * HEIGHT];
+
+    private Color[] values;
+
+    public MainScreenData() {
+        values = new Color[WIDTH * HEIGHT];
+        for (int i = 0; i < WIDTH * HEIGHT; i++) {
+            values[i] = Color.BLACK;
+        }
+    }
 
     public Color get(int x, int y) {
         checkArgument(x >= 0 && x < WIDTH);
         checkArgument(y >= 0 && y < HEIGHT);
-        return value[y * WIDTH + x];
+        return values[y * WIDTH + x];
     }
 
     public void set(Color c, int x, int y) {
         checkArgument(x >= 0 && x < WIDTH);
         checkArgument(y >= 0 && y < HEIGHT);
-        value[y * WIDTH + x] = c;
+        values[y * WIDTH + x] = c;
     }
 
 }
