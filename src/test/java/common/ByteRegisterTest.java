@@ -8,6 +8,13 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ByteRegisterTest {
     @Test
+    void testSet() {
+        ByteRegister sut = new ByteRegister((byte)0);
+        sut.set((byte)0xff);
+        assertEquals((byte)0xff, sut.get());
+    }
+
+    @Test
     void testIncrement() {
         ByteRegister sut = new ByteRegister((byte) 0b11111110);
         assertFalse(sut.increment());
@@ -26,27 +33,75 @@ class ByteRegisterTest {
     }
 
     @Test
-    void testAdd() {
+    void testAddWithCarry() {
         ByteRegister sut = new ByteRegister((byte)0b11110000);
         assertTrue(sut.add((byte)0b00010001));
         assertEquals((byte)0b00000001, sut.get());
     }
 
     @Test
-    void testSubtract() {
+    void testAddWithoutCarry() {
+        ByteRegister sut = new ByteRegister((byte)0b11110000);
+        assertFalse(sut.add((byte)0b00001111));
+        assertEquals((byte)0b11111111, sut.get());
+    }
+
+    @Test
+    void testSubtractWithCarry() {
         ByteRegister sut = new ByteRegister((byte)0b00000001);
         assertTrue(sut.subtract((byte)0b00000010));
         assertEquals((byte)0b11111111, sut.get());
     }
 
     @Test
-    void setBitTest() {
+    void testSubtractWithoutCarry() {
         ByteRegister sut = new ByteRegister((byte)0b00000001);
-        sut.setBit(true, 7);
-        assertEquals((byte)0b10000001, sut.get());
-        sut.setBit(false, 0);
-        assertEquals((byte)0b10000000, sut.get());
-        sut.setBit(false, 1);
-        assertEquals((byte)0b10000000, sut.get());
+        assertFalse(sut.subtract((byte)0b00000001));
+        assertEquals((byte)0b00000000, sut.get());
     }
+
+    @Test
+    void setBitAndGetBitTest() {
+        ByteRegister sut = new ByteRegister((byte)0b00000001);
+        assertTrue(sut.getBit(0));
+        assertFalse(sut.getBit(1));
+        assertFalse(sut.getBit(2));
+        assertFalse(sut.getBit(3));
+        assertFalse(sut.getBit(4));
+        assertFalse(sut.getBit(5));
+        assertFalse(sut.getBit(6));
+        assertFalse(sut.getBit(7));
+
+        sut.setBit(true, 7);
+        assertTrue(sut.getBit(0));
+        assertFalse(sut.getBit(1));
+        assertFalse(sut.getBit(2));
+        assertFalse(sut.getBit(3));
+        assertFalse(sut.getBit(4));
+        assertFalse(sut.getBit(5));
+        assertFalse(sut.getBit(6));
+        assertTrue(sut.getBit(7));
+
+        sut.setBit(false, 0);
+        assertFalse(sut.getBit(0));
+        assertFalse(sut.getBit(1));
+        assertFalse(sut.getBit(2));
+        assertFalse(sut.getBit(3));
+        assertFalse(sut.getBit(4));
+        assertFalse(sut.getBit(5));
+        assertFalse(sut.getBit(6));
+        assertTrue(sut.getBit(7));
+
+        sut.setBit(false, 1);
+        assertFalse(sut.getBit(0));
+        assertFalse(sut.getBit(1));
+        assertFalse(sut.getBit(2));
+        assertFalse(sut.getBit(3));
+        assertFalse(sut.getBit(4));
+        assertFalse(sut.getBit(5));
+        assertFalse(sut.getBit(6));
+        assertTrue(sut.getBit(7));
+
+    }
+
 }

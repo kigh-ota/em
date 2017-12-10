@@ -74,7 +74,7 @@ enum AddressingMode {
             byte upper = cpu.memoryMapper.get(BinaryUtil.getAddress(BinaryUtil.add(pointerLower, (byte)1).getOne(), pointerUpper));
             return BinaryUtil.getAddress(lower, upper);
         }
-    }, // (LOWER,UPPER) => value at UPPER:LOWER
+    }, // (LOWER,UPPER) => value at (UPPER:LOWER):(UPPER:LOWER + 1%)
     INDEXED_INDIRECT_X(1) {
         @Override
         Integer getAddress(Byte operand1, Byte operand2, CPU cpu) {
@@ -89,7 +89,7 @@ enum AddressingMode {
             byte upper = cpu.memoryMapper.get(BinaryUtil.getAddress(BinaryUtil.add(operand1, (byte)1).getOne(), (byte)0));
             return BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.regY.get());
         }
-    }; // (LOWER) => value at((value at $00:LOWER)+Y)
+    }; // (LOWER) => value at ((00:LOWER+1%):(00:LOWER) + Y)
 
     final int addressBytes;
 
