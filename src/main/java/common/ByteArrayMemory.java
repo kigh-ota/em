@@ -26,13 +26,14 @@ public class ByteArrayMemory {
     // 計算後の値を返す
     public byte increment(int offset) {
         Pair<Byte, Boolean> pair = BinaryUtil.add(data[offset], (byte) 1);
-        return pair.getOne();
+        data[offset] = pair.getOne();
+        return data[offset];
     }
 
     // 計算後の値を返す
     public byte decrement(int offset) {
         Pair<Byte, Boolean> pair = BinaryUtil.subtract(data[offset], (byte) 1);
-        data[offset]--;
+        data[offset] = pair.getOne();
         return data[offset];
     }
 }
