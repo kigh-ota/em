@@ -154,7 +154,12 @@ public class PPU implements Runnable {
         return findTopSpriteNumber(x, y).map(sprite -> {
             int spritePatternTable = getSpritePatternTable();
             byte[] pattern = getCharacterPattern(spritePatternTable, oam.getTileIndex(sprite));
-            int color = getColorInPattern(x - oam.getX(sprite), y - oam.getY(sprite), pattern);
+
+            boolean flippedHorizontally = oam.isFlippedHorizontally(sprite);
+            boolean flippedVertically = oam.isFlippedVertically(sprite);
+            int patternX = flippedHorizontally ? 7 - (x - oam.getX(sprite)) : x - oam.getX(sprite);
+            int patternY = flippedVertically ? 7 - (y - oam.getY(sprite)) : y - oam.getY(sprite);
+            int color = getColorInPattern(patternX, patternY, pattern);
             int colorIndex = getColorIndex(oam.getPalette(sprite), color);
             return Optional.of(Palette.get(colorIndex));
         }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));

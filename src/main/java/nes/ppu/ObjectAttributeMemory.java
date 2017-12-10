@@ -3,7 +3,6 @@ package nes.ppu;
 import common.BinaryUtil;
 import common.ByteArrayMemory;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static nes.ppu.PPU.OAM_SIZE;
 
 public class ObjectAttributeMemory extends ByteArrayMemory {
@@ -40,6 +39,16 @@ public class ObjectAttributeMemory extends ByteArrayMemory {
 //                BinaryUtil.getBit(value, 7)
 //        );
 //    }
+
+    public boolean isFlippedHorizontally(int n) {
+        byte value = get(n * 4 + 2);
+        return BinaryUtil.getBit(value, 6);
+    }
+
+    public boolean isFlippedVertically(int n) {
+        byte value = get(n * 4 + 2);
+        return BinaryUtil.getBit(value, 7);
+    }
 
     /**
      *
