@@ -9,6 +9,8 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.stream.IntStream;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 @Slf4j
 public class FileLoader {
     public static final int HEADER_LENGTH = 16;
@@ -50,7 +52,7 @@ public class FileLoader {
         characterRomSize = data[5] * 0x2000;
         flag6 = data[6];
         flag7 = data[7];
-        programRamSize = data[8] * 0x2000;
+        programRamSize = data[8] == 0 ? 0x2000 : data[8] * 0x2000;
         flag9 = data[9];
         flag10 = data[10];
 
@@ -61,6 +63,8 @@ public class FileLoader {
         log.info("Size of PRG RAM (in 8 KB units) = {}", data[8]);
         log.info("Flags 9 = {}", BinaryUtil.toBinaryString(data[9], 8));
         log.info("Flags 10 = {}", BinaryUtil.toBinaryString(data[10], 8));
+
+        checkArgument(data[8] == 0 || data[8] == 1);
 
         boolean zeroFilled = IntStream.range(11, HEADER_LENGTH).allMatch(pos -> data[pos] == 0);
         return zeroFilled;
@@ -75,15 +79,16 @@ public class FileLoader {
         int cursor = HEADER_LENGTH;
         if (programRomSize == 2) {
             nesData.programRom = new ByteArrayMemory(Arrays.copyOfRange(data, cursor, cursor + 0x8000));
+            cursor += 0x8000;
         } else if (programRomSize == 1) {
             nesData.programRom = new ByteArrayMemory(new byte[0x8000]);
             for (int i = 0; i < 0x8000; i++) {
                 nesData.programRom.set(data[cursor + (i % 0x4000)], i);
             }
+            cursor += 0x4000;
         } else {
             throw new IllegalStateException();
         }
-        cursor += 0x8000;
         if (characterRomSize > 0) {
             nesData.characterRom = new ByteArrayMemory(Arrays.copyOfRange(data, cursor, cursor + characterRomSize));
         }
