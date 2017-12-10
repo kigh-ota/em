@@ -25,7 +25,7 @@ public class CPU implements Runnable {
     final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
     final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
     final FlagRegister regP = new FlagRegister((byte)0x34);
-    final RegisterImpl regPC = new RegisterImpl(PROGRAM_OFFSET, 16);   // Program Counter
+    final RegisterImpl regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
 
     final MemoryByte regSQ1_VOL = new ByteRegister((byte)0); // $4000
     final MemoryByte regSQ1_SWEEP = new ByteRegister((byte)0); // $4001
@@ -109,15 +109,11 @@ public class CPU implements Runnable {
                     continue;
                 case 1:
                     byte operand = getCode();
-                    log.debug(" operand={}", Integer.toHexString(Byte.toUnsignedInt(operand)));
                     executeInstruction(op, operand, null);
                     continue;
                 case 2:
                     byte operand1 = getCode();
                     byte operand2 = getCode();
-                    log.debug(" operand={} {}",
-                            Integer.toHexString(Byte.toUnsignedInt(operand2)),
-                            Integer.toHexString(Byte.toUnsignedInt(operand1)));
                     executeInstruction(op, operand1, operand2);
                     continue;
                 default:
@@ -231,11 +227,25 @@ public class CPU implements Runnable {
             default:
                 throw new IllegalArgumentException();
         }
-        if (address != null) {
-            log.debug("  address=${}", Integer.toHexString(address));
-        }
-        if (value != null) {
-            log.debug("  value=${}", Integer.toHexString(Byte.toUnsignedInt(value)));
+
+        if (log.isDebugEnabled()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("  (");
+            if (operand1 != null) {
+                sb.append("$" + Integer.toHexString(Byte.toUnsignedInt(operand1)));
+            }
+            if (operand2 != null) {
+                sb.append(", $");
+                sb.append(Integer.toHexString(Byte.toUnsignedInt(operand2)));
+            }
+            sb.append(")");
+            if (address != null) {
+                sb.append(String.format(" addr=$%04x", address));
+            }
+            if (value != null) {
+                sb.append(String.format(" value=$%02x", Byte.toUnsignedInt(value)));
+            }
+            log.debug(sb.toString());
         }
         op.getOp().execute(address, value, this);
     }
