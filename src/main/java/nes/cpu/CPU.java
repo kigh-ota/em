@@ -90,8 +90,9 @@ public class CPU implements Runnable {
             if (op == null) {
                 log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
             }
-            log.debug("PC={} op={}({}) [X=${} Y=${} A=${} S=${} P={}] cycle={}",
-                    Integer.toHexString(regPC.get()),
+            log.debug("PC={} op={}({}:{}) [X=${} Y=${} A=${} S=${} P={}] cycle={}",
+                    Integer.toHexString(regPC.get() - 1),
+                    Integer.toHexString(Byte.toUnsignedInt(code)),
                     op.getOp().toString(),
                     op.getAddressingMode().toString(),
                     Integer.toHexString(Byte.toUnsignedInt(regX.get())),
