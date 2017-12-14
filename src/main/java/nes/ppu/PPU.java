@@ -34,6 +34,9 @@ public class PPU implements Runnable {
     private long cycles;
     private long frames;
 
+    private int scanX;
+    private int scanY;
+
     @Setter
     private CPU cpu;
 
@@ -80,8 +83,7 @@ public class PPU implements Runnable {
         this.mainScreen = mainScreen;
     }
 
-    @Override
-    public void run() {
+    public void reset() {
         checkNotNull(mainScreen);
         mainScreen.init();
 
@@ -89,44 +91,49 @@ public class PPU implements Runnable {
 
         cycles = 0L;
         frames = 0L;
-        int scanX = 0;
-        int scanY = 0;
+    }
 
-        while (true) {
+    public void runStep() {
 
-            // TODO NEXT draw dot by dot
+        // TODO NEXT draw dot by dot
 //            cycles++;
 
+        if (scanY == 0) {
+            drawFrame();
+
+            cycles += (frames % 2 == 0) ? HEIGHT * 341 : HEIGHT * 341 - 1;
+            scanY += HEIGHT;
+            frames++;
+        } else {
+            if (scanX == 1 && scanY == 241) {
+                regPPUSTATUS.setVblankBit(true);
+                if (regPPUCTRL.getBit(7)) {
+                    cpu.reserveNMI();
+                }
+            } else if (scanX == 1 && scanY == 261) {
+                regPPUSTATUS.setVblankBit(false);
+            }
+
+            cycles++;
+            scanX++;
+            if (scanX == 341) {
+                scanY++;
+                scanX = 0;
+                if (scanY == 262) {
+                    scanY = 0;
+                }
+            }
+        }
+    }
+
+    @Override
+    public void run() {
+        reset();
+        while (true) {
             if (shouldWaitCpu()) {
-                continue;
+                return;
             }
-
-            if (scanY == 0) {
-                drawFrame();
-
-                cycles += (frames % 2 == 0) ? HEIGHT * 341 : HEIGHT * 341 - 1;
-                scanY += HEIGHT;
-                frames++;
-            } else {
-                if (scanX == 1 && scanY == 241) {
-                    regPPUSTATUS.setVblankBit(true);
-                    if (regPPUCTRL.getBit(7)) {
-                        cpu.reserveNMI();
-                    }
-                } else if (scanX == 1 && scanY == 261) {
-                    regPPUSTATUS.setVblankBit(false);
-                }
-
-                cycles++;
-                scanX++;
-                if (scanX == 341) {
-                    scanY++;
-                    scanX = 0;
-                    if (scanY == 262) {
-                        scanY = 0;
-                    }
-                }
-            }
+            runStep();
         }
     }
 

@@ -1,7 +1,7 @@
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
-import nes.NesEmulator;
+import nes.NesEmulatorSingleThread;
 import org.slf4j.LoggerFactory;
 
 public class EmulatorRunner {
@@ -11,6 +11,7 @@ public class EmulatorRunner {
         rootLogger.setLevel(Level.valueOf(System.getProperty("loglevel")));
 //        TD4Emulator td4Simulator = new TD4Emulator();
 //        td4Simulator.start(TD4Emulator.ClockType.FAST);
-        new NesEmulator().start();
+//        new NesEmulator().start();
+        new NesEmulatorSingleThread().start();
     }
 }

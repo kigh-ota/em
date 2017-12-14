@@ -75,51 +75,59 @@ public class CPU implements Runnable {
         return cycles;
     }
 
+    public void reset() {
+        cycles = 0L;
+        regPC.set(getAddress(memoryMapper.get(RESET_VECTOR_ADDRESS), memoryMapper.get(RESET_VECTOR_ADDRESS + 1)));
+    };
+
+    public void runStep() {
+        if (flagNMI) {
+            handleNMI();
+        }
+
+        byte code = getCode();
+        Operation op = operationFactory.get(code);
+        if (op == null) {
+            log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
+        }
+        log.debug("PC={} op={}({}:{}) [X=${} Y=${} A=${} S=${} P={}] cycle={}",
+                Integer.toHexString(regPC.get() - 1),
+                Integer.toHexString(Byte.toUnsignedInt(code)),
+                op.getOp().toString(),
+                op.getAddressingMode().toString(),
+                Integer.toHexString(Byte.toUnsignedInt(regX.get())),
+                Integer.toHexString(Byte.toUnsignedInt(regY.get())),
+                Integer.toHexString(Byte.toUnsignedInt(regA.get())),
+                Integer.toHexString(Byte.toUnsignedInt(regS.get())),
+                BinaryUtil.toBinaryString(regP.get(), 8),
+                cycles);
+
+        cycles += op.getCycles();
+
+        switch (op.getAddressingMode().addressBytes) {
+            case 0:
+                executeInstruction(op, null, null);
+                return;
+            case 1:
+                byte operand = getCode();
+                executeInstruction(op, operand, null);
+                return;
+            case 2:
+                byte operand1 = getCode();
+                byte operand2 = getCode();
+                executeInstruction(op, operand1, operand2);
+                return;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
     @Override
     public void run() {
-        cycles = 0L;
-        regPC.set(getAddress(memoryMapper.get(0xFFFC), memoryMapper.get(0xFFFD)));
+        reset();
 
         while (true) {
-            if (flagNMI) {
-                handleNMI();
-            }
-
-            byte code = getCode();
-            Operation op = operationFactory.get(code);
-            if (op == null) {
-                log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
-            }
-            log.debug("PC={} op={}({}:{}) [X=${} Y=${} A=${} S=${} P={}] cycle={}",
-                    Integer.toHexString(regPC.get() - 1),
-                    Integer.toHexString(Byte.toUnsignedInt(code)),
-                    op.getOp().toString(),
-                    op.getAddressingMode().toString(),
-                    Integer.toHexString(Byte.toUnsignedInt(regX.get())),
-                    Integer.toHexString(Byte.toUnsignedInt(regY.get())),
-                    Integer.toHexString(Byte.toUnsignedInt(regA.get())),
-                    Integer.toHexString(Byte.toUnsignedInt(regS.get())),
-                    BinaryUtil.toBinaryString(regP.get(), 8),
-                    cycles);
-
-            cycles += op.getCycles();
-
-            switch (op.getAddressingMode().addressBytes) {
-                case 0:
-                    executeInstruction(op, null, null);
-                    continue;
-                case 1:
-                    byte operand = getCode();
-                    executeInstruction(op, operand, null);
-                    continue;
-                case 2:
-                    byte operand1 = getCode();
-                    byte operand2 = getCode();
-                    executeInstruction(op, operand1, operand2);
-                    continue;
-                default:
-                    throw new IllegalStateException();
-            }
+            runStep();
         }
     }
 
