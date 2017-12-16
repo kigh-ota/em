@@ -157,6 +157,54 @@ class OpTest {
             expectCarryFlag(true);
         }
 
+        // LSR
+
+        @Test
+        void testLSR() {
+            Op.LSR.execute(null, (byte)0b00001111, cpu);
+            expectA(0b00000111);
+            expectZeroFlag(false);
+            expectNegativeFlag(false);
+            expectCarryFlag(true);
+        }
+
+        // ROL
+
+        @Test
+        void testROL() {
+            when(cpu.getCarryFlag()).thenReturn(true);
+            Op.ROL.execute(null, (byte)0b01110000, cpu);
+            expectA(0b11100001);
+            expectZeroFlag(false);
+            expectNegativeFlag(true);
+            expectCarryFlag(false);
+        }
+
+        // ROR
+
+        @Test
+        void testROR() {
+            when(cpu.getCarryFlag()).thenReturn(true);
+            Op.ROR.execute(null, (byte)0b11110000, cpu);
+            expectA(0b11111000);
+            expectZeroFlag(false);
+            expectNegativeFlag(true);
+            expectCarryFlag(false);
+        }
+
+        // TODO branch instructions
+
+        // BIT
+
+        @Test
+        void testBIT() {
+            when(cpu.getA()).thenReturn((byte)0);
+            Op.BIT.execute(null, (byte)0b11111111, cpu);
+            expectOverflowFlag(true);
+            expectNegativeFlag(true);
+            expectZeroFlag(true);
+        }
+
         private void expectA(int value) {
             byte b = (byte)value;
             verify(cpu).setA((byte)value);

@@ -191,7 +191,7 @@ enum Op {
         void execute(Integer address, Byte value, CPU cpu) {
             byte masked = (byte)(Byte.toUnsignedInt(value) & Byte.toUnsignedInt(cpu.getA()));
             cpu.setZeroFlag(masked);
-            cpu.setCarryFlag(BinaryUtil.getBit(value, 6));
+            cpu.setOverflowFlag(BinaryUtil.getBit(value, 6));
             cpu.setNegativeFlag(value);
         }
     }, // Bit Test
