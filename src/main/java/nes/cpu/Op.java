@@ -199,9 +199,6 @@ enum Op {
     JMP(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-//                if (address == regPC.get() - 3) {
-//                    throw new RuntimeException("Explicit infinite loop"); // FIXME
-//                }
             cpu.jump(address);
         }
     }, // Jump

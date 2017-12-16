@@ -205,6 +205,38 @@ class OpTest {
             expectZeroFlag(true);
         }
 
+        // CMP
+
+        @Test
+        void testCMPPositive() {
+            when(cpu.getA()).thenReturn((byte)0xfe);
+            Op.CMP.execute(null, (byte)0xfd, cpu);
+            expectCarryFlag(true);
+            expectZeroFlag(false);
+            expectNegativeFlag(false);
+        }
+
+        @Test
+        void testCMPEqual() {
+            when(cpu.getA()).thenReturn((byte)0xfe);
+            Op.CMP.execute(null, (byte)0xfe, cpu);
+            expectCarryFlag(true);
+            expectZeroFlag(true);
+            expectNegativeFlag(false);
+        }
+
+        @Test
+        void testCMPNegative() {
+            when(cpu.getA()).thenReturn((byte)0xfe);
+            Op.CMP.execute(null, (byte)0xff, cpu);
+            expectCarryFlag(false);
+            expectZeroFlag(false);
+            expectNegativeFlag(true);
+        }
+
+        // TODO CPX, CPY, increment, decrement, flags, load, store
+
+
         private void expectA(int value) {
             byte b = (byte)value;
             verify(cpu).setA((byte)value);
