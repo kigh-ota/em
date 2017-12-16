@@ -113,6 +113,50 @@ class OpTest {
             expectOverflowFlag(true);
         }
 
+        // AND
+
+        @Test
+        void testAND() {
+            when(cpu.getA()).thenReturn((byte)0b00001111);
+            Op.AND.execute(null, (byte)0b11110000, cpu);
+            expectA(0);
+            expectZeroFlag(true);
+            expectNegativeFlag(false);
+        }
+
+        // ORA
+
+        @Test
+        void testORA() {
+            when(cpu.getA()).thenReturn((byte)0b00001111);
+            Op.ORA.execute(null, (byte)0b11110000, cpu);
+            expectA(0b11111111);
+            expectZeroFlag(false);
+            expectNegativeFlag(true);
+        }
+
+        // EOR
+
+        @Test
+        void testEOR() {
+            when(cpu.getA()).thenReturn((byte)0b00110011);
+            Op.EOR.execute(null, (byte)0b11110000, cpu);
+            expectA(0b11000011);
+            expectZeroFlag(false);
+            expectNegativeFlag(true);
+        }
+
+        // ASL
+
+        @Test
+        void testASL() {
+            Op.ASL.execute(null, (byte)0b11110000, cpu);
+            expectA(0b11100000);
+            expectZeroFlag(false);
+            expectNegativeFlag(true);
+            expectCarryFlag(true);
+        }
+
         private void expectA(int value) {
             byte b = (byte)value;
             verify(cpu).setA((byte)value);

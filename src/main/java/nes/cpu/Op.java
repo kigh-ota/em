@@ -79,7 +79,7 @@ enum Op {
             } else {
                 cpu.memoryMapper.set(newValue, address);
             }
-            cpu.setCarryFlag(BinaryUtil.getBit(oldValue, 0));
+            cpu.setCarryFlag(BinaryUtil.getBit(oldValue, 7));
             cpu.setZeroFlag(newValue);
             cpu.setNegativeFlag(newValue);
         }
