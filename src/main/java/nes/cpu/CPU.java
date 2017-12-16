@@ -20,11 +20,11 @@ public class CPU implements Runnable {
     private final OperationFactory operationFactory;
 
     // https://wiki.nesdev.com/w/index.php/CPU_power_up_state
-    final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
-    final MemoryByte regX = new ByteRegister((byte)0);    // X Index
-    final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
-    final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
-    final FlagRegister regP = new FlagRegister((byte)0x34);
+    private final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
+    private final MemoryByte regX = new ByteRegister((byte)0);    // X Index
+    private final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
+    private final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
+    private final FlagRegister regP = new FlagRegister((byte)0x34);
     private final RegisterImpl regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
 
     final MemoryByte regSQ1_VOL = new ByteRegister((byte)0); // $4000
@@ -96,10 +96,10 @@ public class CPU implements Runnable {
                 BinaryUtil.toHexString(code),
                 op.getOp().toString(),
                 op.getAddressingMode().toString(),
-                BinaryUtil.toHexString(regX.get()),
-                BinaryUtil.toHexString(regY.get()),
-                BinaryUtil.toHexString(regA.get()),
-                BinaryUtil.toHexString(regS.get()),
+                BinaryUtil.toHexString(getX()),
+                BinaryUtil.toHexString(getY()),
+                BinaryUtil.toHexString(getA()),
+                BinaryUtil.toHexString(getS()),
                 BinaryUtil.toBinaryString(regP.get(), 8),
                 cycles);
 
@@ -141,18 +141,18 @@ public class CPU implements Runnable {
         flagNMI = false;
         log.debug("*** NMI ***");
         pushPC();
-        regP.setBreakCommand(false);
+        setBreakCommandFlag(false);
         pushP();
-        regP.setInterruptDisable(true);
+        setInterruptDisableFlag(true);
         jump(getAddress(memoryMapper.get(NMI_VECTOR_ADDRESS), memoryMapper.get(NMI_VECTOR_ADDRESS + 1)));
     }
 
     void handleBRK() {
         log.debug("*** BRK ***");
         pushPC();
-        regP.setBreakCommand(true);
+        setBreakCommandFlag(true);
         pushP();
-        regP.setInterruptDisable(true);
+        setInterruptDisableFlag(true);
         jump(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
     }
 
@@ -261,19 +261,19 @@ public class CPU implements Runnable {
     }
 
     void setZeroFlag(MemoryByte reg) {
-        regP.setZero(reg.get() == 0);
+        setZeroFlag(reg.get() == 0);
     }
 
     void setZeroFlag(byte v) {
-        regP.setZero(v == 0);
+        setZeroFlag(v == 0);
     }
 
     void setNegativeFlag(MemoryByte reg) {
-        regP.setNegative(reg.getBit(7));
+        setNegativeFlag(reg.getBit(7));
     }
 
     void setNegativeFlag(byte v) {
-        regP.setNegative(BinaryUtil.getBit(v, 7));
+        setNegativeFlag(BinaryUtil.getBit(v, 7));
     }
 
     static public int getAddress(byte lower, byte upper) {
@@ -287,5 +287,109 @@ public class CPU implements Runnable {
 
     int getPC() {
         return regPC.get();
+    }
+
+    void setNegativeFlag(boolean flag) {
+        regP.setNegative(flag);
+    }
+
+    void setOverflowFlag(boolean flag) {
+        regP.setOverflow(flag);
+    }
+
+    void setBreakCommandFlag(boolean flag) {
+        regP.setBreakCommand(flag);
+    }
+
+    void setDecimalFlag(boolean flag) {
+        regP.setDecimal(flag);
+    }
+
+    void setInterruptDisableFlag(boolean flag) {
+        regP.setInterruptDisable(flag);
+    }
+
+    void setZeroFlag(boolean flag) {
+        regP.setZero(flag);
+    }
+
+    void setCarryFlag(boolean flag) {
+        regP.setCarry(flag);
+    }
+
+    boolean getNegativeFlag() {
+        return regP.isNegative();
+    }
+
+    boolean getOverflowFlag() {
+        return regP.isOverflow();
+    }
+
+    boolean getBreakCommandFlag() {
+        return regP.isBreakCommand();
+    }
+
+    boolean getDecimalFlag() {
+        return regP.isDecimal();
+    }
+
+    boolean getInterruptDisableFlag() {
+        return regP.isInturruptDisable();
+    }
+
+    boolean getZeroFlag() {
+        return regP.isZero();
+    }
+
+    boolean getCarryFlag() {
+        return regP.isCarry();
+    }
+
+    byte getX() {
+        return regX.get();
+    }
+
+    void setX(byte value) {
+        regX.set(value);
+    }
+
+    void incrementX() {
+        regX.increment();
+    }
+
+    void decrementX() {
+        regX.decrement();
+    }
+
+    byte getY() {
+        return regY.get();
+    }
+
+    void setY(byte value) {
+        regY.set(value);
+    }
+
+    void incrementY() {
+        regY.increment();
+    }
+
+    void decrementY() {
+        regY.decrement();
+    }
+
+    byte getA() {
+        return regA.get();
+    }
+
+    void setA(byte value) {
+        regA.set(value);
+    }
+
+    byte getS() {
+        return regS.get();
+    }
+
+    void setS(byte value) {
+        regS.set(value);
     }
 }

@@ -1,6 +1,5 @@
 package nes.cpu;
 
-import common.ByteRegister;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -61,33 +60,19 @@ class AddressingModeTest {
 
         @Test
         void testZeroPageX() {
-            mockByteRegister("regX", (byte)0xff);
+            when(cpuMock.getX()).thenReturn((byte)0xff);
             assertEquals(0x007f, (int)AddressingMode.ZERO_PAGE_X.getAddress((byte)0x80, null, cpuMock));
         }
 
         @Test
         void testZeroPageY() {
-            mockByteRegister("regY", (byte)0xff);
+            when(cpuMock.getY()).thenReturn((byte)0xff);
             assertEquals(0x007f, (int)AddressingMode.ZERO_PAGE_Y.getAddress((byte)0x80, null, cpuMock));
-        }
-
-        private void mockByteRegister(String name, byte value) {
-            try {
-                Field f = CPU.class.getDeclaredField(name);
-                f.setAccessible(true);
-                f.set(cpuMock, new ByteRegister(value));
-            } catch (Exception e) {}
         }
 
         @Test
         void testRelative() {
-            ProgramCounter mockPC = mock(ProgramCounter.class);
-            when(mockPC.get()).thenReturn(0x1111);
-            try {
-                Field f = CPU.class.getDeclaredField("regPC");
-                f.setAccessible(true);
-                f.set(cpuMock, mockPC);
-            } catch (Exception e) {}
+            when(cpuMock.getPC()).thenReturn(0x1111);
             assertEquals(0x1091, (int)AddressingMode.RELATIVE.getAddress((byte)0x80 /* -128 */, null, cpuMock));
         }
 
@@ -99,13 +84,13 @@ class AddressingModeTest {
 
         @Test
         void testAbsoluteX() {
-            mockByteRegister("regX", (byte)0x02);
+            when(cpuMock.getX()).thenReturn((byte)0x02);
             assertEquals(0x2101, (int)AddressingMode.ABSOLUTE_X.getAddress((byte)0xff, (byte)0x20, cpuMock));
         }
 
         @Test
         void testAbsoluteY() {
-            mockByteRegister("regY", (byte)0x06);
+            when(cpuMock.getY()).thenReturn((byte)0x06);
             assertEquals(0x5205, (int)AddressingMode.ABSOLUTE_Y.getAddress((byte)0xff, (byte)0x51, cpuMock));
         }
 
@@ -134,7 +119,7 @@ class AddressingModeTest {
                 f.setAccessible(true);
                 f.set(cpuMock, mockMemoryMapper);
             } catch (Exception e) {}
-            mockByteRegister("regY", (byte)0x02);
+            when(cpuMock.getY()).thenReturn((byte)0x02);
             assertEquals(0x1101, (int)AddressingMode.INDIRECT_INDEXED_Y.getAddress((byte)0xff, null, cpuMock));
 
         }
