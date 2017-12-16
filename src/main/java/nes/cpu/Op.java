@@ -3,10 +3,12 @@ package nes.cpu;
 import common.BinaryUtil;
 import common.MemoryByte;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 // @see http://obelisk.me.uk/6502/reference.html
 // @see http://pgate1.at-ninja.jp/NES_on_FPGA/nes_cpu.htm
 @RequiredArgsConstructor
+@Slf4j
 enum Op {
     ADC(true) {
         @Override
@@ -131,7 +133,7 @@ enum Op {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             if (!cpu.regP.isCarry()) {
-                cpu.regPC.set(address);
+                cpu.jump(address);
             }
         }
     }, // Branch if Carry Clear
@@ -139,7 +141,7 @@ enum Op {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             if (cpu.regP.isCarry()) {
-                cpu.regPC.set(address);
+                cpu.jump(address);
             }
         }
     }, // Branch if Carry Set
@@ -147,7 +149,7 @@ enum Op {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             if (cpu.regP.isZero()) {
-                cpu.regPC.set(address);
+                cpu.jump(address);
             }
         }
     }, // Branch if Equal
@@ -155,7 +157,7 @@ enum Op {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             if (cpu.regP.isNegative()) {
-                cpu.regPC.set(address);
+                cpu.jump(address);
             }
         }
     }, // Branch if Minus
@@ -163,7 +165,7 @@ enum Op {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             if (!cpu.regP.isZero()) {
-                cpu.regPC.set(address);
+                cpu.jump(address);
             }
         }
     }, // Branch if Not Equal
@@ -171,7 +173,7 @@ enum Op {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             if (!cpu.regP.isNegative()) {
-                cpu.regPC.set(address);
+                cpu.jump(address);
             }
 
         }
@@ -195,20 +197,22 @@ enum Op {
 //                if (address == regPC.get() - 3) {
 //                    throw new RuntimeException("Explicit infinite loop"); // FIXME
 //                }
-            cpu.regPC.set(address);
+            cpu.jump(address);
         }
     }, // Jump
     JSR(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            cpu.push16(cpu.regPC.get() - 1);
-            cpu.regPC.set(address);
+            cpu.push16(cpu.getPC() - 1);
+            cpu.jump(address);
         }
     }, // Jump to Subroutine
     RTS(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            cpu.regPC.set(cpu.pull16() + 1);
+            int returnTo = cpu.pull16() + 1;
+            log.debug("return to: {}", BinaryUtil.toHexString(returnTo));
+            cpu.jump(returnTo);
         }
     }, // Return from Subroutine
 
@@ -222,7 +226,7 @@ enum Op {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             cpu.pullP();
-            cpu.regPC.set(cpu.pull16());
+            cpu.jump(cpu.pull16());
         }
     }, // Return from Interrupt
 
@@ -347,26 +351,32 @@ enum Op {
     STA(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            store(cpu.regA.get(), address, cpu);
+            final byte a = cpu.regA.get();
+            log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(a));
+            store(a, address, cpu);
         }
     }, // Store Accumulator
     STX(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            store(cpu.regX.get(), address, cpu);
+            final byte x = cpu.regX.get();
+            log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(x));
+            store(x, address, cpu);
         }
     }, // Store X Register
     STY(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            store(cpu.regY.get(), address, cpu);
+            final byte y = cpu.regY.get();
+            log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(y));
+            store(y, address, cpu);
         }
     }, // Store Y Register
 
     TAX(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            byte a = cpu.regA.get();
+            final byte a = cpu.regA.get();
             cpu.regX.set(a);
             cpu.setZeroFlag(a);
             cpu.setNegativeFlag(a);
@@ -375,7 +385,7 @@ enum Op {
     TAY(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            byte a = cpu.regA.get();
+            final byte a = cpu.regA.get();
             cpu.regY.set(a);
             cpu.setZeroFlag(a);
             cpu.setNegativeFlag(a);
@@ -384,7 +394,7 @@ enum Op {
     TSX(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            byte s = cpu.regS.get();
+            final byte s = cpu.regS.get();
             cpu.regX.set(s);
             cpu.setZeroFlag(s);
             cpu.setNegativeFlag(s);
@@ -393,7 +403,7 @@ enum Op {
     TXA(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            byte x = cpu.regX.get();
+            final byte x = cpu.regX.get();
             cpu.regA.set(x);
             cpu.setZeroFlag(x);
             cpu.setNegativeFlag(x);
@@ -402,10 +412,10 @@ enum Op {
     TYA(false) {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
-            byte x = cpu.regY.get();
-            cpu.regA.set(x);
-            cpu.setZeroFlag(x);
-            cpu.setNegativeFlag(x);
+            final byte y = cpu.regY.get();
+            cpu.regA.set(y);
+            cpu.setZeroFlag(y);
+            cpu.setNegativeFlag(y);
         }
     }, // Transfer Y to Accumulator
     TXS(false) {

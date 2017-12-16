@@ -1,5 +1,6 @@
 package nes.cpu;
 
+import common.BinaryUtil;
 import common.RegisterImpl;
 import lombok.extern.slf4j.Slf4j;
 
@@ -11,7 +12,7 @@ public class ProgramCounter extends RegisterImpl {
 
     @Override
     public void set(int value) {
-        log.debug("jump to: {}", Integer.toHexString(value));
+        log.debug("jump to: {}", BinaryUtil.toHexString(value));
         super.set(value);
     }
 }

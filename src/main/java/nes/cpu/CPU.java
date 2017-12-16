@@ -25,7 +25,7 @@ public class CPU implements Runnable {
     final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
     final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
     final FlagRegister regP = new FlagRegister((byte)0x34);
-    final RegisterImpl regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
+    private final RegisterImpl regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
 
     final MemoryByte regSQ1_VOL = new ByteRegister((byte)0); // $4000
     final MemoryByte regSQ1_SWEEP = new ByteRegister((byte)0); // $4001
@@ -58,6 +58,7 @@ public class CPU implements Runnable {
     final MemoryMapper memoryMapper;
 
     private boolean flagNMI;
+    // TODO handle IRQ
 
     public CPU(PPU ppu, ByteArrayMemory programRom, Controller controller1) {
         operationFactory = new OperationFactory();
@@ -77,7 +78,7 @@ public class CPU implements Runnable {
 
     public void reset() {
         cycles = 0L;
-        regPC.set(getAddress(memoryMapper.get(RESET_VECTOR_ADDRESS), memoryMapper.get(RESET_VECTOR_ADDRESS + 1)));
+        jump(getAddress(memoryMapper.get(RESET_VECTOR_ADDRESS), memoryMapper.get(RESET_VECTOR_ADDRESS + 1)));
     };
 
     public void runStep() {
@@ -90,15 +91,15 @@ public class CPU implements Runnable {
         if (op == null) {
             log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
         }
-        log.debug("PC={} op={}({}:{}) [X=${} Y=${} A=${} S=${} P={}] cycle={}",
-                Integer.toHexString(regPC.get() - 1),
-                Integer.toHexString(Byte.toUnsignedInt(code)),
+        log.debug("PC={} op={}({}:{}) [X={} Y={} A={} S={} P={}] cycle={}",
+                BinaryUtil.toHexString(regPC.get() - 1),
+                BinaryUtil.toHexString(code),
                 op.getOp().toString(),
                 op.getAddressingMode().toString(),
-                Integer.toHexString(Byte.toUnsignedInt(regX.get())),
-                Integer.toHexString(Byte.toUnsignedInt(regY.get())),
-                Integer.toHexString(Byte.toUnsignedInt(regA.get())),
-                Integer.toHexString(Byte.toUnsignedInt(regS.get())),
+                BinaryUtil.toHexString(regX.get()),
+                BinaryUtil.toHexString(regY.get()),
+                BinaryUtil.toHexString(regA.get()),
+                BinaryUtil.toHexString(regS.get()),
                 BinaryUtil.toBinaryString(regP.get(), 8),
                 cycles);
 
@@ -143,7 +144,7 @@ public class CPU implements Runnable {
         regP.setBreakCommand(false);
         pushP();
         regP.setInterruptDisable(true);
-        regPC.set(getAddress(memoryMapper.get(NMI_VECTOR_ADDRESS), memoryMapper.get(NMI_VECTOR_ADDRESS + 1)));
+        jump(getAddress(memoryMapper.get(NMI_VECTOR_ADDRESS), memoryMapper.get(NMI_VECTOR_ADDRESS + 1)));
     }
 
     void handleBRK() {
@@ -152,7 +153,7 @@ public class CPU implements Runnable {
         regP.setBreakCommand(true);
         pushP();
         regP.setInterruptDisable(true);
-        regPC.set(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
+        jump(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
     }
 
     private void pushPC() {
@@ -241,18 +242,18 @@ public class CPU implements Runnable {
             StringBuilder sb = new StringBuilder();
             sb.append("  (");
             if (operand1 != null) {
-                sb.append("$" + Integer.toHexString(Byte.toUnsignedInt(operand1)));
+                sb.append(BinaryUtil.toHexString(operand1));
             }
             if (operand2 != null) {
-                sb.append(", $");
-                sb.append(Integer.toHexString(Byte.toUnsignedInt(operand2)));
+                sb.append(", ");
+                sb.append(BinaryUtil.toHexString(operand2));
             }
             sb.append(")");
             if (address != null) {
-                sb.append(String.format(" addr=$%04x", address));
+                sb.append(String.format(" addr=%s", BinaryUtil.toHexString(address)));
             }
             if (value != null) {
-                sb.append(String.format(" value=$%02x", Byte.toUnsignedInt(value)));
+                sb.append(String.format(" value=%s", BinaryUtil.toHexString(value)));
             }
             log.debug(sb.toString());
         }
@@ -279,4 +280,12 @@ public class CPU implements Runnable {
         return BinaryUtil.getAddress(lower, upper);
     }
 
+    void jump(int address) {
+        log.debug("jump to {}", BinaryUtil.toHexString(address));
+        regPC.set(address);
+    }
+
+    int getPC() {
+        return regPC.get();
+    }
 }

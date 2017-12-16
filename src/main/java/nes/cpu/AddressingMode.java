@@ -5,6 +5,8 @@ package nes.cpu;
 import com.google.common.base.Preconditions;
 import common.BinaryUtil;
 
+// TODO consider additional cycle when going into different page
+
 enum AddressingMode {
     IMPLICIT(0),
     ACCUMULATOR(0),
@@ -42,7 +44,7 @@ enum AddressingMode {
         @Override
         Integer getAddress(Byte operand1, Byte operand2, CPU cpu) {
             validateOperands(operand1, operand2);
-            return cpu.regPC.get() + operand1;
+            return cpu.getPC() + operand1;
         }
     },    // 8 bit offset (=> -126 to +129)
     ABSOLUTE(2) {

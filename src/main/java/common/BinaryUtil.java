@@ -14,6 +14,14 @@ public class BinaryUtil {
         return toBinaryString(Byte.toUnsignedInt(value), width);
     }
 
+    public static String toHexString(byte value) {
+        return String.format("$%02x", Byte.toUnsignedInt(value));
+    }
+
+    public static String toHexString(int value) {
+        return String.format("$%04x", value);
+    }
+
     public static boolean getBit(int value, int bit) {
         checkArgument(bit >= 0 && bit < 32);
         return (value & (1 << bit)) != 0;
