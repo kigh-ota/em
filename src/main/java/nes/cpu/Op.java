@@ -185,8 +185,22 @@ enum Op {
 
         }
     }, // Branch if Positive
-    BVC(false), // Branch if Overflow Clear
-    BVS(false), // Branch if Overflow Set
+    BVC(false) {
+        @Override
+        void execute(Integer address, Byte value, CPU cpu) {
+            if (!cpu.getOverflowFlag()) {
+                cpu.jump(address);
+            }
+        }
+    }, // Branch if Overflow Clear
+    BVS(false) {
+        @Override
+        void execute(Integer address, Byte value, CPU cpu) {
+            if (cpu.getOverflowFlag()) {
+                cpu.jump(address);
+            }
+        }
+    }, // Branch if Overflow Set
 
     BIT(true) {
         @Override
