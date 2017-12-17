@@ -43,9 +43,11 @@ public class StatusRegister extends ByteRegister {
         return value;
     }
 
-    public void setVblankBit(boolean flag) {
+    void setVblankBit(boolean flag) {
         setBit(flag, 7);
     }
+
+    void setSprite0Hit(boolean flag) { setBit(flag, 6); }
 
     @Override
     public boolean increment() {

@@ -112,6 +112,7 @@ public class PPU implements Runnable {
                 }
             } else if (scanX == 1 && scanY == 261) {
                 regPPUSTATUS.setVblankBit(false);
+                regPPUSTATUS.setSprite0Hit(false);
             }
 
             cycles++;
@@ -183,6 +184,9 @@ public class PPU implements Runnable {
             int spriteX = oam.getX(n);
             int spriteY = oam.getY(n);
             if (x >= spriteX && x < spriteX + 8 && y >= spriteY && y < spriteY + 8) {
+                if (n == 0) {
+                    regPPUSTATUS.setSprite0Hit(true);
+                }
                 return Optional.of(n);
             }
         }
