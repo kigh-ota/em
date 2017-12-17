@@ -37,6 +37,22 @@ class OpTest {
         }
 
         @Test
+        void testADC2() {
+            // 0 + 0xff + 0 = 0xff
+            // (SMB's $b03c)
+            when(cpu.getA()).thenReturn((byte)0x00);
+            when(cpu.getCarryFlag()).thenReturn(false);
+
+            Op.ADC.execute(null, (byte)0xff, cpu);
+
+            expectA(0xff);
+            expectZeroFlag(false);
+            expectCarryFlag(false);
+            expectNegativeFlag(true);
+            expectOverflowFlag(false);
+        }
+
+        @Test
         void testADC_NegativeCarry() {
             // -1 + (-1) + 1 = -1
             when(cpu.getA()).thenReturn((byte)0b11111111);
@@ -108,7 +124,7 @@ class OpTest {
 
             expectA(0b10000000);
             expectZeroFlag(false);
-            expectCarryFlag(true);
+            expectCarryFlag(false);
             expectNegativeFlag(true);
             expectOverflowFlag(true);
         }

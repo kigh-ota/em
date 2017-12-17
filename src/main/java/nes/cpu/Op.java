@@ -16,8 +16,9 @@ enum Op {
             byte c = cpu.getCarryFlag() ? (byte)1 : (byte)0;
             int signedResult = a + value + c;
             boolean overflow = signedResult < -128 || signedResult > 127;
-            boolean carry = BinaryUtil.getBit(signedResult, 8);
-            byte newA = (byte)signedResult; // take last 8 bits
+            int unsignedResult = Byte.toUnsignedInt(a) + Byte.toUnsignedInt(value) + c;
+            boolean carry = BinaryUtil.getBit(unsignedResult, 8);
+            byte newA = (byte)unsignedResult; // take last 8 bits
             cpu.setOverflowFlag(overflow);
             cpu.setCarryFlag(carry);
             cpu.setA(newA);
@@ -32,8 +33,9 @@ enum Op {
             byte c = cpu.getCarryFlag() ? (byte)0 : (byte)1;
             int signedResult = a - value - c;
             boolean overflow = signedResult < -128 || signedResult > 127;
-            boolean carry = BinaryUtil.getBit(signedResult, 8);
-            byte newA = (byte)signedResult;
+            int unsignedResult = Byte.toUnsignedInt(a) - Byte.toUnsignedInt(value) - c;
+            boolean carry = BinaryUtil.getBit(unsignedResult, 8);
+            byte newA = (byte)unsignedResult;
             cpu.setOverflowFlag(overflow);
             cpu.setCarryFlag(!carry);
             cpu.setA(newA);

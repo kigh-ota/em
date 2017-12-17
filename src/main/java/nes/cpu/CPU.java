@@ -102,6 +102,9 @@ public class CPU implements Runnable {
                 BinaryUtil.toHexString(getS()),
                 BinaryUtil.toBinaryString(regP.get(), 8),
                 cycles);
+        if (regPC.get() != 0x8058) {
+            log.info(String.format("%04x %x", regPC.get() - 1, code));
+        }
 
         cycles += op.getCycles();
 
