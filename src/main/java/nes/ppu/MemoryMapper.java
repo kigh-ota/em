@@ -14,7 +14,7 @@ class MemoryMapper {
     private final PPU ppu;
 
     private static final int NAMETABLE_OFFSET = 0x2000;
-    private static final int PALETTE_RAM_OFFSET = 0x3F00;
+    static final int PALETTE_RAM_OFFSET = 0x3F00;
     private static final int SIZE = 0x4000;
 
     /**

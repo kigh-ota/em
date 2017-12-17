@@ -31,6 +31,7 @@ class AddressRegister extends ByteRegister {
             address += Byte.toUnsignedInt(value);
             next = Latch.UPPER;
             log.debug("addr={} (type={})", BinaryUtil.toHexString(address), MemoryMapper.getType(address));
+            log.info(String.format("PPUaddr=%x", address));
         }
     }
 
