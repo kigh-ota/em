@@ -7,7 +7,6 @@ import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 
 import static nes.ppu.PPU.NAMETABLE_MEMORY_SIZE;
-import static nes.ppu.PPU.PALETTE_RAM_SIZE;
 
 @Slf4j
 class MemoryMapper {
@@ -84,7 +83,7 @@ class MemoryMapper {
         } else if (address < PALETTE_RAM_OFFSET) {
             return Tuples.pair(ppu.nametables, (address - NAMETABLE_OFFSET) % NAMETABLE_MEMORY_SIZE);
         } else if (address < SIZE) {
-            return Tuples.pair(ppu.paletteRam, (address - PALETTE_RAM_OFFSET) % PALETTE_RAM_SIZE);
+            return Tuples.pair(ppu.paletteRam, (address - PALETTE_RAM_OFFSET) % PaletteRam.SIZE);
         }
         throw new IllegalArgumentException();
     }

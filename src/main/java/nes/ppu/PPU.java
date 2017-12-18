@@ -45,7 +45,6 @@ public class PPU implements Runnable {
     private MainScreen mainScreen;
     private InfoScreen infoScreen;
 
-    static final int PALETTE_RAM_SIZE = 0x20;
     public static final int OAM_SIZE = 0x100;
     static final int NAMETABLE_MEMORY_SIZE = 0x800;
 
@@ -73,7 +72,7 @@ public class PPU implements Runnable {
         memoryMapper = new MemoryMapper(this);
         this.characterRom = characterRom;
         nametables = new ByteArrayMemory(new byte[NAMETABLE_MEMORY_SIZE]);
-        paletteRam = new ByteArrayMemory(new byte[PALETTE_RAM_SIZE]);
+        paletteRam = new PaletteRam();
         regPPUCTRL = new ControlRegister();
         regPPUSTATUS = new StatusRegister(this);
         regOAMDATA = new OAMDataRegister(oam, regOAMADDR);
