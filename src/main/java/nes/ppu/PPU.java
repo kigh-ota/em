@@ -218,23 +218,41 @@ public class PPU implements Runnable {
     }
 
     private Optional<Color> getColorAt(int x, int y, int scrollX, int scrollY) {
-        return findTopSpriteNumber(x, y).map(sprite -> {
-            int spritePatternTable = getSpritePatternTable();
-            byte[] pattern = getCharacterPattern(spritePatternTable, oam.getTileIndex(sprite));
-
-            boolean flippedHorizontally = oam.isFlippedHorizontally(sprite);
-            boolean flippedVertically = oam.isFlippedVertically(sprite);
-            int patternX = flippedHorizontally ? 7 - (x - oam.getX(sprite)) : x - oam.getX(sprite);
-            int patternY = flippedVertically ? 7 - (y - oam.getY(sprite)) : y - oam.getY(sprite);
-            int color = getColorInPattern(patternX, patternY, pattern);
-            int colorIndex = getColorIndex(oam.getPalette(sprite), color);
-            return Optional.of(Palette.get(colorIndex));
-        }).orElseGet(() -> getBackgroundColor(x + scrollX, y + scrollY));
+        Integer sprite = findTopSpriteNumber(x, y);
+        Color c = null;
+        if (sprite != null) {
+            c = getSpriteColorAt(x, y, sprite);
+        }
+        if (c == null) {
+            // no sprite exists, or sprite does exist but is transparent
+            c = getBackgroundColorAt(x + scrollX, y + scrollY);
+        }
+        return Optional.ofNullable(c);
     }
 
-    private Optional<Integer> findTopSpriteNumber(int x, int y) {
+    private Color getSpriteColorAt(int x, int y, int sprite) {
+        int spritePatternTable = getSpritePatternTable();
+        byte[] pattern = getCharacterPattern(spritePatternTable, oam.getTileIndex(sprite));
+
+        boolean flippedHorizontally = oam.isFlippedHorizontally(sprite);
+        boolean flippedVertically = oam.isFlippedVertically(sprite);
+        int patternX = flippedHorizontally ? 7 - (x - oam.getX(sprite)) : x - oam.getX(sprite);
+        int patternY = flippedVertically ? 7 - (y - oam.getY(sprite)) : y - oam.getY(sprite);
+        int color = getColorInPattern(patternX, patternY, pattern);
+        if (color == 0) {
+            return null;
+        }
+        if (sprite == 0) {
+            // Sprite 0 hit
+            regPPUSTATUS.setSprite0Hit(true);
+        }
+        int colorIndex = getColorIndex(oam.getPalette(sprite), color);
+        return Palette.get(colorIndex);
+    }
+
+    private Integer findTopSpriteNumber(int x, int y) {
         if (!regPPUMASK.enableSprites()) {
-            return Optional.empty();
+            return null;
         }
         checkArgument(x >= 0 && x < WIDTH);
         checkArgument(y >= 0 && y < HEIGHT);
@@ -243,13 +261,10 @@ public class PPU implements Runnable {
             int spriteX = oam.getX(n);
             int spriteY = oam.getY(n);
             if (x >= spriteX && x < spriteX + 8 && y >= spriteY && y < spriteY + 8) {
-                if (n == 0) {
-                    regPPUSTATUS.setSprite0Hit(true);
-                }
-                return Optional.of(n);
+                return n;
             }
         }
-        return Optional.empty();
+        return null;
     }
 
     private boolean shouldWaitCpu() {
@@ -294,9 +309,9 @@ public class PPU implements Runnable {
         }
     }
 
-    private Optional<Color> getBackgroundColor(int x, int y) {
+    private Color getBackgroundColorAt(int x, int y) {
         if (!regPPUMASK.enableBackground()) {
-            return Optional.empty();
+            return null;
         }
         checkArgument(x >= 0 && x < 2 * WIDTH);
         checkArgument(y >= 0 && y < 2 * HEIGHT);
@@ -308,7 +323,7 @@ public class PPU implements Runnable {
         int palette = getPalette(screen, cell);
         int color = getColorInPattern(x % 8, y % 8, pattern);
         int colorIndex = getColorIndex(palette, color);
-        return Optional.of(Palette.get(colorIndex));
+        return Palette.get(colorIndex);
     }
 
     /**
