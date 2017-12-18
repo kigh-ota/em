@@ -1,11 +1,16 @@
 package nes.screen;
 
+import java.awt.*;
+
 public class InfoScreen extends SwingScreen {
     public static final int WIDTH = 8 * 16 * 2;
     public static final int HEIGHT = 8 * 16 + 8 * 4;
 
-    public void init() {
+    public void init(MainScreen mainScreen) {
         super.init("info", WIDTH, HEIGHT);
+        Point location = mainScreen.mainFrame.getLocation();
+        location.translate(0, mainScreen.mainFrame.getHeight());
+        mainFrame.setLocation(location);
     }
 
     public void refresh(ScreenData data) {

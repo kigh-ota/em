@@ -89,7 +89,7 @@ public class PPU implements Runnable {
     public void reset() {
         checkNotNull(mainScreen);
         mainScreen.init();
-        infoScreen.init();
+        infoScreen.init(mainScreen);
 
         checkNotNull(cpu);
 

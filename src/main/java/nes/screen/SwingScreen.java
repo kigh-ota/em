@@ -10,6 +10,7 @@ public abstract class SwingScreen {
     protected Graphics gMain;
     protected Graphics gBuffer;
     protected Image buffer;
+    protected JFrame mainFrame;
 
     private int width;
     private int height;
@@ -18,7 +19,7 @@ public abstract class SwingScreen {
         this.width = width;
         this.height = height;
 
-        JFrame mainFrame = new JFrame();
+        mainFrame = new JFrame();
         mainFrame.setTitle(title);
         mainFrame.setDefaultCloseOperation(EXIT_ON_CLOSE);
         mainFrame.setResizable(false);
