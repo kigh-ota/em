@@ -348,17 +348,17 @@ public class PPU implements Runnable {
      * @return 0-3
      */
     private int getPalette(int nameTable, int cell) {
-        int base = nameTable * 0x400;
+        int base = nameTable * 0x400 + ATTRIBUTE_TABLE_OFFSET;
         int cellRow = cell / 32; // 0-29
         int cellCol = cell % 32; // 0-31
         int attributeRow = cellRow / 4; // 0-7
         int attributeCol = cellCol / 4; // 0-7
-        boolean isUpper = cellRow % 2 == 0;
-        boolean isLeft = cellCol % 2 == 0;
+        boolean isUpper = cellRow % 4 < 2;
+        boolean isLeft = cellCol % 4 < 2;
 
         byte attribute = nametables.get(base + attributeRow * 8 + attributeCol);
         int shift = (isUpper ? 0 : 4) + (isLeft ? 0 : 2);
-        return (Byte.toUnsignedInt(attribute) >> shift) & 4;
+        return (Byte.toUnsignedInt(attribute) >> shift) & 3;
     }
 
     private int getBackgroundPatternTable() {
