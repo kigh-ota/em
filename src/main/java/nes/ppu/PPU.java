@@ -7,8 +7,10 @@ import common.MemoryByte;
 import lombok.Getter;
 import lombok.Setter;
 import nes.cpu.CPU;
+import nes.screen.InfoScreen;
 import nes.screen.MainScreen;
 import nes.screen.MainScreenData;
+import nes.screen.ScreenData;
 
 import java.awt.*;
 import java.util.Optional;
@@ -41,6 +43,7 @@ public class PPU implements Runnable {
     private CPU cpu;
 
     private MainScreen mainScreen;
+    private InfoScreen infoScreen;
 
     static final int PALETTE_RAM_SIZE = 0x20;
     public static final int OAM_SIZE = 0x100;
@@ -66,7 +69,7 @@ public class PPU implements Runnable {
     @Getter
     private final Mirroring mirroring;
 
-    public PPU(ByteArrayMemory characterRom, Mirroring mirroring, MainScreen mainScreen) {
+    public PPU(ByteArrayMemory characterRom, Mirroring mirroring, MainScreen mainScreen, InfoScreen infoScreen) {
         memoryMapper = new MemoryMapper(this);
         this.characterRom = characterRom;
         nametables = new ByteArrayMemory(new byte[NAMETABLE_MEMORY_SIZE]);
@@ -81,11 +84,13 @@ public class PPU implements Runnable {
         this.mirroring = mirroring;
 
         this.mainScreen = mainScreen;
+        this.infoScreen = infoScreen;
     }
 
     public void reset() {
         checkNotNull(mainScreen);
         mainScreen.init();
+        infoScreen.init();
 
         checkNotNull(cpu);
 
@@ -100,6 +105,7 @@ public class PPU implements Runnable {
 
         if (scanY == 0) {
             drawFrame();
+            drawInfoScreen();
 
             cycles += (frames % 2 == 0) ? HEIGHT * 341 : HEIGHT * 341 - 1;
             scanY += HEIGHT;
@@ -138,22 +144,64 @@ public class PPU implements Runnable {
         }
     }
 
+    MainScreenData mainScreenData = new MainScreenData();
+
     private void drawFrame() {
-        MainScreenData data = new MainScreenData();
+        mainScreenData.clear();
         if (isCharacterRomAvailable()) {
             final int scrollX = regPPUSCROLL.getX();
             final int scrollY = regPPUSCROLL.getY();
             IntStream.range(0, HEIGHT).forEach(y -> {
-                setLineData(y, scrollX, scrollY, data);
+                setLineData(y, scrollX, scrollY);
             });
         }
-        mainScreen.refresh(data);
+        mainScreen.refresh(mainScreenData);
     }
 
-    private void setLineData(int y, int scrollX, int scrollY, MainScreenData data) {
+    ScreenData infoScreenData = new ScreenData(InfoScreen.WIDTH, InfoScreen.HEIGHT);
+
+    private void drawInfoScreen() {
+        infoScreenData.clear();
+        // nametables
+        if (isCharacterRomAvailable()) {
+            for (int nametable = 0; nametable < 2; nametable++) {
+                for (int tile = 0; tile < 256; tile++) {
+                    final int x0 = 8 * (nametable * 16 + (tile % 16));
+                    final int y0 = 8 * (tile / 16);
+                    byte[] characterPattern = getCharacterPattern(nametable, tile);
+                    for (int x = 0; x < 8; x++) {
+                        for (int y = 0; y < 8; y++) {
+                            int color = getColorInPattern(x, y, characterPattern);
+                            infoScreenData.set(Palette.get(color), x0 + x, y0 + y);
+                        }
+                    }
+                }
+            }
+        }
+        // BG/Sprite palette
+        for (int palette = 0; palette < 8; palette++) {
+            for (int i = 0; i < 4; i++) {
+                Color c = Palette.get(getColorIndex(palette, i));
+                final int x0 = 8 * (4 * palette + i);
+                final int y0 = 8 * 16;
+                for (int x = 0; x < 8; x++) {
+                    for (int y = 0; y < 8; y++) {
+                        infoScreenData.set(c, x0 + x, y0 + y);
+                    }
+                }
+            }
+        }
+        // Sprite palette
+        // OAM
+
+        infoScreen.refresh(infoScreenData);
+
+    }
+
+    private void setLineData(int y, int scrollX, int scrollY) {
         IntStream.range(0, WIDTH).forEach(x -> {
             getColorAt(x, y, scrollX, scrollY).ifPresent(c -> {
-                data.set(c, x, y);
+                mainScreenData.set(c, x, y);
             });
         });
     }
@@ -198,7 +246,13 @@ public class PPU implements Runnable {
         return this.cycles >= cpuCycles * 3;
     }
 
-    public byte[] getCharacterPattern(int table, int i) {
+    /**
+     *
+     * @param table 0-1
+     * @param i 0-255
+     * @return
+     */
+    private byte[] getCharacterPattern(int table, int i) {
         checkArgument(table >= 0 && table < 2);
         checkArgument(i >= 0 && i < 256);
         int from = table * 0x1000 + i * 0x10;
@@ -281,7 +335,7 @@ public class PPU implements Runnable {
      * @param cell 0-959
      * @return 0-3
      */
-    public int getPalette(int nameTable, int cell) {
+    private int getPalette(int nameTable, int cell) {
         int base = nameTable * 0x400;
         int cellRow = cell / 32; // 0-29
         int cellCol = cell % 32; // 0-31
@@ -295,11 +349,11 @@ public class PPU implements Runnable {
         return (Byte.toUnsignedInt(attribute) >> shift) & 4;
     }
 
-    public int getBackgroundPatternTable() {
+    private int getBackgroundPatternTable() {
         return regPPUCTRL.getBackgroundPatternTable();
     }
 
-    public int getSpritePatternTable() {
+    private int getSpritePatternTable() {
         return regPPUCTRL.getSpritePatternTable();
     }
 
@@ -309,7 +363,7 @@ public class PPU implements Runnable {
      * @param cell 0-959
      * @return 0-255
      */
-    public int getCharacter(int nameTable, int cell) {
+    private int getCharacter(int nameTable, int cell) {
         checkArgument(nameTable == 0 || nameTable == 1);
         checkArgument(cell >= 0 && cell < 960);
         return Byte.toUnsignedInt(nametables.get(nameTable * 0x400 + cell));
@@ -320,14 +374,14 @@ public class PPU implements Runnable {
      * @param i 0-3
      * @return 0-63
      */
-    public int getColorIndex(int palette, int i) {
+    private int getColorIndex(int palette, int i) {
         checkArgument(palette >= 0 && palette < 8);
         checkArgument(i >= 0 && i < 4);
         int offset = (i != 0) ? palette * 4 + i : 0;
         return paletteRam.get(offset);
     }
 
-    public boolean isCharacterRomAvailable() {
+    private boolean isCharacterRomAvailable() {
         return characterRom != null;
     }
 
