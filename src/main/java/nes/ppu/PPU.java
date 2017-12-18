@@ -191,8 +191,20 @@ public class PPU implements Runnable {
                 }
             }
         }
-        // Sprite palette
-        // OAM
+        // Sprites
+        final int spritePatternTable = getSpritePatternTable();
+        for (int sprite = 0; sprite < 64; sprite++) {
+            final int x0 = 8 * (sprite % 32);
+            final int y0 = 8 * (16 + 2 + (sprite / 32));
+            byte[] pattern = getCharacterPattern(spritePatternTable, oam.getTileIndex(sprite));
+            for (int x = 0; x < 8; x++) {
+                for (int y = 0; y < 8; y++) {
+                    int color = getColorInPattern(x, y, pattern);
+                    int colorIndex = getColorIndex(oam.getPalette(sprite), color);
+                    infoScreenData.set(Palette.get(colorIndex), x0 + x, y0 + y);
+                }
+            }
+        }
 
         infoScreen.refresh(infoScreenData);
 
