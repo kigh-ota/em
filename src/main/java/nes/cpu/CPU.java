@@ -20,12 +20,12 @@ public class CPU implements Runnable {
     private final OperationFactory operationFactory;
 
     // https://wiki.nesdev.com/w/index.php/CPU_power_up_state
-    final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
-    final MemoryByte regX = new ByteRegister((byte)0);    // X Index
-    final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
-    final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
-    final FlagRegister regP = new FlagRegister((byte)0x34);
-    final RegisterImpl regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
+    private final MemoryByte regA = new ByteRegister((byte)0);    // Accumulator
+    private final MemoryByte regX = new ByteRegister((byte)0);    // X Index
+    private final MemoryByte regY = new ByteRegister((byte)0);    // Y Index
+    private final MemoryByte regS = new ByteRegister((byte)0xFD);    // Stack Pointer
+    private final FlagRegister regP = new FlagRegister((byte)0x34);
+    private final RegisterImpl regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
 
     final MemoryByte regSQ1_VOL = new ByteRegister((byte)0); // $4000
     final MemoryByte regSQ1_SWEEP = new ByteRegister((byte)0); // $4001
@@ -58,6 +58,7 @@ public class CPU implements Runnable {
     final MemoryMapper memoryMapper;
 
     private boolean flagNMI;
+    // TODO handle IRQ
 
     public CPU(PPU ppu, ByteArrayMemory programRom, Controller controller1) {
         operationFactory = new OperationFactory();
@@ -75,50 +76,62 @@ public class CPU implements Runnable {
         return cycles;
     }
 
+    public void reset() {
+        cycles = 0L;
+        jump(getAddress(memoryMapper.get(RESET_VECTOR_ADDRESS), memoryMapper.get(RESET_VECTOR_ADDRESS + 1)));
+    };
+
+    public void runStep() {
+        if (flagNMI) {
+            handleNMI();
+        }
+
+        byte code = getCode();
+        Operation op = operationFactory.get(code);
+        if (op == null) {
+            log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
+        }
+        log.debug("PC={} op={}({}:{}) [X={} Y={} A={} S={} P={}] cycle={}",
+                BinaryUtil.toHexString(regPC.get() - 1),
+                BinaryUtil.toHexString(code),
+                op.getOp().toString(),
+                op.getAddressingMode().toString(),
+                BinaryUtil.toHexString(getX()),
+                BinaryUtil.toHexString(getY()),
+                BinaryUtil.toHexString(getA()),
+                BinaryUtil.toHexString(getS()),
+                BinaryUtil.toBinaryString(regP.get(), 8),
+                cycles);
+        if (regPC.get() != 0x8058) {
+            log.info(String.format("%04x %x %x %x %x %x %x", regPC.get() - 1, code, getA(), getX(), getY(), getS(), regP.get()));
+        }
+
+        cycles += op.getCycles();
+
+        switch (op.getAddressingMode().addressBytes) {
+            case 0:
+                executeInstruction(op, null, null);
+                return;
+            case 1:
+                byte operand = getCode();
+                executeInstruction(op, operand, null);
+                return;
+            case 2:
+                byte operand1 = getCode();
+                byte operand2 = getCode();
+                executeInstruction(op, operand1, operand2);
+                return;
+            default:
+                throw new IllegalStateException();
+        }
+    }
+
     @Override
     public void run() {
-        cycles = 0L;
-        regPC.set(getAddress(memoryMapper.get(0xFFFC), memoryMapper.get(0xFFFD)));
+        reset();
 
         while (true) {
-            if (flagNMI) {
-                handleNMI();
-            }
-
-            byte code = getCode();
-            Operation op = operationFactory.get(code);
-            if (op == null) {
-                log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
-            }
-            log.debug("PC={} op={}({}) [X=${} Y=${} A=${} S=${} P={}] cycle={}",
-                    Integer.toHexString(regPC.get()),
-                    op.getOp().toString(),
-                    op.getAddressingMode().toString(),
-                    Integer.toHexString(Byte.toUnsignedInt(regX.get())),
-                    Integer.toHexString(Byte.toUnsignedInt(regY.get())),
-                    Integer.toHexString(Byte.toUnsignedInt(regA.get())),
-                    Integer.toHexString(Byte.toUnsignedInt(regS.get())),
-                    BinaryUtil.toBinaryString(regP.get(), 8),
-                    cycles);
-
-            cycles += op.getCycles();
-
-            switch (op.getAddressingMode().addressBytes) {
-                case 0:
-                    executeInstruction(op, null, null);
-                    continue;
-                case 1:
-                    byte operand = getCode();
-                    executeInstruction(op, operand, null);
-                    continue;
-                case 2:
-                    byte operand1 = getCode();
-                    byte operand2 = getCode();
-                    executeInstruction(op, operand1, operand2);
-                    continue;
-                default:
-                    throw new IllegalStateException();
-            }
+            runStep();
         }
     }
 
@@ -131,19 +144,19 @@ public class CPU implements Runnable {
         flagNMI = false;
         log.debug("*** NMI ***");
         pushPC();
-        regP.setBreakCommand(false);
+        setBreakCommandFlag(false);
         pushP();
-        regP.setInterruptDisable(true);
-        regPC.set(getAddress(memoryMapper.get(NMI_VECTOR_ADDRESS), memoryMapper.get(NMI_VECTOR_ADDRESS + 1)));
+        setInterruptDisableFlag(true);
+        jump(getAddress(memoryMapper.get(NMI_VECTOR_ADDRESS), memoryMapper.get(NMI_VECTOR_ADDRESS + 1)));
     }
 
     void handleBRK() {
         log.debug("*** BRK ***");
         pushPC();
-        regP.setBreakCommand(true);
+        setBreakCommandFlag(true);
         pushP();
-        regP.setInterruptDisable(true);
-        regPC.set(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
+        setInterruptDisableFlag(true);
+        jump(getAddress(memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS), memoryMapper.get(IRQ_BRK_VECTOR_ADDRESS + 1)));
     }
 
     private void pushPC() {
@@ -232,18 +245,18 @@ public class CPU implements Runnable {
             StringBuilder sb = new StringBuilder();
             sb.append("  (");
             if (operand1 != null) {
-                sb.append("$" + Integer.toHexString(Byte.toUnsignedInt(operand1)));
+                sb.append(BinaryUtil.toHexString(operand1));
             }
             if (operand2 != null) {
-                sb.append(", $");
-                sb.append(Integer.toHexString(Byte.toUnsignedInt(operand2)));
+                sb.append(", ");
+                sb.append(BinaryUtil.toHexString(operand2));
             }
             sb.append(")");
             if (address != null) {
-                sb.append(String.format(" addr=$%04x", address));
+                sb.append(String.format(" addr=%s", BinaryUtil.toHexString(address)));
             }
             if (value != null) {
-                sb.append(String.format(" value=$%02x", Byte.toUnsignedInt(value)));
+                sb.append(String.format(" value=%s", BinaryUtil.toHexString(value)));
             }
             log.debug(sb.toString());
         }
@@ -251,23 +264,135 @@ public class CPU implements Runnable {
     }
 
     void setZeroFlag(MemoryByte reg) {
-        regP.setZero(reg.get() == 0);
+        setZeroFlag(reg.get() == 0);
     }
 
     void setZeroFlag(byte v) {
-        regP.setZero(v == 0);
+        setZeroFlag(v == 0);
     }
 
     void setNegativeFlag(MemoryByte reg) {
-        regP.setNegative(reg.getBit(7));
+        setNegativeFlag(reg.getBit(7));
     }
 
     void setNegativeFlag(byte v) {
-        regP.setNegative(BinaryUtil.getBit(v, 7));
+        setNegativeFlag(BinaryUtil.getBit(v, 7));
     }
 
     static public int getAddress(byte lower, byte upper) {
         return BinaryUtil.getAddress(lower, upper);
     }
 
+    void jump(int address) {
+        log.debug("jump to {}", BinaryUtil.toHexString(address));
+        regPC.set(address);
+    }
+
+    int getPC() {
+        return regPC.get();
+    }
+
+    void setNegativeFlag(boolean flag) {
+        regP.setNegative(flag);
+    }
+
+    void setOverflowFlag(boolean flag) {
+        regP.setOverflow(flag);
+    }
+
+    void setBreakCommandFlag(boolean flag) {
+        regP.setBreakCommand(flag);
+    }
+
+    void setDecimalFlag(boolean flag) {
+        regP.setDecimal(flag);
+    }
+
+    void setInterruptDisableFlag(boolean flag) {
+        regP.setInterruptDisable(flag);
+    }
+
+    void setZeroFlag(boolean flag) {
+        regP.setZero(flag);
+    }
+
+    void setCarryFlag(boolean flag) {
+        regP.setCarry(flag);
+    }
+
+    boolean getNegativeFlag() {
+        return regP.isNegative();
+    }
+
+    boolean getOverflowFlag() {
+        return regP.isOverflow();
+    }
+
+    boolean getBreakCommandFlag() {
+        return regP.isBreakCommand();
+    }
+
+    boolean getDecimalFlag() {
+        return regP.isDecimal();
+    }
+
+    boolean getInterruptDisableFlag() {
+        return regP.isInturruptDisable();
+    }
+
+    boolean getZeroFlag() {
+        return regP.isZero();
+    }
+
+    boolean getCarryFlag() {
+        return regP.isCarry();
+    }
+
+    byte getX() {
+        return regX.get();
+    }
+
+    void setX(byte value) {
+        regX.set(value);
+    }
+
+    void incrementX() {
+        regX.increment();
+    }
+
+    void decrementX() {
+        regX.decrement();
+    }
+
+    byte getY() {
+        return regY.get();
+    }
+
+    void setY(byte value) {
+        regY.set(value);
+    }
+
+    void incrementY() {
+        regY.increment();
+    }
+
+    void decrementY() {
+        regY.decrement();
+    }
+
+    byte getA() {
+        return regA.get();
+    }
+
+    void setA(byte value) {
+        regA.set(value);
+    }
+
+    byte getS() {
+        return regS.get();
+    }
+
+    void setS(byte value) {
+        regS.set(value);
+    }
 }

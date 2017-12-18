@@ -12,6 +12,10 @@ public class MainScreenData {
 
     public MainScreenData() {
         values = new Color[WIDTH * HEIGHT];
+        clear();
+    }
+
+    public void clear() {
         for (int i = 0; i < WIDTH * HEIGHT; i++) {
             values[i] = Color.BLACK;
         }

@@ -1,20 +1,19 @@
 package nes.ppu;
 
+import common.BinaryUtil;
 import common.ByteArrayMemory;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.collections.api.tuple.Pair;
 import org.eclipse.collections.impl.tuple.Tuples;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static nes.ppu.PPU.NAMETABLE_MEMORY_SIZE;
-import static nes.ppu.PPU.PALETTE_RAM_SIZE;
 
 @Slf4j
 class MemoryMapper {
     private final PPU ppu;
 
     private static final int NAMETABLE_OFFSET = 0x2000;
-    private static final int PALETTE_RAM_OFFSET = 0x3F00;
+    static final int PALETTE_RAM_OFFSET = 0x3F00;
     private static final int SIZE = 0x4000;
 
     /**
@@ -34,8 +33,29 @@ class MemoryMapper {
         this.ppu = ppu;
     }
 
+    public static String getType(int address) {
+        if (address < 0) {
+            return "N/A";
+        } else if (address < 0x1000) {
+            return "Pattern Table 0";
+        } else if (address < 0x2000) {
+            return "Pattern Table 1";
+        } else if (address < 0x3F00) {
+            int i = ((address - 0x2000) / 0x400) % 2;
+            if ((address - 0x2000) % 0x400 < 0x3C0) {
+                return String.format("Nametable %d", i);
+            } else {
+                return String.format("Attribute table %d", i);
+            }
+        } else if (address < 0x4000) {
+            return "Palette RAM";
+        } else {
+            return "N/A";
+        }
+    }
+
     byte get(int address) {
-        log.debug("Get: PPU ${}", Integer.toHexString(address));
+        log.debug("Get: PPU {} (type={})", BinaryUtil.toHexString(address), getType(address));
         Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
         ByteArrayMemory memory = memoryOffsetPair.getOne();
         int offset = memoryOffsetPair.getTwo();
@@ -43,7 +63,7 @@ class MemoryMapper {
     }
 
     void set(byte value, int address) {
-        log.debug("Set PPU ${}={}", Integer.toHexString(address), Integer.toHexString(Byte.toUnsignedInt(value)));
+        log.debug("Set PPU {}={} (type={})", BinaryUtil.toHexString(address), BinaryUtil.toHexString(value), getType(address));
         Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
         ByteArrayMemory memory = memoryOffsetPair.getOne();
         int offset = memoryOffsetPair.getTwo();
@@ -63,7 +83,7 @@ class MemoryMapper {
         } else if (address < PALETTE_RAM_OFFSET) {
             return Tuples.pair(ppu.nametables, (address - NAMETABLE_OFFSET) % NAMETABLE_MEMORY_SIZE);
         } else if (address < SIZE) {
-            return Tuples.pair(ppu.paletteRam, (address - PALETTE_RAM_OFFSET) % PALETTE_RAM_SIZE);
+            return Tuples.pair(ppu.paletteRam, (address - PALETTE_RAM_OFFSET) % PaletteRam.SIZE);
         }
         throw new IllegalArgumentException();
     }

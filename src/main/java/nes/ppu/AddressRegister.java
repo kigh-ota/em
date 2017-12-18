@@ -1,8 +1,11 @@
 package nes.ppu;
 
+import common.BinaryUtil;
 import common.ByteRegister;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 class AddressRegister extends ByteRegister {
     private enum Latch {UPPER, LOWER} // TODO clear latch by reading StatusRegister
     private Latch next;
@@ -27,6 +30,8 @@ class AddressRegister extends ByteRegister {
         } else {
             address += Byte.toUnsignedInt(value);
             next = Latch.UPPER;
+            log.debug("addr={} (type={})", BinaryUtil.toHexString(address), MemoryMapper.getType(address));
+            log.info(String.format("PPUaddr=%x", address));
         }
     }
 

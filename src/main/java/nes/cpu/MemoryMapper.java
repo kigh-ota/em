@@ -24,7 +24,7 @@ class MemoryMapper {
      * $1800-$1FFF (mirror)
      * $2000-$2007 PPU registers
      * $2008-$3FFF (mirrors)
-     * $4000-$4017 APU & I/O registers
+     * $4000-$4017 apu & I/O registers
      * $4018-$401F ?
      * $4020-$FFFF Cartridge space: PRG ROM, PRG RAM, mapper registers
      *   commonly:
