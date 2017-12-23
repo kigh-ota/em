@@ -29,4 +29,5 @@ public class MainScreen extends SwingScreen {
         }
         gMain.drawImage(buffer, 0, 0, canvas);
     }
+
 }

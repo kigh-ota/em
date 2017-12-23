@@ -99,17 +99,30 @@ public class PPU implements Runnable {
 
     public void runStep() {
 
-        // TODO NEXT draw dot by dot
-//            cycles++;
+        if (scanY <= 239) {
+            // Scanline 0-239
+            if (scanY == 0 && scanX == 0) {
+                drawInfoScreen();
+                mainScreenData.clear();
+            }
 
-        if (scanY == 0) {
-            drawFrame();
-            drawInfoScreen();
+            if (scanX == 0) {
+                // draw line by line
+                scanX = 340;
 
-            cycles += (frames % 2 == 0) ? HEIGHT * 341 : HEIGHT * 341 - 1;
-            scanY += HEIGHT;
-            frames++;
+                if (isCharacterRomAvailable()) {
+                    final int scrollX = regPPUSCROLL.getX();
+                    final int scrollY = regPPUSCROLL.getY();
+                    setLineData(scanY, scrollX, scrollY);
+                }
+
+                if (scanY == 239) {
+                    mainScreen.refresh(mainScreenData);
+                }
+            }
+
         } else {
+            // Scanline 240-261
             if (scanX == 1 && scanY == 241) {
                 regPPUSTATUS.setVblankBit(true);
                 if (regPPUCTRL.getBit(7)) {
@@ -119,15 +132,20 @@ public class PPU implements Runnable {
                 regPPUSTATUS.setVblankBit(false);
                 regPPUSTATUS.setSprite0Hit(false);
             }
+        }
+        cycles++;
+        scanX++;
 
-            cycles++;
-            scanX++;
-            if (scanX == 341) {
-                scanY++;
-                scanX = 0;
-                if (scanY == 262) {
-                    scanY = 0;
-                }
+        if (frames % 2 == 1 && scanX == 340 && scanY == 261) {
+            scanX++; // skip the last cycle for odd frames
+        }
+
+        if (scanX == 341) {
+            scanY++;
+            scanX = 0;
+            if (scanY == 262) {
+                scanY = 0;
+                frames++;
             }
         }
     }
@@ -146,7 +164,6 @@ public class PPU implements Runnable {
     MainScreenData mainScreenData = new MainScreenData();
 
     private void drawFrame() {
-        mainScreenData.clear();
         if (isCharacterRomAvailable()) {
             final int scrollX = regPPUSCROLL.getX();
             final int scrollY = regPPUSCROLL.getY();
@@ -154,7 +171,7 @@ public class PPU implements Runnable {
                 setLineData(y, scrollX, scrollY);
             });
         }
-        mainScreen.refresh(mainScreenData);
+//        mainScreen.refresh(mainScreenData);
     }
 
     ScreenData infoScreenData = new ScreenData(InfoScreen.WIDTH, InfoScreen.HEIGHT);
