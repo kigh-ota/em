@@ -97,12 +97,16 @@ public class PPU implements Runnable {
         frames = 0L;
     }
 
+    private int scrollX;
+    private int scrollY;
+
     public void runStep() {
 
         if (scanY <= 239) {
             // Scanline 0-239
             if (scanY == 0 && scanX == 0) {
-                drawInfoScreen();
+//                drawInfoScreen();
+
                 mainScreenData.clear();
             }
 
@@ -110,14 +114,17 @@ public class PPU implements Runnable {
                 // draw line by line
                 scanX = 340;
 
+                scrollX = regPPUSCROLL.getX();
+                scrollY = regPPUSCROLL.getY();
+
                 if (isCharacterRomAvailable()) {
-                    final int scrollX = regPPUSCROLL.getX();
-                    final int scrollY = regPPUSCROLL.getY();
-                    setLineData(scanY, scrollX, scrollY);
+                    setLineData(scanY);
                 }
 
                 if (scanY == 239) {
                     mainScreen.refresh(mainScreenData);
+
+                    regPPUSCROLL.resetLatch();
                 }
             }
 
@@ -154,9 +161,9 @@ public class PPU implements Runnable {
     public void run() {
         reset();
         while (true) {
-            if (shouldWaitCpu()) {
-                return;
-            }
+//            if (shouldWaitCpu()) {
+//                return;
+//            }
             runStep();
         }
     }
@@ -168,7 +175,7 @@ public class PPU implements Runnable {
             final int scrollX = regPPUSCROLL.getX();
             final int scrollY = regPPUSCROLL.getY();
             IntStream.range(0, HEIGHT).forEach(y -> {
-                setLineData(y, scrollX, scrollY);
+                setLineData(y);
             });
         }
 //        mainScreen.refresh(mainScreenData);
@@ -226,15 +233,55 @@ public class PPU implements Runnable {
 
     }
 
-    private void setLineData(int y, int scrollX, int scrollY) {
-        IntStream.range(0, WIDTH).forEach(x -> {
-            getColorAt(x, y, scrollX, scrollY).ifPresent(c -> {
-                mainScreenData.set(c, x, y);
-            });
-        });
+//    private void setLineData(int y) {
+//        IntStream.range(0, WIDTH).forEach(x -> {
+//            getColorAt(x, y).ifPresent(c -> {
+//                mainScreenData.set(c, x, y);
+//            });
+//        });
+//    }
+
+    private void setLineData(int y) {
+        int character;
+        int palette = 0;
+        int bgPatternTable;
+        byte[] pattern = new byte[0];
+
+        for (int x = 0; x < WIDTH; x++) {
+            Color c = null;
+
+            // get background color
+            if (regPPUMASK.enableBackground()) {
+                // update background character & palette if necessary
+                int xx = x + scrollX;
+                int yy = y + scrollY;
+                if (x == 0 || xx % 8 == 0) {
+                    int screen = getScreen(xx, yy);
+                    int cell = getCell(xx % WIDTH, yy % HEIGHT);
+                    character = getCharacter(screen, cell);
+                    palette = getPalette(screen, cell);
+                    bgPatternTable = getBackgroundPatternTable();
+                    pattern = getCharacterPattern(bgPatternTable, character);
+                }
+                int color = getColorInPattern(xx % 8, yy % 8, pattern);
+                int colorIndex = getColorIndex(palette, color);
+                c = Palette.get(colorIndex);
+            }
+
+            // get sprite color
+            Integer sprite = findTopSpriteNumber(x, y);
+            if (sprite != null) {
+                Color spriteColor = getSpriteColorAt(x, y, sprite);
+                if (spriteColor != null) {
+                    c = spriteColor;
+                }
+            }
+            
+            mainScreenData.set(c, x, y);
+        }
     }
 
-    private Optional<Color> getColorAt(int x, int y, int scrollX, int scrollY) {
+    private Optional<Color> getColorAt(int x, int y) {
         Integer sprite = findTopSpriteNumber(x, y);
         Color c = null;
         if (sprite != null) {
