@@ -1,7 +1,7 @@
 package nes.cpu;
 
 import common.ByteArrayMemory;
-import common.MemoryByte;
+import common.ByteRegister;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import nes.ppu.PPU;
@@ -58,7 +58,7 @@ class MemoryMapper {
     byte get(int address) {
         switch (getType(address)) {
             case REGISTER:
-                MemoryByte register = getReadableRegister(address);
+                ByteRegister register = getReadableRegister(address);
                 return register.get();
             case MEMORY:
                 Pair<ByteArrayMemory, Integer> pair = getReadableMemory(address);
@@ -70,7 +70,7 @@ class MemoryMapper {
     void set(byte value, int address) {
         switch (getType(address)) {
             case REGISTER:
-                MemoryByte register = getWritableRegister(address);
+                ByteRegister register = getWritableRegister(address);
                 register.set(value);
                 return;
             case MEMORY:
@@ -84,7 +84,7 @@ class MemoryMapper {
     byte increment(int address) {
         switch (getType(address)) {
             case REGISTER:
-                MemoryByte register = getWritableRegister(address);
+                ByteRegister register = getWritableRegister(address);
                 register.increment();
                 return register.get();
             case MEMORY:
@@ -97,7 +97,7 @@ class MemoryMapper {
     byte decrement(int address) {
         switch (getType(address)) {
             case REGISTER:
-                MemoryByte register = getWritableRegister(address);
+                ByteRegister register = getWritableRegister(address);
                 register.decrement();
                 return register.get();
             case MEMORY:
@@ -139,23 +139,23 @@ class MemoryMapper {
         throw new IllegalArgumentException();
     }
 
-    private MemoryByte getWritableRegister(int address) {
-        Pair<MemoryByte, Permission> pair = getRegister(address);
+    private ByteRegister getWritableRegister(int address) {
+        Pair<ByteRegister, Permission> pair = getRegister(address);
         if (pair.getTwo() == RO) {
             throw new IllegalArgumentException("not writable register");
         }
         return pair.getOne();
     }
 
-    private MemoryByte getReadableRegister(int address) {
-        Pair<MemoryByte, Permission> pair = getRegister(address);
+    private ByteRegister getReadableRegister(int address) {
+        Pair<ByteRegister, Permission> pair = getRegister(address);
         if (pair.getTwo() == WO) {
             throw new IllegalArgumentException("not readable register");
         }
         return pair.getOne();
     }
 
-    private Pair<MemoryByte, Permission> getRegister(int address) {
+    private Pair<ByteRegister, Permission> getRegister(int address) {
         if (address >= 0x2000 && address < 0x4000) {
             // PPU registers
             switch (address % 8) {

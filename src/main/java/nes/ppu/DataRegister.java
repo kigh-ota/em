@@ -1,13 +1,13 @@
 package nes.ppu;
 
 import common.BinaryUtil;
-import common.ByteRegister;
+import common.ByteRegisterImpl;
 import lombok.extern.slf4j.Slf4j;
 
 import static nes.ppu.MemoryMapper.PALETTE_RAM_OFFSET;
 
 @Slf4j
-class DataRegister extends ByteRegister {
+class DataRegister extends ByteRegisterImpl {
     private final PPU ppu;
 
     private byte readBuffer;

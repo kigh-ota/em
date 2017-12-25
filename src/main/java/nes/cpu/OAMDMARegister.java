@@ -1,9 +1,9 @@
 package nes.cpu;
 
-import common.ByteRegister;
+import common.ByteRegisterImpl;
 import nes.ppu.PPU;
 
-public class OAMDMARegister extends ByteRegister {
+public class OAMDMARegister extends ByteRegisterImpl {
 
     private final CPU cpu;
     private final PPU ppu;

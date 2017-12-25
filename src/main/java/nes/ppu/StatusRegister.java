@@ -1,6 +1,6 @@
 package nes.ppu;
 
-import common.ByteRegister;
+import common.ByteRegisterImpl;
 
 /**
  * https://wiki.nesdev.com/w/index.php/PPU_registers#Status_.28.242002.29_.3C_read
@@ -26,7 +26,7 @@ import common.ByteRegister;
  * line); cleared after reading $2002 and at dot 1 of the
  * pre-render line.
  */
-public class StatusRegister extends ByteRegister {
+public class StatusRegister extends ByteRegisterImpl {
     final private PPU ppu;
 
     StatusRegister(PPU ppu) {
