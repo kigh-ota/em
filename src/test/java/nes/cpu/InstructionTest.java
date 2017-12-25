@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.mockito.Mockito.*;
 
-class OpTest {
+class InstructionTest {
     @Nested
     class ExecuteTest {
 
@@ -27,7 +27,7 @@ class OpTest {
             when(cpu.getA()).thenReturn((byte)0x10);
             when(cpu.getCarryFlag()).thenReturn(true);
 
-            Op.ADC.execute(null, (byte)0x10, cpu);
+            Instruction.ADC.execute(null, (byte)0x10, cpu);
 
             expectA(0x21);
             expectZeroFlag(false);
@@ -43,7 +43,7 @@ class OpTest {
             when(cpu.getA()).thenReturn((byte)0x00);
             when(cpu.getCarryFlag()).thenReturn(false);
 
-            Op.ADC.execute(null, (byte)0xff, cpu);
+            Instruction.ADC.execute(null, (byte)0xff, cpu);
 
             expectA(0xff);
             expectZeroFlag(false);
@@ -58,7 +58,7 @@ class OpTest {
             when(cpu.getA()).thenReturn((byte)0b11111111);
             when(cpu.getCarryFlag()).thenReturn(true);
 
-            Op.ADC.execute(null, (byte)0b11111111, cpu);
+            Instruction.ADC.execute(null, (byte)0b11111111, cpu);
 
             expectA(0b11111111);
             expectZeroFlag(false);
@@ -73,7 +73,7 @@ class OpTest {
             when(cpu.getA()).thenReturn((byte)0b01111111);
             when(cpu.getCarryFlag()).thenReturn(false);
 
-            Op.ADC.execute(null, (byte)0b00000001, cpu);
+            Instruction.ADC.execute(null, (byte)0b00000001, cpu);
 
             expectA(0b10000000);
             expectZeroFlag(false);
@@ -90,7 +90,7 @@ class OpTest {
             when(cpu.getA()).thenReturn((byte)0x10);
             when(cpu.getCarryFlag()).thenReturn(false);
 
-            Op.SBC.execute(null, (byte)0x01, cpu);
+            Instruction.SBC.execute(null, (byte)0x01, cpu);
 
             expectA(0x0e);
             expectZeroFlag(false);
@@ -105,7 +105,7 @@ class OpTest {
             when(cpu.getA()).thenReturn((byte)0b01111111); // +127
             when(cpu.getCarryFlag()).thenReturn(false); // --
 
-            Op.SBC.execute(null, (byte)0b01111111, cpu); // +127
+            Instruction.SBC.execute(null, (byte)0b01111111, cpu); // +127
 
             expectA(0b11111111); // -1
             expectZeroFlag(false);
@@ -120,7 +120,7 @@ class OpTest {
             when(cpu.getA()).thenReturn((byte)0b01111111);
             when(cpu.getCarryFlag()).thenReturn(true);
 
-            Op.SBC.execute(null, (byte)0b11111111, cpu);
+            Instruction.SBC.execute(null, (byte)0b11111111, cpu);
 
             expectA(0b10000000);
             expectZeroFlag(false);
@@ -134,7 +134,7 @@ class OpTest {
         @Test
         void testAND() {
             when(cpu.getA()).thenReturn((byte)0b00001111);
-            Op.AND.execute(null, (byte)0b11110000, cpu);
+            Instruction.AND.execute(null, (byte)0b11110000, cpu);
             expectA(0);
             expectZeroFlag(true);
             expectNegativeFlag(false);
@@ -145,7 +145,7 @@ class OpTest {
         @Test
         void testORA() {
             when(cpu.getA()).thenReturn((byte)0b00001111);
-            Op.ORA.execute(null, (byte)0b11110000, cpu);
+            Instruction.ORA.execute(null, (byte)0b11110000, cpu);
             expectA(0b11111111);
             expectZeroFlag(false);
             expectNegativeFlag(true);
@@ -156,7 +156,7 @@ class OpTest {
         @Test
         void testEOR() {
             when(cpu.getA()).thenReturn((byte)0b00110011);
-            Op.EOR.execute(null, (byte)0b11110000, cpu);
+            Instruction.EOR.execute(null, (byte)0b11110000, cpu);
             expectA(0b11000011);
             expectZeroFlag(false);
             expectNegativeFlag(true);
@@ -166,7 +166,7 @@ class OpTest {
 
         @Test
         void testASL() {
-            Op.ASL.execute(null, (byte)0b11110000, cpu);
+            Instruction.ASL.execute(null, (byte)0b11110000, cpu);
             expectA(0b11100000);
             expectZeroFlag(false);
             expectNegativeFlag(true);
@@ -177,7 +177,7 @@ class OpTest {
 
         @Test
         void testLSR() {
-            Op.LSR.execute(null, (byte)0b00001111, cpu);
+            Instruction.LSR.execute(null, (byte)0b00001111, cpu);
             expectA(0b00000111);
             expectZeroFlag(false);
             expectNegativeFlag(false);
@@ -189,7 +189,7 @@ class OpTest {
         @Test
         void testROL() {
             when(cpu.getCarryFlag()).thenReturn(true);
-            Op.ROL.execute(null, (byte)0b01110000, cpu);
+            Instruction.ROL.execute(null, (byte)0b01110000, cpu);
             expectA(0b11100001);
             expectZeroFlag(false);
             expectNegativeFlag(true);
@@ -201,7 +201,7 @@ class OpTest {
         @Test
         void testROR() {
             when(cpu.getCarryFlag()).thenReturn(true);
-            Op.ROR.execute(null, (byte)0b11110000, cpu);
+            Instruction.ROR.execute(null, (byte)0b11110000, cpu);
             expectA(0b11111000);
             expectZeroFlag(false);
             expectNegativeFlag(true);
@@ -215,7 +215,7 @@ class OpTest {
         @Test
         void testBIT() {
             when(cpu.getA()).thenReturn((byte)0);
-            Op.BIT.execute(null, (byte)0b11111111, cpu);
+            Instruction.BIT.execute(null, (byte)0b11111111, cpu);
             expectOverflowFlag(true);
             expectNegativeFlag(true);
             expectZeroFlag(true);
@@ -226,7 +226,7 @@ class OpTest {
         @Test
         void testCMPPositive() {
             when(cpu.getA()).thenReturn((byte)0xfe);
-            Op.CMP.execute(null, (byte)0xfd, cpu);
+            Instruction.CMP.execute(null, (byte)0xfd, cpu);
             expectCarryFlag(true);
             expectZeroFlag(false);
             expectNegativeFlag(false);
@@ -235,7 +235,7 @@ class OpTest {
         @Test
         void testCMPEqual() {
             when(cpu.getA()).thenReturn((byte)0xfe);
-            Op.CMP.execute(null, (byte)0xfe, cpu);
+            Instruction.CMP.execute(null, (byte)0xfe, cpu);
             expectCarryFlag(true);
             expectZeroFlag(true);
             expectNegativeFlag(false);
@@ -244,7 +244,7 @@ class OpTest {
         @Test
         void testCMPNegative() {
             when(cpu.getA()).thenReturn((byte)0xfe);
-            Op.CMP.execute(null, (byte)0xff, cpu);
+            Instruction.CMP.execute(null, (byte)0xff, cpu);
             expectCarryFlag(false);
             expectZeroFlag(false);
             expectNegativeFlag(true);

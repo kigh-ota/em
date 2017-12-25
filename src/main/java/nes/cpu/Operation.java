@@ -5,7 +5,7 @@ import lombok.Value;
 
 @Value
 class Operation {
-    private final Op op;
+    private final Instruction instruction;
     @Getter
     private final AddressingMode addressingMode;
     @Getter

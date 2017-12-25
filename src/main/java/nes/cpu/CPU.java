@@ -94,7 +94,7 @@ public class CPU implements Runnable {
         log.debug("PC={} op={}({}:{}) [X={} Y={} A={} S={} P={}] cycle={}",
                 BinaryUtil.toHexString(regPC.get() - 1),
                 BinaryUtil.toHexString(code),
-                op.getOp().toString(),
+                op.getInstruction().toString(),
                 op.getAddressingMode().toString(),
                 BinaryUtil.toHexString(getX()),
                 BinaryUtil.toHexString(getY()),
@@ -227,7 +227,7 @@ public class CPU implements Runnable {
             case INDIRECT:
             case INDEXED_INDIRECT_X:
             case INDIRECT_INDEXED_Y:
-                if (op.getOp().needsValue) {
+                if (op.getInstruction().needsValue) {
                     value = memoryMapper.get(address);
                 }
                 break;
@@ -260,7 +260,7 @@ public class CPU implements Runnable {
             }
             log.debug(sb.toString());
         }
-        op.getOp().execute(address, value, this);
+        op.getInstruction().execute(address, value, this);
     }
 
     void setZeroFlag(MemoryByte reg) {

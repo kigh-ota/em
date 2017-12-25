@@ -6,7 +6,7 @@ import org.eclipse.collections.impl.factory.Maps;
 import java.util.Map;
 
 import static nes.cpu.AddressingMode.*;
-import static nes.cpu.Op.*;
+import static nes.cpu.Instruction.*;
 import static org.eclipse.collections.impl.tuple.Tuples.pair;
 
 class OperationFactory {
@@ -198,16 +198,16 @@ class OperationFactory {
         putInstance(0x9A, pair(TXS, IMPLICIT),2);
     }
 
-    private void putInstance(int opcodeInt, Pair<Op, AddressingMode> value, int cycles) {
+    private void putInstance(int opcodeInt, Pair<Instruction, AddressingMode> value, int cycles) {
         byte opcode = (byte)opcodeInt;
         if (instanceMap.containsKey(opcode)) {
             throw new IllegalArgumentException();
         }
-        Op newOp = value.getOne();
+        Instruction newInstruction = value.getOne();
         AddressingMode newAddressingMode = value.getTwo();
-        Operation newOperation = new Operation(newOp, newAddressingMode, cycles);
+        Operation newOperation = new Operation(newInstruction, newAddressingMode, cycles);
         boolean dup = instanceMap.values().stream().anyMatch(operation -> {
-            return operation.getOp() == newOp && operation.getAddressingMode() == newAddressingMode;
+            return operation.getInstruction() == newInstruction && operation.getAddressingMode() == newAddressingMode;
         });
         if (dup) {
             throw new IllegalArgumentException();
