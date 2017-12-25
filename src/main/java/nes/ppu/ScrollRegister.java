@@ -1,9 +1,9 @@
 package nes.ppu;
 
-import common.ByteRegisterImpl;
+import common.ByteRegister;
 import lombok.Getter;
 
-public class ScrollRegister extends ByteRegisterImpl {
+public class ScrollRegister extends ByteRegister {
     enum Latch {X, Y} // TODO clear latch by reading StatusRegister
 
     final private PPU ppu;

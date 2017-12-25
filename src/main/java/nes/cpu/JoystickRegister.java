@@ -1,7 +1,7 @@
 package nes.cpu;
 
 import common.BinaryUtil;
-import common.ByteRegisterImpl;
+import common.ByteRegister;
 import nes.Controller;
 
 import java.util.HashMap;
@@ -9,7 +9,7 @@ import java.util.Map;
 
 import static nes.Controller.Button.*;
 
-public class JoystickRegister extends ByteRegisterImpl {
+public class JoystickRegister extends ByteRegister {
     private Controller controller;
     private boolean strobe;
     private Map<Controller.Button, Boolean> pressed;

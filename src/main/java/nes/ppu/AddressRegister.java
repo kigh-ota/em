@@ -1,12 +1,12 @@
 package nes.ppu;
 
 import common.BinaryUtil;
-import common.ByteRegisterImpl;
+import common.ByteRegister;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-class AddressRegister extends ByteRegisterImpl {
+class AddressRegister extends ByteRegister {
     private enum Latch {UPPER, LOWER} // TODO clear latch by reading StatusRegister
     private Latch next;
 

@@ -1,11 +1,11 @@
 package nes.cpu;
 
 import common.BinaryUtil;
-import common.RegisterImpl;
+import common.IntegerRegister;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class ProgramCounter extends RegisterImpl {
+public class ProgramCounter extends IntegerRegister {
     public ProgramCounter(int value, int width) {
         super(value, width);
     }

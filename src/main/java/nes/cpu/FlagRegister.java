@@ -1,8 +1,8 @@
 package nes.cpu;
 
-import common.ByteRegisterImpl;
+import common.ByteRegister;
 
-class FlagRegister extends ByteRegisterImpl {
+class FlagRegister extends ByteRegister {
     private static final int NEGATIVE_BIT = 7;
     private static final int OVERFLOW_BIT = 6;
     private static final int ONE_BIT = 5;

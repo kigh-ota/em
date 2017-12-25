@@ -35,9 +35,18 @@ public class BinaryUtil {
     public static byte setBit(boolean flag, byte value, int bit) {
         checkArgument(bit >= 0 && bit < 8);
         if (flag) {
-            return value |= (1 << bit);
+            return (byte)(value | (1 << bit));
         } else {
-            return value &= ~(1 << bit);
+            return (byte)(value & ~(1 << bit));
+        }
+    }
+
+    public static int setBit(boolean flag, int value, int bit) {
+        checkArgument(bit >= 0 && bit < 32);
+        if (flag) {
+            return value | (1 << bit);
+        } else {
+            return value & ~(1 << bit);
         }
     }
 

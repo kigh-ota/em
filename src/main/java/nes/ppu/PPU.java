@@ -2,7 +2,6 @@ package nes.ppu;
 
 import common.BinaryUtil;
 import common.ByteArrayMemory;
-import common.ByteRegisterImpl;
 import common.ByteRegister;
 import lombok.Getter;
 import lombok.Setter;
@@ -59,7 +58,7 @@ public class PPU implements Runnable {
     public final ControlRegister regPPUCTRL; // $2000
     public final MaskRegister regPPUMASK = new MaskRegister((byte)0);
     public final StatusRegister regPPUSTATUS; // $2002
-    public final ByteRegister regOAMADDR = new ByteRegisterImpl((byte)0);
+    public final ByteRegister regOAMADDR = new ByteRegister((byte)0);
     public final ByteRegister regOAMDATA; // $2004
     public final ScrollRegister regPPUSCROLL; // $2005
     public final AddressRegister regPPUADDR; // $2006

@@ -1,7 +1,7 @@
 package td4;
 
 import common.BinaryUtil;
-import common.RegisterImpl;
+import common.IntegerRegister;
 
 import java.util.Timer;
 
@@ -60,20 +60,20 @@ public class TD4Emulator extends java.util.TimerTask {
             (byte)0b00000000
     };
 
-    private final RegisterImpl registerA;
-    private final RegisterImpl registerB;
+    private final IntegerRegister registerA;
+    private final IntegerRegister registerB;
     private boolean carryFlag = false;
-    private final RegisterImpl programCounter;
+    private final IntegerRegister programCounter;
     private byte memory[];
-    private final RegisterImpl inPort;
-    private final RegisterImpl outPort;
+    private final IntegerRegister inPort;
+    private final IntegerRegister outPort;
 
     public TD4Emulator() {
-        registerA = new RegisterImpl(0b0000, WIDTH);
-        registerB = new RegisterImpl(0b0000, WIDTH);
-        programCounter = new RegisterImpl(0b0000, WIDTH);
-        inPort = new RegisterImpl(0b0000, WIDTH);
-        outPort = new RegisterImpl(0b0000, WIDTH);
+        registerA = new IntegerRegister(0b0000, WIDTH);
+        registerB = new IntegerRegister(0b0000, WIDTH);
+        programCounter = new IntegerRegister(0b0000, WIDTH);
+        inPort = new IntegerRegister(0b0000, WIDTH);
+        outPort = new IntegerRegister(0b0000, WIDTH);
 
 //        memory = SAMPLE_PROGRAM_MARQUEE;
         memory = SAMPLE_PROGRAM_TIMER;
@@ -117,10 +117,10 @@ public class TD4Emulator extends java.util.TimerTask {
                 registerB.set(instruction.getOperand());
                 break;
             case MOV_A_B:
-                registerB.set(registerA);
+                registerB.set(registerA.get());
                 break;
             case MOV_B_A:
-                registerA.set(registerB);
+                registerA.set(registerB.get());
                 break;
             case JMP_X:
                 programCounter.set(instruction.getOperand());
@@ -131,13 +131,13 @@ public class TD4Emulator extends java.util.TimerTask {
                 }
                 break;
             case IN_A:
-                registerA.set(inPort);
+                registerA.set(inPort.get());
                 break;
             case IN_B:
-                registerB.set(inPort);
+                registerB.set(inPort.get());
                 break;
             case OUT_B:
-                outPort.set(registerB);
+                outPort.set(registerB.get());
                 break;
             case OUT_X:
                 outPort.set(instruction.getOperand());

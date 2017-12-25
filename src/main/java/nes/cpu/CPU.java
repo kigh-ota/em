@@ -20,37 +20,37 @@ public class CPU implements Runnable {
     private final OperationFactory operationFactory;
 
     // https://wiki.nesdev.com/w/index.php/CPU_power_up_state
-    private final ByteRegister regA = new ByteRegisterImpl((byte)0);    // Accumulator
-    private final ByteRegister regX = new ByteRegisterImpl((byte)0);    // X Index
-    private final ByteRegister regY = new ByteRegisterImpl((byte)0);    // Y Index
-    private final ByteRegister regS = new ByteRegisterImpl((byte)0xFD);    // Stack Pointer
+    private final ByteRegister regA = new ByteRegister((byte)0);    // Accumulator
+    private final ByteRegister regX = new ByteRegister((byte)0);    // X Index
+    private final ByteRegister regY = new ByteRegister((byte)0);    // Y Index
+    private final ByteRegister regS = new ByteRegister((byte)0xFD);    // Stack Pointer
     private final FlagRegister regP = new FlagRegister((byte)0x34);
-    private final RegisterImpl regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
+    private final IntegerRegister regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
 
-    final ByteRegister regSQ1_VOL = new ByteRegisterImpl((byte)0); // $4000
-    final ByteRegister regSQ1_SWEEP = new ByteRegisterImpl((byte)0); // $4001
-    final ByteRegister regSQ1_LO = new ByteRegisterImpl((byte)0); // $4002
-    final ByteRegister regSQ1_HI = new ByteRegisterImpl((byte)0); // $4003
-    final ByteRegister regSQ2_VOL= new ByteRegisterImpl((byte)0); // $4004
-    final ByteRegister regSQ2_SWEEP = new ByteRegisterImpl((byte)0); // $4005
-    final ByteRegister regSQ2_LO = new ByteRegisterImpl((byte)0); // $4006
-    final ByteRegister regSQ2_HI = new ByteRegisterImpl((byte)0); // $4007
-    final ByteRegister regTRI_LINEAR = new ByteRegisterImpl((byte)0); // $4008
-    final ByteRegister regUNUSED1 = new ByteRegisterImpl((byte)0); // $4009
-    final ByteRegister regTRI_LO = new ByteRegisterImpl((byte)0); // $400A
-    final ByteRegister regTRI_HI = new ByteRegisterImpl((byte)0); // $400B
-    final ByteRegister regNOISE_VOL = new ByteRegisterImpl((byte)0); // $400C
-    final ByteRegister regUNUSED2 = new ByteRegisterImpl((byte)0); // $400D
-    final ByteRegister regNOISE_LO = new ByteRegisterImpl((byte)0); // $400E
-    final ByteRegister regNOISE_HI = new ByteRegisterImpl((byte)0); // $400F
-    final ByteRegister regDMC_FREQ = new ByteRegisterImpl((byte)0); // $4010
-    final ByteRegister regDMC_RAW = new ByteRegisterImpl((byte)0); // $4011
-    final ByteRegister regDMC_START = new ByteRegisterImpl((byte)0); // $4012
-    final ByteRegister regDMC_LEN = new ByteRegisterImpl((byte)0); // $4013
+    final ByteRegister regSQ1_VOL = new ByteRegister((byte)0); // $4000
+    final ByteRegister regSQ1_SWEEP = new ByteRegister((byte)0); // $4001
+    final ByteRegister regSQ1_LO = new ByteRegister((byte)0); // $4002
+    final ByteRegister regSQ1_HI = new ByteRegister((byte)0); // $4003
+    final ByteRegister regSQ2_VOL= new ByteRegister((byte)0); // $4004
+    final ByteRegister regSQ2_SWEEP = new ByteRegister((byte)0); // $4005
+    final ByteRegister regSQ2_LO = new ByteRegister((byte)0); // $4006
+    final ByteRegister regSQ2_HI = new ByteRegister((byte)0); // $4007
+    final ByteRegister regTRI_LINEAR = new ByteRegister((byte)0); // $4008
+    final ByteRegister regUNUSED1 = new ByteRegister((byte)0); // $4009
+    final ByteRegister regTRI_LO = new ByteRegister((byte)0); // $400A
+    final ByteRegister regTRI_HI = new ByteRegister((byte)0); // $400B
+    final ByteRegister regNOISE_VOL = new ByteRegister((byte)0); // $400C
+    final ByteRegister regUNUSED2 = new ByteRegister((byte)0); // $400D
+    final ByteRegister regNOISE_LO = new ByteRegister((byte)0); // $400E
+    final ByteRegister regNOISE_HI = new ByteRegister((byte)0); // $400F
+    final ByteRegister regDMC_FREQ = new ByteRegister((byte)0); // $4010
+    final ByteRegister regDMC_RAW = new ByteRegister((byte)0); // $4011
+    final ByteRegister regDMC_START = new ByteRegister((byte)0); // $4012
+    final ByteRegister regDMC_LEN = new ByteRegister((byte)0); // $4013
     final OAMDMARegister regOAMDMA; // $4014
-    final ByteRegister regSND_CHN = new ByteRegisterImpl((byte)0); // $4015
+    final ByteRegister regSND_CHN = new ByteRegister((byte)0); // $4015
     final ByteRegister regJOY1; // $4016
-    final ByteRegister regJOY2 = new ByteRegisterImpl((byte)0); // $4017
+    final ByteRegister regJOY2 = new ByteRegister((byte)0); // $4017
 
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;

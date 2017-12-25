@@ -1,6 +1,6 @@
 package nes.ppu;
 
-import common.ByteRegisterImpl;
+import common.ByteRegister;
 
 /**
  * https://wiki.nesdev.com/w/index.php/PPU_registers#PPUCTRL
@@ -22,7 +22,7 @@ import common.ByteRegisterImpl;
  +--------- Generate an NMI at the start of the
  vertical blanking interval (0: off; 1: on)
  */
-public class ControlRegister extends ByteRegisterImpl {
+public class ControlRegister extends ByteRegister {
     ControlRegister() {
         super((byte) 0);
     }
