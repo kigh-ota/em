@@ -1,7 +1,10 @@
 package common;
 
-public interface MemoryByte extends ReadableByte, WritableByte {
+public interface MemoryByte {
     static final int MAX_VALUE = 0b11111111;
+
+    byte get();
+    void set(byte value);
 
     boolean increment();
     boolean decrement();
