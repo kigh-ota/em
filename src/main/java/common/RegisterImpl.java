@@ -3,7 +3,7 @@ package common;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Preconditions;
 
-public class RegisterImpl {
+public class RegisterImpl implements Register {
     private int value;
     private final int width;
 
@@ -51,6 +51,11 @@ public class RegisterImpl {
         return checkOverflow();
     }
 
+    @Override
+    public boolean subtract(byte subtrahend) {
+        throw new UnsupportedOperationException();
+    }
+
     public boolean add(RegisterImpl reg) {
         return add(reg.get());
     }
@@ -69,5 +74,10 @@ public class RegisterImpl {
 
     public boolean getBit(int bit) {
         return BinaryUtil.getBit(value, bit);
+    }
+
+    @Override
+    public void setBit(boolean value, int bit) {
+        throw new UnsupportedOperationException();
     }
 }
