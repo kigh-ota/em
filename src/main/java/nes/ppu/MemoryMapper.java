@@ -55,7 +55,9 @@ class MemoryMapper {
     }
 
     byte get(int address) {
-        log.debug("Get: PPU {} (type={})", BinaryUtil.toHexString(address), getType(address));
+        if (log.isDebugEnabled()) {
+            log.debug("Get: PPU {} (type={})", BinaryUtil.toHexString(address), getType(address));
+        }
         Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
         ByteArrayMemory memory = memoryOffsetPair.getOne();
         int offset = memoryOffsetPair.getTwo();
@@ -63,7 +65,9 @@ class MemoryMapper {
     }
 
     void set(byte value, int address) {
-        log.debug("Set PPU {}={} (type={})", BinaryUtil.toHexString(address), BinaryUtil.toHexString(value), getType(address));
+        if (log.isDebugEnabled()) {
+            log.debug("Set PPU {}={} (type={})", BinaryUtil.toHexString(address), BinaryUtil.toHexString(value), getType(address));
+        }
         Pair<ByteArrayMemory, Integer> memoryOffsetPair = getMemory(address);
         ByteArrayMemory memory = memoryOffsetPair.getOne();
         int offset = memoryOffsetPair.getTwo();

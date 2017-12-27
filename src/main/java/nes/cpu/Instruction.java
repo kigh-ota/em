@@ -229,7 +229,9 @@ enum Instruction {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             int returnTo = cpu.pull16() + 1;
-            log.debug("return to: {}", BinaryUtil.toHexString(returnTo));
+            if (log.isDebugEnabled()) {
+                log.debug("return to: {}", BinaryUtil.toHexString(returnTo));
+            }
             cpu.jump(returnTo);
         }
     }, // Return from Subroutine
@@ -382,7 +384,9 @@ enum Instruction {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             final byte a = cpu.getA();
-            log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(a));
+            if (log.isDebugEnabled()) {
+                log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(a));
+            }
             store(a, address, cpu);
         }
     }, // Store Accumulator
@@ -390,7 +394,9 @@ enum Instruction {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             final byte x = cpu.getX();
-            log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(x));
+            if (log.isDebugEnabled()) {
+                log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(x));
+            }
             store(x, address, cpu);
         }
     }, // Store X Register
@@ -398,7 +404,9 @@ enum Instruction {
         @Override
         void execute(Integer address, Byte value, CPU cpu) {
             final byte y = cpu.getY();
-            log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(y));
+            if (log.isDebugEnabled()) {
+                log.debug("{}={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(y));
+            }
             store(y, address, cpu);
         }
     }, // Store Y Register

@@ -30,7 +30,9 @@ class AddressRegister extends ByteRegister {
         } else {
             tempAddress = (tempAddress & 0xff00) | Byte.toUnsignedInt(value);
             address = tempAddress;
-            log.debug("addr={} (type={})", BinaryUtil.toHexString(address), MemoryMapper.getType(address));
+            if (log.isDebugEnabled()) {
+                log.debug("addr={} (type={})", BinaryUtil.toHexString(address), MemoryMapper.getType(address));
+            }
             log.info(String.format("PPUaddr=%x", address));
         }
         ppu.addressLatch = !ppu.addressLatch;

@@ -91,17 +91,19 @@ public class CPU implements Runnable {
         if (op == null) {
             log.error(BinaryUtil.toBinaryString(code, CODE_WIDTH));
         }
-        log.debug("PC={} op={}({}:{}) [X={} Y={} A={} S={} P={}] cycle={}",
-                BinaryUtil.toHexString(regPC.get() - 1),
-                BinaryUtil.toHexString(code),
-                op.getInstruction().toString(),
-                op.getAddressingMode().toString(),
-                BinaryUtil.toHexString(getX()),
-                BinaryUtil.toHexString(getY()),
-                BinaryUtil.toHexString(getA()),
-                BinaryUtil.toHexString(getS()),
-                BinaryUtil.toBinaryString(regP.get(), 8),
-                cycles);
+        if (log.isDebugEnabled()) {
+            log.debug("PC={} op={}({}:{}) [X={} Y={} A={} S={} P={}] cycle={}",
+                    BinaryUtil.toHexString(regPC.get() - 1),
+                    BinaryUtil.toHexString(code),
+                    op.getInstruction().toString(),
+                    op.getAddressingMode().toString(),
+                    BinaryUtil.toHexString(getX()),
+                    BinaryUtil.toHexString(getY()),
+                    BinaryUtil.toHexString(getA()),
+                    BinaryUtil.toHexString(getS()),
+                    BinaryUtil.toBinaryString(regP.get(), 8),
+                    cycles);
+        }
         if (regPC.get() != 0x8058) {
             log.info(String.format("%04x %x %x %x %x %x %x", regPC.get() - 1, code, getA(), getX(), getY(), getS(), regP.get()));
         }
@@ -284,7 +286,9 @@ public class CPU implements Runnable {
     }
 
     void jump(int address) {
-        log.debug("jump to {}", BinaryUtil.toHexString(address));
+        if (log.isDebugEnabled()) {
+            log.debug("jump to {}", BinaryUtil.toHexString(address));
+        }
         regPC.set(address);
     }
 

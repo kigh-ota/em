@@ -21,7 +21,9 @@ class DataRegister extends ByteRegister {
     @Override
     public void set(byte value) {
         int address = ppu.regPPUADDR.getAddress();
-        log.debug("set PPU: addr={}", BinaryUtil.toHexString(address));
+        if (log.isDebugEnabled()) {
+            log.debug("set PPU: addr={}", BinaryUtil.toHexString(address));
+        }
         ppu.memoryMapper.set(value, address);
         ppu.regPPUADDR.incrementAddress();
     }

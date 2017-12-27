@@ -12,7 +12,9 @@ public class ProgramCounter extends IntegerRegister {
 
     @Override
     public void set(int value) {
-        log.debug("jump to: {}", BinaryUtil.toHexString(value));
+        if (log.isDebugEnabled()) {
+            log.debug("jump to: {}", BinaryUtil.toHexString(value));
+        }
         super.set(value);
     }
 }
