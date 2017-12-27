@@ -10,8 +10,13 @@ import nes.screen.InfoScreen;
 import nes.screen.MainScreen;
 import nes.screen.MainScreenData;
 import nes.screen.ScreenData;
+import org.eclipse.collections.api.tuple.Pair;
+import org.eclipse.collections.impl.tuple.Tuples;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
 
@@ -130,13 +135,14 @@ public class PPU implements Runnable {
         } else {
             // Scanline 240-261
             if (scanX == 1 && scanY == 241) {
-                regPPUSTATUS.setVblankBit(true);
+                regPPUSTATUS.setVBlank(true);
                 if (regPPUCTRL.getBit(7)) {
                     cpu.reserveNMI();
                 }
             } else if (scanX == 1 && scanY == 261) {
-                regPPUSTATUS.setVblankBit(false);
+                regPPUSTATUS.setVBlank(false);
                 regPPUSTATUS.setSprite0Hit(false);
+                regPPUSTATUS.setSpriteOverflow(false);
             }
         }
         cycles++;
@@ -246,10 +252,14 @@ public class PPU implements Runnable {
         int bgPatternTable;
         byte[] pattern = new byte[0];
 
+        List<Integer> sprites = getSpritesToBeRendered(y);
+
         for (int x = 0; x < WIDTH; x++) {
-            Color c = null;
+            // get sprite color
+            Pair<Color, Boolean> spriteColorAndIsFront = getSpriteColorAndIsFront(x, y, sprites);
 
             // get background color
+            Color backgroundColor = null;
             if (regPPUMASK.enableBackground()) {
                 // update background character & palette if necessary
                 int xx = x + scrollX;
@@ -264,19 +274,16 @@ public class PPU implements Runnable {
                 }
                 int color = getColorInPattern(xx % 8, yy % 8, pattern);
                 int colorIndex = getColorIndex(palette, color);
-                c = Palette.get(colorIndex);
+                backgroundColor = Palette.get(colorIndex);
             }
 
-            // get sprite color
-            Integer sprite = findTopSpriteNumber(x, y);
-            if (sprite != null) {
-                Color spriteColor = getSpriteColorAt(x, y, sprite);
-                if (spriteColor != null) {
-                    c = spriteColor;
-                }
+            if (spriteColorAndIsFront != null && spriteColorAndIsFront.getTwo()) {
+                mainScreenData.set(spriteColorAndIsFront.getOne(), x, y);
+            } else if (backgroundColor != null) {
+                mainScreenData.set(backgroundColor, x, y);
+            } else if (spriteColorAndIsFront != null && !spriteColorAndIsFront.getTwo()) {
+                mainScreenData.set(spriteColorAndIsFront.getOne(), x, y);
             }
-            
-            mainScreenData.set(c, x, y);
         }
     }
 
@@ -313,6 +320,7 @@ public class PPU implements Runnable {
         return Palette.get(colorIndex);
     }
 
+
     private Integer findTopSpriteNumber(int x, int y) {
         if (!regPPUMASK.enableSprites()) {
             return null;
@@ -328,6 +336,78 @@ public class PPU implements Runnable {
             }
         }
         return null;
+    }
+
+    /**
+     * 最初の不透明なドットを持つスプライトのColorとisFrontフラグを返す
+     * @param x
+     * @param y
+     * @param sprites
+     * @return
+     */
+    private Pair<Color, Boolean> getSpriteColorAndIsFront(int x, int y, List<Integer> sprites) {
+        checkArgument(x >= 0 && x < WIDTH);
+        checkArgument(y >= 0 && y < HEIGHT);
+        checkArgument(regPPUCTRL.getSpriteSize() == ControlRegister.SpriteSize.EIGHT_BY_EIGHT); // TODO 8x16 sprite
+        for (int sprite : sprites) {
+            if (!isSpriteInHorizonalRange(sprite, x)) {
+                continue;
+            }
+            int spriteX = oam.getX(sprite);
+            int spriteY = oam.getY(sprite);
+            int spritePatternTable = getSpritePatternTable();
+            byte[] pattern = getCharacterPattern(spritePatternTable, oam.getTileIndex(sprite));
+            boolean flippedHorizontally = oam.isFlippedHorizontally(sprite);
+            boolean flippedVertically = oam.isFlippedVertically(sprite);
+            int patternX = flippedHorizontally ? 7 - (x - spriteX) : x - spriteX;
+            int patternY = flippedVertically ? 7 - (y - spriteY) : y - spriteY;
+            int color = getColorInPattern(patternX, patternY, pattern);
+            if (color == 0) {
+                continue;
+            }
+            if (sprite == 0) {
+                // Sprite 0 hit
+                regPPUSTATUS.setSprite0Hit(true);
+            }
+            int colorIndex = getColorIndex(oam.getPalette(sprite), color);
+            return Tuples.pair(Palette.get(colorIndex), oam.hasFrontPriority(sprite));
+        }
+        // 該当するスプライトが無い
+        return null;
+    }
+
+    private static final int SPRITE_SIZE = 8;
+
+    /**
+     * scanline yに乗っているスプライトを最大8個取得
+     * TODO Sprite Overflow
+     * @return
+     */
+    private List<Integer> getSpritesToBeRendered(int y) {
+        if (!regPPUMASK.enableSprites()) {
+            return Collections.emptyList();
+        }
+
+        List<Integer> sprites = new ArrayList<>();
+        for (int n = 0; n < 64; n++) {
+            if (isSpriteOnScanline(n, y)) {
+                sprites.add(n);
+            }
+            if (sprites.size() == 8) {
+                return sprites;
+            }
+        }
+        return sprites;
+    }
+
+    private boolean isSpriteOnScanline(int n, int y) {
+        int spriteY = oam.getY(n);
+        return y >= spriteY && y < spriteY + SPRITE_SIZE;
+    }
+
+    private boolean isSpriteInHorizonalRange(int n, int x) {
+        int spriteX = oam.getX(n);
+        return x >= spriteX && x < spriteX + SPRITE_SIZE;
     }
 
     private boolean shouldWaitCpu() {

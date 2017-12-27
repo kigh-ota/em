@@ -50,6 +50,11 @@ public class ObjectAttributeMemory extends ByteArrayMemory {
         return BinaryUtil.getBit(value, 7);
     }
 
+    public boolean hasFrontPriority(int n) {
+        byte value = get(n * 4 + 2);
+        return !BinaryUtil.getBit(value, 5);
+    }
+
     /**
      *
      * @param n 0-63

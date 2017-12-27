@@ -37,16 +37,18 @@ public class StatusRegister extends ByteRegister {
     @Override
     public byte get() {
         byte value = super.get();
-        setVblankBit(false);
+        setVBlank(false);
         ppu.addressLatch = false;
         return value;
     }
 
-    void setVblankBit(boolean flag) {
+    void setVBlank(boolean flag) {
         setBit(flag, 7);
     }
 
     void setSprite0Hit(boolean flag) { setBit(flag, 6); }
+
+    void setSpriteOverflow(boolean flag) { setBit(flag, 5); }
 
     @Override
     public boolean increment() {
