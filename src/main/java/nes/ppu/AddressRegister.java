@@ -13,18 +13,23 @@ class AddressRegister extends ByteRegister {
     @Getter
     private int address;
 
+    @Getter
+    private int tempAddress;
+
     AddressRegister(PPU ppu) {
         super((byte)0);
         this.ppu = ppu;
+        tempAddress = 0;
         address = 0;
     }
 
     @Override
     public void set(byte value) {
         if (!ppu.addressLatch) {
-            address = Byte.toUnsignedInt(value) << 8;
+            tempAddress = (tempAddress & 0x00ff) | Byte.toUnsignedInt(value) << 8;
         } else {
-            address += Byte.toUnsignedInt(value);
+            tempAddress = (tempAddress & 0xff00) | Byte.toUnsignedInt(value);
+            address = tempAddress;
             log.debug("addr={} (type={})", BinaryUtil.toHexString(address), MemoryMapper.getType(address));
             log.info(String.format("PPUaddr=%x", address));
         }
