@@ -38,8 +38,7 @@ public class StatusRegister extends ByteRegister {
     public byte get() {
         byte value = super.get();
         setVblankBit(false);
-        ppu.regPPUADDR.resetLatch();
-        ppu.regPPUSCROLL.resetLatch();
+        ppu.addressLatch = false;
         return value;
     }
 

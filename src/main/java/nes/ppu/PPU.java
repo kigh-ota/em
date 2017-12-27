@@ -67,6 +67,8 @@ public class PPU implements Runnable {
     @Getter
     private final Mirroring mirroring;
 
+    boolean addressLatch;
+
     public PPU(ByteArrayMemory characterRom, Mirroring mirroring, MainScreen mainScreen, InfoScreen infoScreen) {
         memoryMapper = new MemoryMapper(this);
         this.characterRom = characterRom;
@@ -94,6 +96,8 @@ public class PPU implements Runnable {
 
         cycles = 0L;
         frames = 0L;
+
+        addressLatch = false;
     }
 
     private int scrollX;
@@ -111,8 +115,6 @@ public class PPU implements Runnable {
 
             if (scanX == 0) {
                 // draw line by line
-                scanX = 340;
-
                 scrollX = regPPUSCROLL.getX();
                 scrollY = regPPUSCROLL.getY();
 
@@ -122,8 +124,6 @@ public class PPU implements Runnable {
 
                 if (scanY == 239) {
                     mainScreen.refresh(mainScreenData);
-
-                    regPPUSCROLL.resetLatch();
                 }
             }
 
