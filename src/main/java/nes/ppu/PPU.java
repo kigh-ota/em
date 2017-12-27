@@ -355,21 +355,36 @@ public class PPU implements Runnable {
      * @return 0 or 1
      */
     private int getScreen(int x, int y) {
+        // TODO support 4 screen mode
         checkArgument(x >= 0 && x < 2 * WIDTH);
         checkArgument(y >= 0 && y < 2 * HEIGHT);
-        if (y < HEIGHT) {
-            if (x < WIDTH) {
-                return 0;
-            } else {
-                return mirroring == Mirroring.VERTICAL ? 1 : 0;
+        /**
+         * Vertical  Horizontal
+         *  +-+-+      +-+-+
+         *  |0|1|      |0|0|
+         *  +-+-+      +-+-+
+         *  |0|1|      |1|1|
+         *  +-+-+      +-+-+
+         */
+        boolean isScreen0 = true;
+        if (mirroring == Mirroring.VERTICAL) {
+            if (x >= WIDTH) {
+                isScreen0 = !isScreen0;
             }
-        } else {
-            if (x < WIDTH) {
-                return mirroring == Mirroring.VERTICAL ? 0 : 1;
-            } else {
-                return 1;
+            if (regPPUCTRL.getBit(0)) {
+                isScreen0 = !isScreen0;
             }
         }
+
+        if (mirroring == Mirroring.HORIZONTAL) {
+            if (y >= HEIGHT) {
+                isScreen0 = !isScreen0;
+            }
+            if (regPPUCTRL.getBit(1)) {
+                isScreen0 = !isScreen0;
+            }
+        }
+        return isScreen0 ? 0 : 1;
     }
 
     private Color getBackgroundColorAt(int x, int y) {
