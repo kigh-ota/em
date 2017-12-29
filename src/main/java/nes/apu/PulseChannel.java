@@ -37,16 +37,14 @@ public class PulseChannel extends Channel {
 
     @Override
     void reset() {
+        super.reset();
         on = false;
         sequencerPhase = 0;
         volume = 0;
-        timer = 0;
-        timerReset = 0;
         duty = 0;
 
         envelope.reset();
         sweep.reset();
-        lengthCounter.reset();
     }
 
     @Override
@@ -101,8 +99,4 @@ public class PulseChannel extends Channel {
         sweep.clock();
     }
 
-    // Length Counter
-    void clockLengthCounter() {
-        lengthCounter.clock();
-    }
 }

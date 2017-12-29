@@ -155,6 +155,7 @@ public class APU {
                     pulse2.clockSweep();
                     pulse1.clockLengthCounter();
                     pulse2.clockLengthCounter();
+                    triangle.clockLengthCounter();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
@@ -172,6 +173,7 @@ public class APU {
                     pulse2.clockSweep();
                     pulse1.clockLengthCounter();
                     pulse2.clockLengthCounter();
+                    triangle.clockLengthCounter();
                     break;
             }
         } else {
@@ -187,6 +189,7 @@ public class APU {
                     pulse2.clockEnvelope();
                     pulse1.clockSweep();
                     pulse2.clockSweep();
+                    triangle.clockLengthCounter();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
@@ -199,6 +202,7 @@ public class APU {
                     pulse2.clockEnvelope();
                     pulse1.clockSweep();
                     pulse2.clockSweep();
+                    triangle.clockLengthCounter();
                     break;
             }
         }

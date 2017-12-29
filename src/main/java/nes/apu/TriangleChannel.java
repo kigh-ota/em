@@ -16,7 +16,7 @@ public class TriangleChannel extends Channel {
 
     @Override
     int get() {
-        return enabled ? WAVEFORM[phase] : 0;
+        return (enabled && !lengthCounter.isMuting()) ? WAVEFORM[phase] : 0;
     }
 
     @Override

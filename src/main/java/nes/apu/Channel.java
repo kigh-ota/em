@@ -34,7 +34,11 @@ public abstract class Channel {
         }
     }
 
-    abstract void reset();
+    void reset() {
+        timer = 0;
+        timerReset = 0;
+        lengthCounter.reset();
+    }
 
     /**
      *
@@ -59,5 +63,10 @@ public abstract class Channel {
      */
     void setTimerHigh(int value) {
         timerReset = (timerReset & 0b00011111111) | (value << 8);
+    }
+
+    // Length Counter
+    void clockLengthCounter() {
+        lengthCounter.clock();
     }
 }
