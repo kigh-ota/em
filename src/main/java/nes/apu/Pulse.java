@@ -10,7 +10,7 @@ import java.util.Map;
 @Slf4j
 public class Pulse {
 
-    @Setter private boolean enabled;
+    @Setter @Getter private boolean enabled;
     private boolean on; // sequencer
     private int sequencerPhase; // 0-7, proceeds downward
     private boolean useConstantVolume; // constant volume or envelope
@@ -18,13 +18,14 @@ public class Pulse {
     private int timer; // 11 bit, reset when HI written
     @Getter @Setter private int timerReset;
     private int duty; // 0-3
-    private int lengthCounter; // ?
     @Getter private boolean lengthCounterHalt; // also used as the envelop loop flag?
 
+    // Gates
     @Getter private final Envelope envelope;
     @Getter private final Sweep sweep;
+    @Getter private LengthCounter lengthCounter;
 
-    private static final Map<Integer, Boolean[]> dutyToWaveform;
+    private static final Map<Integer, Boolean[]> DUTY_TO_WAVEFORM;
 
     static {
         ImmutableMap.Builder<Integer, Boolean[]> builder = ImmutableMap.builder();
@@ -32,12 +33,13 @@ public class Pulse {
         builder.put(1, new Boolean[]{false, false, false, false, false, false, true, true});
         builder.put(2, new Boolean[]{false, false, false, false, true, true, true, true});
         builder.put(3, new Boolean[]{true, true, true, true, true, true, false, false});
-        dutyToWaveform = builder.build();
+        DUTY_TO_WAVEFORM = builder.build();
     }
 
     Pulse() {
         envelope = new Envelope(this);
         sweep = new Sweep(this);
+        lengthCounter = new LengthCounter(this);
     }
 
     void reset() {
@@ -50,6 +52,7 @@ public class Pulse {
 
         envelope.reset();
         sweep.reset();
+        lengthCounter.reset();
     }
 
     /**
@@ -94,7 +97,11 @@ public class Pulse {
     }
 
     private void clockSequencer() {
-        on = (timerReset < 8 || !enabled) ? false : dutyToWaveform.get(duty)[sequencerPhase];
+        if (!enabled || timerReset < 8 || sweep.isMuting() || lengthCounter.isMuting()) {
+            on = false;
+        } else {
+            on = DUTY_TO_WAVEFORM.get(duty)[sequencerPhase];
+        }
         if (sequencerPhase == 0) {
             sequencerPhase = 7;
         } else {
@@ -124,8 +131,12 @@ public class Pulse {
     }
 
     // Sweep
-
     void clockSweep() {
         sweep.clock();
+    }
+
+    // Length Counter
+    void clockLengthCounter() {
+        lengthCounter.clock();
     }
 }

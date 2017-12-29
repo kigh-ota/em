@@ -11,7 +11,9 @@ public class PulseHighRegister extends APURegister {
 
     @Override
     public void set(byte value) {
+        pulse.getLengthCounter().setValue((Byte.toUnsignedInt(value) & 0b11111000) >> 3);
         pulse.setTimerHigh(Byte.toUnsignedInt(value) & 0b00000111);
+
         pulse.resetSequencerPhase();
         pulse.getEnvelope().setStartFlag(true);
     }

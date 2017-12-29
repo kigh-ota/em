@@ -1,5 +1,6 @@
 package nes.apu;
 
+import lombok.Getter;
 import lombok.Setter;
 
 public class Sweep {
@@ -11,7 +12,7 @@ public class Sweep {
     @Setter private boolean negateFlag;
     @Setter private boolean reloadFlag;
     @Setter private int shiftCount;
-    private boolean mute;
+    @Getter private boolean muting;
 
     Sweep(Pulse pulse) {
         this.pulse = pulse;
@@ -23,15 +24,15 @@ public class Sweep {
         negateFlag = false;
         reloadFlag = false;
         shiftCount = 0;
-        mute = false;
+        muting = false;
     }
 
     void clock() {
         if (divider == 0 && enabled) {
             // adjust period if the target period is in range
             int targetPeriod = calculateTargetPeriod();
-            mute = targetPeriod >= 0x800;
-            if (!mute) {
+            muting = targetPeriod >= 0x800;
+            if (!muting) {
                 pulse.setTimerReset(targetPeriod);
             }
         }

@@ -5,10 +5,10 @@ import java.awt.Color;
 import java.util.List;
 
 public class Palette {
-    private static final List<Color> list;
+    private static final List<Color> LIST;
 
     static {
-        list = ImmutableList.<Color>builder().add(
+        LIST = ImmutableList.<Color>builder().add(
                 new Color(96, 96, 96),
                 new Color(0, 32, 128),
                 new Color(0, 0, 192),
@@ -77,6 +77,6 @@ public class Palette {
     }
 
     static Color get(int i) {
-        return list.get(i);
+        return LIST.get(i);
     }
 }
