@@ -4,10 +4,10 @@ import common.BinaryUtil;
 
 public class StatusRegister extends APURegister {
 
-    Pulse pulse1;
-    Pulse pulse2;
+    PulseChannel pulse1;
+    PulseChannel pulse2;
 
-    public StatusRegister(Pulse pulse1, Pulse pulse2, APU apu) {
+    public StatusRegister(PulseChannel pulse1, PulseChannel pulse2, APU apu) {
         super(apu);
         this.pulse1 = pulse1;
         this.pulse2 = pulse2;

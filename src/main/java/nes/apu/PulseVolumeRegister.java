@@ -5,9 +5,9 @@ import common.BinaryUtil;
 // Duty, Length counter halt, Volume/Envelope flag, Volume
 public class PulseVolumeRegister extends APURegister {
 
-    private final Pulse pulse;
+    private final PulseChannel pulse;
 
-    public PulseVolumeRegister(Pulse pulse, APU apu) {
+    public PulseVolumeRegister(PulseChannel pulse, APU apu) {
         super(apu);
         this.pulse = pulse;
     }

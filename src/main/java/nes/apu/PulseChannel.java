@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.Map;
 
 @Slf4j
-public class Pulse extends Channel {
+public class PulseChannel extends Channel {
 
     @Setter @Getter private boolean enabled;
     private boolean on; // sequencer
@@ -36,7 +36,7 @@ public class Pulse extends Channel {
         DUTY_TO_WAVEFORM = builder.build();
     }
 
-    Pulse() {
+    PulseChannel() {
         envelope = new Envelope(this);
         sweep = new Sweep(this);
         lengthCounter = new LengthCounter(this);

@@ -21,11 +21,11 @@ public class LengthCounter {
             32, 30
     };
 
-    private final Pulse pulse;
+    private final PulseChannel pulse;
 
     private int value;
 
-    LengthCounter(Pulse pulse) {
+    LengthCounter(PulseChannel pulse) {
         this.pulse = pulse;
     }
 

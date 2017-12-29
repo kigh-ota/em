@@ -46,8 +46,8 @@ public class APU {
     public final StatusRegister regAPUSTATUS; // $4015
 
     public APU() {
-        pulse1 = new Pulse();
-        pulse2 = new Pulse();
+        pulse1 = new PulseChannel();
+        pulse2 = new PulseChannel();
 
         regSQ1_VOL = new PulseVolumeRegister(pulse1, this);
         regSQ1_SWEEP = new PulseSweepRegister(pulse1.getSweep(), this);
@@ -91,8 +91,8 @@ public class APU {
     private long cycle;
     private int sample;
 
-    private final Pulse pulse1;
-    private final Pulse pulse2;
+    private final PulseChannel pulse1;
+    private final PulseChannel pulse2;
 
     /**
      * 各チャネル

@@ -5,7 +5,7 @@ import lombok.Setter;
 
 public class Envelope {
 
-    private final Pulse pulse;
+    private final PulseChannel pulse;
 
     @Setter
     private boolean startFlag;
@@ -15,7 +15,7 @@ public class Envelope {
 
     private int divider;
 
-    Envelope(Pulse pulse) {
+    Envelope(PulseChannel pulse) {
         this.pulse = pulse;
     }
 

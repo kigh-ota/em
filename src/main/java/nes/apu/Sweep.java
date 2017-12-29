@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class Sweep {
-    private final Pulse pulse;
+    private final PulseChannel pulse;
 
     private int divider;
     @Setter private int dividerReset;
@@ -14,7 +14,7 @@ public class Sweep {
     @Setter private int shiftCount;
     @Getter private boolean muting;
 
-    Sweep(Pulse pulse) {
+    Sweep(PulseChannel pulse) {
         this.pulse = pulse;
     }
 
