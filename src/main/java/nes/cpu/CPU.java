@@ -33,7 +33,7 @@ public class CPU implements Runnable {
 
     final OAMDMARegister regOAMDMA; // $4014
     final ByteRegister regJOY1; // $4016
-    final ByteRegister regJOY2 = new ByteRegister((byte)0); // $4017
+    public final ByteRegister regJOY2 = new ByteRegister((byte)0); // $4017
 
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;

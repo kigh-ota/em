@@ -224,7 +224,7 @@ class MemoryMapper {
                 case 0x4014:
                     return pair(cpu.regOAMDMA, WO);
                 case 0x4015:
-                    return pair(apu.regSND_CHN, WO);
+                    return pair(apu.regAPUSTATUS, WO);
                 case 0x4016:
                     return pair(cpu.regJOY1, RW);
                 case 0x4017:
