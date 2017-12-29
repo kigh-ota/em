@@ -4,6 +4,7 @@ import common.ByteArrayMemory;
 import common.ByteRegister;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import nes.apu.APU;
 import nes.ppu.PPU;
 import org.eclipse.collections.api.tuple.Pair;
 
@@ -54,6 +55,7 @@ class MemoryMapper {
 
     private final CPU cpu;
     private final PPU ppu;
+    private final APU apu;
 
     byte get(int address) {
         switch (getType(address)) {
@@ -180,49 +182,49 @@ class MemoryMapper {
             // APU and I/O registers
             switch (address) {
                 case 0x4000:
-                    return pair(cpu.regSQ1_VOL, RW);
+                    return pair(apu.regSQ1_VOL, RW);
                 case 0x4001:
-                    return pair(cpu.regSQ1_SWEEP, RW);
+                    return pair(apu.regSQ1_SWEEP, RW);
                 case 0x4002:
-                    return pair(cpu.regSQ1_LO, RW);
+                    return pair(apu.regSQ1_LO, RW);
                 case 0x4003:
-                    return pair(cpu.regSQ1_HI, RW);
+                    return pair(apu.regSQ1_HI, RW);
                 case 0x4004:
-                    return pair(cpu.regSQ2_VOL, RW);
+                    return pair(apu.regSQ2_VOL, RW);
                 case 0x4005:
-                    return pair(cpu.regSQ2_SWEEP, RW);
+                    return pair(apu.regSQ2_SWEEP, RW);
                 case 0x4006:
-                    return pair(cpu.regSQ2_LO, RW);
+                    return pair(apu.regSQ2_LO, RW);
                 case 0x4007:
-                    return pair(cpu.regSQ2_HI, RW);
+                    return pair(apu.regSQ2_HI, RW);
                 case 0x4008:
-                    return pair(cpu.regTRI_LINEAR, RW);
+                    return pair(apu.regTRI_LINEAR, RW);
                 case 0x4009:
-                    return pair(cpu.regUNUSED1, RW);
+                    return pair(apu.regUNUSED1, RW);
                 case 0x400A:
-                    return pair(cpu.regTRI_LO, RW);
+                    return pair(apu.regTRI_LO, RW);
                 case 0x400B:
-                    return pair(cpu.regTRI_HI, RW);
+                    return pair(apu.regTRI_HI, RW);
                 case 0x400C:
-                    return pair(cpu.regNOISE_VOL, RW);
+                    return pair(apu.regNOISE_VOL, RW);
                 case 0x400D:
-                    return pair(cpu.regUNUSED2, RW);
+                    return pair(apu.regUNUSED2, RW);
                 case 0x400E:
-                    return pair(cpu.regNOISE_LO, RW);
+                    return pair(apu.regNOISE_LO, RW);
                 case 0x400F:
-                    return pair(cpu.regNOISE_HI, RW);
+                    return pair(apu.regNOISE_HI, RW);
                 case 0x4010:
-                    return pair(cpu.regDMC_FREQ, RW);
+                    return pair(apu.regDMC_FREQ, RW);
                 case 0x4011:
-                    return pair(cpu.regDMC_RAW, RW);
+                    return pair(apu.regDMC_RAW, RW);
                 case 0x4012:
-                    return pair(cpu.regDMC_START, RW);
+                    return pair(apu.regDMC_START, RW);
                 case 0x4013:
-                    return pair(cpu.regDMC_LEN, RW);
+                    return pair(apu.regDMC_LEN, RW);
                 case 0x4014:
                     return pair(cpu.regOAMDMA, WO);
                 case 0x4015:
-                    return pair(cpu.regSND_CHN, RW);
+                    return pair(apu.regSND_CHN, RW);
                 case 0x4016:
                     return pair(cpu.regJOY1, RW);
                 case 0x4017:

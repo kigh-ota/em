@@ -1,8 +1,12 @@
 package nes.cpu;
 
-import common.*;
+import common.BinaryUtil;
+import common.ByteArrayMemory;
+import common.ByteRegister;
+import common.IntegerRegister;
 import lombok.extern.slf4j.Slf4j;
 import nes.Controller;
+import nes.apu.APU;
 import nes.ppu.PPU;
 
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
@@ -27,28 +31,7 @@ public class CPU implements Runnable {
     private final FlagRegister regP = new FlagRegister((byte)0x34);
     private final IntegerRegister regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
 
-    final ByteRegister regSQ1_VOL = new ByteRegister((byte)0); // $4000
-    final ByteRegister regSQ1_SWEEP = new ByteRegister((byte)0); // $4001
-    final ByteRegister regSQ1_LO = new ByteRegister((byte)0); // $4002
-    final ByteRegister regSQ1_HI = new ByteRegister((byte)0); // $4003
-    final ByteRegister regSQ2_VOL= new ByteRegister((byte)0); // $4004
-    final ByteRegister regSQ2_SWEEP = new ByteRegister((byte)0); // $4005
-    final ByteRegister regSQ2_LO = new ByteRegister((byte)0); // $4006
-    final ByteRegister regSQ2_HI = new ByteRegister((byte)0); // $4007
-    final ByteRegister regTRI_LINEAR = new ByteRegister((byte)0); // $4008
-    final ByteRegister regUNUSED1 = new ByteRegister((byte)0); // $4009
-    final ByteRegister regTRI_LO = new ByteRegister((byte)0); // $400A
-    final ByteRegister regTRI_HI = new ByteRegister((byte)0); // $400B
-    final ByteRegister regNOISE_VOL = new ByteRegister((byte)0); // $400C
-    final ByteRegister regUNUSED2 = new ByteRegister((byte)0); // $400D
-    final ByteRegister regNOISE_LO = new ByteRegister((byte)0); // $400E
-    final ByteRegister regNOISE_HI = new ByteRegister((byte)0); // $400F
-    final ByteRegister regDMC_FREQ = new ByteRegister((byte)0); // $4010
-    final ByteRegister regDMC_RAW = new ByteRegister((byte)0); // $4011
-    final ByteRegister regDMC_START = new ByteRegister((byte)0); // $4012
-    final ByteRegister regDMC_LEN = new ByteRegister((byte)0); // $4013
     final OAMDMARegister regOAMDMA; // $4014
-    final ByteRegister regSND_CHN = new ByteRegister((byte)0); // $4015
     final ByteRegister regJOY1; // $4016
     final ByteRegister regJOY2 = new ByteRegister((byte)0); // $4017
 
@@ -60,9 +43,9 @@ public class CPU implements Runnable {
     private boolean flagNMI;
     // TODO handle IRQ
 
-    public CPU(PPU ppu, ByteArrayMemory programRom, Controller controller1) {
+    public CPU(PPU ppu, APU apu, ByteArrayMemory programRom, Controller controller1) {
         operationFactory = new OperationFactory();
-        memoryMapper = new MemoryMapper(this, ppu);
+        memoryMapper = new MemoryMapper(this, ppu, apu);
         this.programRom = programRom;
         this.ram = new ByteArrayMemory(new byte[0x800]);
         this.regOAMDMA = new OAMDMARegister(this, ppu);
