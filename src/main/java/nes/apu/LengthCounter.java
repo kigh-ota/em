@@ -21,12 +21,12 @@ public class LengthCounter {
             32, 30
     };
 
-    private final PulseChannel pulse;
+    private final Channel channel;
 
     private int value;
 
-    LengthCounter(PulseChannel pulse) {
-        this.pulse = pulse;
+    LengthCounter(Channel channel) {
+        this.channel = channel;
     }
 
     void reset() {
@@ -34,11 +34,11 @@ public class LengthCounter {
     }
 
     void clock() {
-        if (!pulse.isEnabled()) {
+        if (!channel.isEnabled()) {
             value = 0;
             return;
         }
-        if (value == 0 || pulse.isLengthCounterHalt()) {
+        if (value == 0 || channel.isLengthCounterHalt()) {
             return;
         }
         value--;
@@ -49,7 +49,7 @@ public class LengthCounter {
     }
 
     void setValue(int key) {
-        if (!pulse.isEnabled()) {
+        if (!channel.isEnabled()) {
             return;
         }
         this.value = LENGTH_TABLE[key];

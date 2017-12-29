@@ -2,7 +2,6 @@ package nes.apu;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -10,20 +9,15 @@ import java.util.Map;
 @Slf4j
 public class PulseChannel extends Channel {
 
-    @Setter @Getter private boolean enabled;
     private boolean on; // sequencer
     private int sequencerPhase; // 0-7, proceeds downward
     private boolean useConstantVolume; // constant volume or envelope
     @Getter private int volume; // 0-15, also used as the envelope divider period
-    private int timer; // 11 bit, reset when HI written
-    @Getter @Setter private int timerReset;
     private int duty; // 0-3
-    @Getter private boolean lengthCounterHalt; // also used as the envelop loop flag?
 
     // Gates
     @Getter private final Envelope envelope;
     @Getter private final Sweep sweep;
-    @Getter private LengthCounter lengthCounter;
 
     private static final Map<Integer, Boolean[]> DUTY_TO_WAVEFORM;
 
@@ -39,9 +33,9 @@ public class PulseChannel extends Channel {
     PulseChannel() {
         envelope = new Envelope(this);
         sweep = new Sweep(this);
-        lengthCounter = new LengthCounter(this);
     }
 
+    @Override
     void reset() {
         on = false;
         sequencerPhase = 0;
@@ -55,10 +49,7 @@ public class PulseChannel extends Channel {
         lengthCounter.reset();
     }
 
-    /**
-     *
-     * @return 0-15
-     */
+    @Override
     int get() {
         if (!on) {
             return 0;
@@ -66,37 +57,12 @@ public class PulseChannel extends Channel {
         return useConstantVolume ? volume : envelope.getDecayLevel();
     }
 
-    /**
-     *
-     * @param value 0-255
-     */
-    void setTimerLow(int value) {
-        timerReset = (timerReset & 0b11100000000) | value;
-    }
-
-    /**
-     *
-     * @param value 0-7
-     */
-    void setTimerHigh(int value) {
-        timerReset = (timerReset & 0b00011111111) | (value << 8);
-    }
-
-
     void resetSequencerPhase() {
         sequencerPhase = 0;
     }
 
-    void clockTimer() {
-        if (timer == 0) {
-            timer = timerReset;
-            clockSequencer();
-        } else {
-            timer--;
-        }
-    }
-
-    private void clockSequencer() {
+    @Override
+    protected void clockSequencer() {
         if (!enabled || timerReset < 8 || sweep.isMuting() || lengthCounter.isMuting()) {
             on = false;
         } else {

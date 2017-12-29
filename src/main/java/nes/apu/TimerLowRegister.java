@@ -1,10 +1,10 @@
 package nes.apu;
 
-public class PulseLowRegister extends APURegister {
+public class TimerLowRegister extends APURegister {
 
-    private final PulseChannel pulse;
+    private final Channel pulse;
 
-    PulseLowRegister(PulseChannel pulse, APU apu) {
+    TimerLowRegister(Channel pulse, APU apu) {
         super(apu);
         this.pulse = pulse;
     }

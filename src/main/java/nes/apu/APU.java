@@ -12,9 +12,6 @@ import java.util.Random;
 import static nes.apu.APU.FrameCounterMode.FIVE_STEP;
 import static nes.apu.APU.FrameCounterMode.FOUR_STEP;
 
-/**
- * APU - Pulse -
- */
 @Slf4j
 public class APU {
 
@@ -25,16 +22,16 @@ public class APU {
 
     public final PulseVolumeRegister regSQ1_VOL; // $4000
     public final PulseSweepRegister regSQ1_SWEEP; // $4001
-    public final PulseLowRegister regSQ1_LO; // $4002
-    public final PulseHighRegister regSQ1_HI; // $4003
+    public final TimerLowRegister regSQ1_LO; // $4002
+    public final PulseTimerHighRegister regSQ1_HI; // $4003
     public final PulseVolumeRegister regSQ2_VOL; // $4004
     public final PulseSweepRegister regSQ2_SWEEP; // $4005
-    public final PulseLowRegister regSQ2_LO; // $4006
-    public final PulseHighRegister regSQ2_HI; // $4007
+    public final TimerLowRegister regSQ2_LO; // $4006
+    public final PulseTimerHighRegister regSQ2_HI; // $4007
     public final ByteRegister regTRI_LINEAR = new ByteRegister((byte)0); // $4008
     public final ByteRegister regUNUSED1 = new ByteRegister((byte)0); // $4009
-    public final ByteRegister regTRI_LO = new ByteRegister((byte)0); // $400A
-    public final ByteRegister regTRI_HI = new ByteRegister((byte)0); // $400B
+    public final TimerLowRegister regTRI_LO; // $400A
+    public final TimerHighRegister regTRI_HI; // $400B
     public final ByteRegister regNOISE_VOL = new ByteRegister((byte)0); // $400C
     public final ByteRegister regUNUSED2 = new ByteRegister((byte)0); // $400D
     public final ByteRegister regNOISE_LO = new ByteRegister((byte)0); // $400E
@@ -48,16 +45,19 @@ public class APU {
     public APU() {
         pulse1 = new PulseChannel();
         pulse2 = new PulseChannel();
+        triangle = new TriangleChannel();
 
         regSQ1_VOL = new PulseVolumeRegister(pulse1, this);
         regSQ1_SWEEP = new PulseSweepRegister(pulse1.getSweep(), this);
-        regSQ1_LO = new PulseLowRegister(pulse1, this);
-        regSQ1_HI = new PulseHighRegister(pulse1, this);
+        regSQ1_LO = new TimerLowRegister(pulse1, this);
+        regSQ1_HI = new PulseTimerHighRegister(pulse1, this);
         regSQ2_VOL = new PulseVolumeRegister(pulse2, this);
         regSQ2_SWEEP = new PulseSweepRegister(pulse2.getSweep(), this);
-        regSQ2_LO = new PulseLowRegister(pulse2, this);
-        regSQ2_HI = new PulseHighRegister(pulse2, this);
-        regAPUSTATUS = new StatusRegister(pulse1, pulse2, this);
+        regSQ2_LO = new TimerLowRegister(pulse2, this);
+        regSQ2_HI = new PulseTimerHighRegister(pulse2, this);
+        regTRI_LO = new TimerLowRegister(triangle, this);
+        regTRI_HI = new TimerHighRegister(triangle, this);
+        regAPUSTATUS = new StatusRegister(pulse1, pulse2, triangle, this);
     }
 
     private static final int SAMPLE_RATE = 22050;
@@ -93,6 +93,7 @@ public class APU {
 
     private final PulseChannel pulse1;
     private final PulseChannel pulse2;
+    private final TriangleChannel triangle;
 
     /**
      * 各チャネル
@@ -132,6 +133,7 @@ public class APU {
         if (cycle % 2 == 0) {
             pulse1.clockTimer();
             pulse2.clockTimer();
+            triangle.clockTimer();
         }
 
         FrameCounterMode frameCounterMode = getFrameCounterMode();
@@ -203,7 +205,8 @@ public class APU {
 
         if (cycle % (getBaseFrequency() / SAMPLE_RATE) == 0) {
             // mix pulse1 & pulse2
-            buffer[sample % BUFFER_LENGTH] = mixPulse();
+            buffer[sample % BUFFER_LENGTH] = (byte)(mixPulse() + mixTriangleNoiseDMC());
+//            buffer[sample % BUFFER_LENGTH] = (byte)(mixTriangleNoiseDMC());
 //            log.warn("{}", buffer[sample % BUFFER_LENGTH]);
             sample++;
             if (sample % BUFFER_LENGTH == 0) {
@@ -230,8 +233,17 @@ public class APU {
         if (pulse == 0) {
             return 0;
         }
-        double outputLevel = 95.88 / ((8128 / pulse) + 100); // 0.0-1.0
+        double outputLevel = 95.88 / ((8128.0 / pulse) + 100.0); // 0.0-1.0
         return (byte)(255 * outputLevel);
+    }
+
+    private byte mixTriangleNoiseDMC() {
+        int tnd = triangle.get();
+        if (tnd == 0) {
+            return 0;
+        }
+        double level = 159.79 / ( 1.0 / (triangle.get() / 8227.0) + 100.0 );
+        return (byte)(255 * level);
     }
 
     int getBaseFrequency() {
