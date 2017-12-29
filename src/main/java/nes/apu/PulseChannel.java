@@ -81,10 +81,6 @@ public class PulseChannel extends Channel {
         this.duty = duty;
     }
 
-    public void setLengthCounterHalt(boolean flag) {
-        this.lengthCounterHalt = flag;
-    }
-
     public void setUseConstantVolume(boolean useConstantVolume) {
         this.useConstantVolume = useConstantVolume;
     }

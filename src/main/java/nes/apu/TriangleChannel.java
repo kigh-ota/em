@@ -1,5 +1,7 @@
 package nes.apu;
 
+import lombok.Getter;
+
 public class TriangleChannel extends Channel {
 
     private int phase;
@@ -9,14 +11,23 @@ public class TriangleChannel extends Channel {
              0,  1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15
     };
 
+    @Getter
+    private final LinearCounter linearCounter;
+
+    TriangleChannel() {
+        linearCounter = new LinearCounter(this);
+    }
+
     @Override
     void reset() {
+        super.reset();
         phase = 0;
+        linearCounter.reset();
     }
 
     @Override
     int get() {
-        return (enabled && !lengthCounter.isMuting()) ? WAVEFORM[phase] : 0;
+        return (enabled && !lengthCounter.isMuting() && !linearCounter.isMuting()) ? WAVEFORM[phase] : 0;
     }
 
     @Override
@@ -26,6 +37,10 @@ public class TriangleChannel extends Channel {
         } else {
             phase--;
         }
+    }
+
+    void clockLinearCounter() {
+        linearCounter.clock();
     }
 
 }

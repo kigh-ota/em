@@ -69,4 +69,9 @@ public abstract class Channel {
     void clockLengthCounter() {
         lengthCounter.clock();
     }
+
+    public void setLengthCounterHalt(boolean flag) {
+        this.lengthCounterHalt = flag;
+    }
+
 }

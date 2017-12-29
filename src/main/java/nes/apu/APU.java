@@ -24,18 +24,22 @@ public class APU {
     public final PulseSweepRegister regSQ1_SWEEP; // $4001
     public final TimerLowRegister regSQ1_LO; // $4002
     public final PulseTimerHighRegister regSQ1_HI; // $4003
+
     public final PulseVolumeRegister regSQ2_VOL; // $4004
     public final PulseSweepRegister regSQ2_SWEEP; // $4005
     public final TimerLowRegister regSQ2_LO; // $4006
     public final PulseTimerHighRegister regSQ2_HI; // $4007
-    public final ByteRegister regTRI_LINEAR = new ByteRegister((byte)0); // $4008
+
+    public final TriangleLinearRegister regTRI_LINEAR; // $4008
     public final ByteRegister regUNUSED1 = new ByteRegister((byte)0); // $4009
     public final TimerLowRegister regTRI_LO; // $400A
-    public final TimerHighRegister regTRI_HI; // $400B
+    public final TriangleTimerHighRegister regTRI_HI; // $400B
+
     public final ByteRegister regNOISE_VOL = new ByteRegister((byte)0); // $400C
     public final ByteRegister regUNUSED2 = new ByteRegister((byte)0); // $400D
     public final ByteRegister regNOISE_LO = new ByteRegister((byte)0); // $400E
     public final ByteRegister regNOISE_HI = new ByteRegister((byte)0); // $400F
+
     public final ByteRegister regDMC_FREQ = new ByteRegister((byte)0); // $4010
     public final ByteRegister regDMC_RAW = new ByteRegister((byte)0); // $4011
     public final ByteRegister regDMC_START = new ByteRegister((byte)0); // $4012
@@ -55,15 +59,15 @@ public class APU {
         regSQ2_SWEEP = new PulseSweepRegister(pulse2.getSweep(), this);
         regSQ2_LO = new TimerLowRegister(pulse2, this);
         regSQ2_HI = new PulseTimerHighRegister(pulse2, this);
+        regTRI_LINEAR = new TriangleLinearRegister(triangle, this);
         regTRI_LO = new TimerLowRegister(triangle, this);
-        regTRI_HI = new TimerHighRegister(triangle, this);
+        regTRI_HI = new TriangleTimerHighRegister(triangle, this);
         regAPUSTATUS = new StatusRegister(pulse1, pulse2, triangle, this);
     }
 
     private static final int SAMPLE_RATE = 22050;
 
     public void reset() throws LineUnavailableException {
-        // オーディオ形式を指定
         AudioFormat audioFormat = new AudioFormat(
                 SAMPLE_RATE, 8, 1, false, true);
         DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
@@ -146,6 +150,7 @@ public class APU {
                     // 1 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    triangle.clockLinearCounter();
                     break;
                 case 14913:
                     // 2 envelope & triangles's linear, length counter & sweep
@@ -156,11 +161,13 @@ public class APU {
                     pulse1.clockLengthCounter();
                     pulse2.clockLengthCounter();
                     triangle.clockLengthCounter();
+                    triangle.clockLinearCounter();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    triangle.clockLinearCounter();
                     break;
                 case 29828:
                     // frame interrupt
@@ -174,6 +181,7 @@ public class APU {
                     pulse1.clockLengthCounter();
                     pulse2.clockLengthCounter();
                     triangle.clockLengthCounter();
+                    triangle.clockLinearCounter();
                     break;
             }
         } else {
@@ -182,6 +190,7 @@ public class APU {
                     // 1 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    triangle.clockLinearCounter();
                     break;
                 case 14913:
                     // 2 envelope & triangles's linear, length counter & sweep
@@ -190,11 +199,13 @@ public class APU {
                     pulse1.clockSweep();
                     pulse2.clockSweep();
                     triangle.clockLengthCounter();
+                    triangle.clockLinearCounter();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    triangle.clockLinearCounter();
                     break;
                 case 37281:
                     // 4 envelope & triangles's linear, length counter & sweep
@@ -203,6 +214,7 @@ public class APU {
                     pulse1.clockSweep();
                     pulse2.clockSweep();
                     triangle.clockLengthCounter();
+                    triangle.clockLinearCounter();
                     break;
             }
         }
