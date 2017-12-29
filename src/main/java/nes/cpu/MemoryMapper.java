@@ -182,49 +182,49 @@ class MemoryMapper {
             // APU and I/O registers
             switch (address) {
                 case 0x4000:
-                    return pair(apu.regSQ1_VOL, RW);
+                    return pair(apu.regSQ1_VOL, WO);
                 case 0x4001:
-                    return pair(apu.regSQ1_SWEEP, RW);
+                    return pair(apu.regSQ1_SWEEP, WO);
                 case 0x4002:
-                    return pair(apu.regSQ1_LO, RW);
+                    return pair(apu.regSQ1_LO, WO);
                 case 0x4003:
-                    return pair(apu.regSQ1_HI, RW);
+                    return pair(apu.regSQ1_HI, WO);
                 case 0x4004:
-                    return pair(apu.regSQ2_VOL, RW);
+                    return pair(apu.regSQ2_VOL, WO);
                 case 0x4005:
-                    return pair(apu.regSQ2_SWEEP, RW);
+                    return pair(apu.regSQ2_SWEEP, WO);
                 case 0x4006:
-                    return pair(apu.regSQ2_LO, RW);
+                    return pair(apu.regSQ2_LO, WO);
                 case 0x4007:
-                    return pair(apu.regSQ2_HI, RW);
+                    return pair(apu.regSQ2_HI, WO);
                 case 0x4008:
-                    return pair(apu.regTRI_LINEAR, RW);
+                    return pair(apu.regTRI_LINEAR, WO);
                 case 0x4009:
                     return pair(apu.regUNUSED1, RW);
                 case 0x400A:
-                    return pair(apu.regTRI_LO, RW);
+                    return pair(apu.regTRI_LO, WO);
                 case 0x400B:
-                    return pair(apu.regTRI_HI, RW);
+                    return pair(apu.regTRI_HI, WO);
                 case 0x400C:
-                    return pair(apu.regNOISE_VOL, RW);
+                    return pair(apu.regNOISE_VOL, WO);
                 case 0x400D:
                     return pair(apu.regUNUSED2, RW);
                 case 0x400E:
-                    return pair(apu.regNOISE_LO, RW);
+                    return pair(apu.regNOISE_LO, WO);
                 case 0x400F:
-                    return pair(apu.regNOISE_HI, RW);
+                    return pair(apu.regNOISE_HI, WO);
                 case 0x4010:
-                    return pair(apu.regDMC_FREQ, RW);
+                    return pair(apu.regDMC_FREQ, WO);
                 case 0x4011:
-                    return pair(apu.regDMC_RAW, RW);
+                    return pair(apu.regDMC_RAW, WO);
                 case 0x4012:
-                    return pair(apu.regDMC_START, RW);
+                    return pair(apu.regDMC_START, WO);
                 case 0x4013:
-                    return pair(apu.regDMC_LEN, RW);
+                    return pair(apu.regDMC_LEN, WO);
                 case 0x4014:
                     return pair(cpu.regOAMDMA, WO);
                 case 0x4015:
-                    return pair(apu.regSND_CHN, RW);
+                    return pair(apu.regSND_CHN, WO);
                 case 0x4016:
                     return pair(cpu.regJOY1, RW);
                 case 0x4017:
