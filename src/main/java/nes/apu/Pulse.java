@@ -14,13 +14,14 @@ public class Pulse {
     private boolean on; // sequencer
     private int sequencerPhase; // 0-7, proceeds downward
     private boolean useConstantVolume; // constant volume or envelope
-    private int volume; // 0-15, also used as the envelope divider period
+    @Getter private int volume; // 0-15, also used as the envelope divider period
     private int timer; // 11 bit, reset when HI written
     @Getter @Setter private int timerReset;
     private int duty; // 0-3
     private int lengthCounter; // ?
-    private boolean lengthCounterHaltFlag; // also used as the envelop loop flag?
+    @Getter private boolean lengthCounterHalt; // also used as the envelop loop flag?
 
+    @Getter private final Envelope envelope;
     @Getter private final Sweep sweep;
 
     private static final Map<Integer, Boolean[]> dutyToWaveform;
@@ -35,6 +36,7 @@ public class Pulse {
     }
 
     Pulse() {
+        envelope = new Envelope(this);
         sweep = new Sweep(this);
     }
 
@@ -46,9 +48,7 @@ public class Pulse {
         timerReset = 0;
         duty = 0;
 
-        startFlag = false;
-        decayLevel = 0;
-
+        envelope.reset();
         sweep.reset();
     }
 
@@ -60,7 +60,7 @@ public class Pulse {
         if (!on) {
             return 0;
         }
-        return useConstantVolume ? volume : decayLevel;
+        return useConstantVolume ? volume : envelope.getDecayLevel();
     }
 
     /**
@@ -110,8 +110,8 @@ public class Pulse {
         this.duty = duty;
     }
 
-    public void setLengthCounterHaltFlag(boolean flag) {
-        this.lengthCounterHaltFlag = flag;
+    public void setLengthCounterHalt(boolean flag) {
+        this.lengthCounterHalt = flag;
     }
 
     public void setUseConstantVolume(boolean useConstantVolume) {
@@ -119,37 +119,8 @@ public class Pulse {
     }
 
     // Envelope
-
-    @Setter private boolean startFlag;
-    private int decayLevel;
-    private int divider;
-
     void clockEnvelope() {
-        if (startFlag) {
-            startFlag = false;
-            decayLevel = 15;
-        } else {
-            clockDivider();
-        }
-    }
-
-    private void clockDivider() {
-        if (divider == 0) {
-            divider = volume;
-            clockDecayLevelCounter();
-        } else {
-            divider--;
-        }
-    }
-
-    private void clockDecayLevelCounter() {
-        if (decayLevel == 0) {
-            if (lengthCounterHaltFlag) {
-                decayLevel = 15;
-            }
-        } else {
-            decayLevel--;
-        }
+        envelope.clock();
     }
 
     // Sweep

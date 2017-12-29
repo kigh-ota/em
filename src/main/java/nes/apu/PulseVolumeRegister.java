@@ -15,7 +15,7 @@ public class PulseVolumeRegister extends APURegister {
     @Override
     public void set(byte value) {
         pulse.setDuty((Byte.toUnsignedInt(value) & 0b11000000) >> 6);
-        pulse.setLengthCounterHaltFlag(BinaryUtil.getBit(value, 6));
+        pulse.setLengthCounterHalt(BinaryUtil.getBit(value, 6));
         pulse.setUseConstantVolume(BinaryUtil.getBit(value, 5));
         pulse.setVolume(Byte.toUnsignedInt(value) & 0b00001111);
     }
