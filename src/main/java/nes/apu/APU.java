@@ -50,11 +50,11 @@ public class APU {
         pulse2 = new Pulse();
 
         regSQ1_VOL = new PulseVolumeRegister(pulse1, this);
-        regSQ1_SWEEP = new PulseSweepRegister(pulse1, this);
+        regSQ1_SWEEP = new PulseSweepRegister(pulse1.getSweep(), this);
         regSQ1_LO = new PulseLowRegister(pulse1, this);
         regSQ1_HI = new PulseHighRegister(pulse1, this);
         regSQ2_VOL = new PulseVolumeRegister(pulse2, this);
-        regSQ2_SWEEP = new PulseSweepRegister(pulse2, this);
+        regSQ2_SWEEP = new PulseSweepRegister(pulse2.getSweep(), this);
         regSQ2_LO = new PulseLowRegister(pulse2, this);
         regSQ2_HI = new PulseHighRegister(pulse2, this);
         regAPUSTATUS = new StatusRegister(pulse1, pulse2, this);
@@ -149,6 +149,8 @@ public class APU {
                     // 2 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    pulse1.clockSweep();
+                    pulse2.clockSweep();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
@@ -162,6 +164,8 @@ public class APU {
                     // 4 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    pulse1.clockSweep();
+                    pulse2.clockSweep();
                     break;
             }
         } else {
@@ -175,6 +179,8 @@ public class APU {
                     // 2 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    pulse1.clockSweep();
+                    pulse2.clockSweep();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
@@ -185,6 +191,8 @@ public class APU {
                     // 4 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    pulse1.clockSweep();
+                    pulse2.clockSweep();
                     break;
             }
         }
