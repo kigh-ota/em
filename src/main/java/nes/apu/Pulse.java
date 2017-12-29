@@ -1,6 +1,7 @@
 package nes.apu;
 
 import com.google.common.collect.ImmutableMap;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
@@ -8,16 +9,17 @@ import java.util.Map;
 @Slf4j
 public class Pulse {
 
+    @Setter
     private boolean enabled;
     private boolean on; // sequencer
     private int sequencerPhase; // 0-7, proceeds downward
-    private int volume; // 0-15
+    private boolean useConstantVolume; // constant volume or envelope
+    private int volume; // 0-15, also used as the envelope divider period
     private int timer; // 11 bit, reset when HI written
     private int timerReset;
     private int duty; // 0-3
     private int lengthCounter; // ?
-    private boolean lengthCounterHalt; // ?
-    private boolean useConstantVolume;
+    private boolean lengthCounterHaltFlag; // also used as the envelop loop flag?
 
     private static final Map<Integer, Boolean[]> dutyToWaveform;
 
@@ -37,6 +39,9 @@ public class Pulse {
         timer = 0;
         timerReset = 0;
         duty = 0;
+
+        startFlag = false;
+        decayLevel = 0;
     }
 
     /**
@@ -44,7 +49,10 @@ public class Pulse {
      * @return 0-15
      */
     int get() {
-        return on ? 15 : 0;
+        if (!on) {
+            return 0;
+        }
+        return useConstantVolume ? volume : decayLevel;
     }
 
     /**
@@ -75,7 +83,38 @@ public class Pulse {
         } else {
             timer--;
         }
+    }
 
+    @Setter private boolean startFlag;
+    private int decayLevel;
+    private int divider;
+
+    void clockEnvelope() {
+        if (startFlag) {
+            startFlag = false;
+            decayLevel = 15;
+        } else {
+            clockDivider();
+        }
+    }
+
+    private void clockDivider() {
+        if (divider == 0) {
+            divider = volume;
+            clockDecayLevelCounter();
+        } else {
+            divider--;
+        }
+    }
+
+    private void clockDecayLevelCounter() {
+        if (decayLevel == 0) {
+            if (lengthCounterHaltFlag) {
+                decayLevel = 15;
+            }
+        } else {
+            decayLevel--;
+        }
     }
 
     private void clockSequencer() {
@@ -87,17 +126,6 @@ public class Pulse {
         }
     }
 
-    public void setEnabled(boolean enabled) {
-        this.enabled = enabled;
-        if (enabled) {
-//            log.warn("enabled {}", this)
-        }
-    }
-
-    public void setOn(boolean on) {
-        this.on = on;
-    }
-
     public void setVolume(int volume) {
         this.volume = volume;
     }
@@ -106,8 +134,8 @@ public class Pulse {
         this.duty = duty;
     }
 
-    public void setLengthCounterHalt(boolean lengthCounterHalt) {
-        this.lengthCounterHalt = lengthCounterHalt;
+    public void setLengthCounterHaltFlag(boolean flag) {
+        this.lengthCounterHaltFlag = flag;
     }
 
     public void setUseConstantVolume(boolean useConstantVolume) {

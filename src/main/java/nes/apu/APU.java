@@ -141,34 +141,50 @@ public class APU {
                     // frame interrupt
                     break;
                 case 7457:
-                    // 1
+                    // 1 envelope & triangles's linear
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
                 case 14913:
-                    // 2
+                    // 2 envelope & triangles's linear, length counter & sweep
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
                 case 22371:
-                    // 3
+                    // 3 envelope & triangles's linear
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
                 case 29828:
                     // frame interrupt
                     break;
                 case 29829:
-                    // 4
+                    // 4 envelope & triangles's linear, length counter & sweep
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
             }
         } else {
             switch ((int) (cycle % frameCounterMode.getCycles())) {
                 case 7457:
-                    // 1
+                    // 1 envelope & triangles's linear
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
                 case 14913:
-                    // 2
+                    // 2 envelope & triangles's linear, length counter & sweep
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
                 case 22371:
-                    // 3
+                    // 3 envelope & triangles's linear
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
                 case 37281:
-                    // 4
+                    // 4 envelope & triangles's linear, length counter & sweep
+                    pulse1.clockEnvelope();
+                    pulse2.clockEnvelope();
                     break;
             }
         }
