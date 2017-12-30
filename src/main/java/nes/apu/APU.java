@@ -1,25 +1,18 @@
 package nes.apu;
 
 import common.ByteRegister;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import nes.cpu.CPU;
 
 import javax.sound.sampled.*;
 import java.util.Random;
 
-import static nes.apu.APU.FrameCounterMode.FIVE_STEP;
-import static nes.apu.APU.FrameCounterMode.FOUR_STEP;
-
 @Slf4j
 public class APU {
 
-    @Setter
-    private CPU cpu;
-
     private SourceDataLine line;
 
+    // Registers
     private final PulseChannel pulse1;
     private final PulseChannel pulse2;
     private final TriangleChannel triangle;
@@ -52,6 +45,8 @@ public class APU {
 
     public final StatusRegister regAPUSTATUS; // $4015
 
+    private final FrameCounter frameCounter;
+
     public APU() {
         pulse1 = new PulseChannel();
         pulse2 = new PulseChannel();
@@ -77,6 +72,12 @@ public class APU {
         regNOISE_HI = new NoiseLengthCounterRegister(noise);
 
         regAPUSTATUS = new StatusRegister(pulse1, pulse2, triangle, noise,this);
+
+        frameCounter = new FrameCounter();
+    }
+
+    public void setCpu(CPU cpu) {
+        this.frameCounter.setCpu(cpu);
     }
 
     private static final int SAMPLE_RATE = 22050;
@@ -91,6 +92,10 @@ public class APU {
 
         pulse1.reset();
         pulse2.reset();
+        triangle.reset();
+        noise.reset();
+
+        frameCounter.reset();
 
         cycle = 0;
         sample = 0;
@@ -144,6 +149,7 @@ public class APU {
 
     private void runStepInner() {
 
+        // Frequency
         if (cycle % 2 == 0) {
             pulse1.clockTimer();
             pulse2.clockTimer();
@@ -151,101 +157,24 @@ public class APU {
             noise.clockTimer();
         }
 
-        FrameCounterMode frameCounterMode = getFrameCounterMode();
-        if (frameCounterMode == FIVE_STEP) {
-            switch ((int) (cycle % frameCounterMode.getCycles())) {
-                case 0:
-                    // frame interrupt
-                    break;
-                case 7457:
-                    // 1 envelope & triangles's linear
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    break;
-                case 14913:
-                    // 2 envelope & triangles's linear, length counter & sweep
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    pulse1.clockLengthCounter();
-                    pulse2.clockLengthCounter();
-                    triangle.clockLengthCounter();
-                    noise.clockLengthCounter();
-                    pulse1.clockSweep();
-                    pulse2.clockSweep();
-                    break;
-                case 22371:
-                    // 3 envelope & triangles's linear
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    break;
-                case 29828:
-                    // frame interrupt
-                    break;
-                case 29829:
-                    // 4 envelope & triangles's linear, length counter & sweep
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    pulse1.clockLengthCounter();
-                    pulse2.clockLengthCounter();
-                    triangle.clockLengthCounter();
-                    noise.clockLengthCounter();
-                    pulse1.clockSweep();
-                    pulse2.clockSweep();
-                    break;
-            }
-        } else {
-            switch ((int) (cycle % frameCounterMode.getCycles())) {
-                case 7457:
-                    // 1 envelope & triangles's linear
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    break;
-                case 14913:
-                    // 2 envelope & triangles's linear, length counter & sweep
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    pulse1.clockLengthCounter();
-                    pulse2.clockLengthCounter();
-                    triangle.clockLengthCounter();
-                    noise.clockLengthCounter();
-                    pulse1.clockSweep();
-                    pulse2.clockSweep();
-                    break;
-                case 22371:
-                    // 3 envelope & triangles's linear
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    break;
-                case 37281:
-                    // 4 envelope & triangles's linear, length counter & sweep
-                    pulse1.clockEnvelope();
-                    pulse2.clockEnvelope();
-                    noise.clockEnvelope();
-                    triangle.clockLinearCounter();
-                    pulse1.clockLengthCounter();
-                    pulse2.clockLengthCounter();
-                    triangle.clockLengthCounter();
-                    noise.clockLengthCounter();
-                    pulse1.clockSweep();
-                    pulse2.clockSweep();
-                    break;
-            }
+        // Envelope, Length Counters, Sweep
+        frameCounter.clock();
+        if (frameCounter.isQuarterFrame()) {
+            pulse1.clockEnvelope();
+            pulse2.clockEnvelope();
+            noise.clockEnvelope();
+            triangle.clockLinearCounter();
+        }
+        if (frameCounter.isHalfFrame()) {
+            pulse1.clockLengthCounter();
+            pulse2.clockLengthCounter();
+            triangle.clockLengthCounter();
+            noise.clockLengthCounter();
+            pulse1.clockSweep();
+            pulse2.clockSweep();
         }
 
+        // Sampling, Mixing, Output
         if (cycle % (getBaseFrequency() / SAMPLE_RATE) == 0) {
             // mix pulse1 & pulse2
             buffer[sample % BUFFER_LENGTH] = (byte)(mixPulse()+ mixTriangleNoiseDMC());
@@ -253,19 +182,6 @@ public class APU {
 //            log.warn("{}", buffer[sample % BUFFER_LENGTH]);
             sample++;
             if (sample % BUFFER_LENGTH == 0) {
-                // when buffer is filled
-
-//                if (line.getBufferSize() - line.available() == 0) {
-//                    freqParam -= 0.001;
-//                    log.warn("freqParam={}", freqParam);
-//                } else {
-//                    freqParam += 0.001;
-//                    if (freqParam >= 1.0) {
-//                        freqParam = 1.0;
-//                    }
-//                    log.warn("freqParam={}", freqParam);
-//                }
-
                 line.write(buffer, 0, BUFFER_LENGTH);
             }
         }
@@ -291,22 +207,6 @@ public class APU {
 
     int getBaseFrequency() {
         return (int)(BASE_FREQ * freqParam);
-    }
-
-    enum FrameCounterMode {
-        FOUR_STEP(29830), FIVE_STEP(37282);
-
-        @Getter
-        private final int cycles;
-
-        FrameCounterMode(int cycles) {
-            this.cycles = cycles;
-        }
-    }
-
-
-    FrameCounterMode getFrameCounterMode() {
-        return cpu.regJOY2.getBit(7) ? FIVE_STEP : FOUR_STEP;
     }
 
     // TODO frame interrupt
