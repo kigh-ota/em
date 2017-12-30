@@ -1,19 +1,20 @@
-package nes.apu;
+package nes.apu.register;
 
 import common.BinaryUtil;
+import common.ByteRegister;
 import nes.apu.channel.NoiseChannel;
 import nes.apu.channel.PulseChannel;
 import nes.apu.channel.TriangleChannel;
 
-public class StatusRegister extends APURegister {
+public class StatusRegister extends ByteRegister {
 
     PulseChannel pulse1;
     PulseChannel pulse2;
     TriangleChannel triangle;
     NoiseChannel noise;
 
-    public StatusRegister(PulseChannel pulse1, PulseChannel pulse2, TriangleChannel triangle, NoiseChannel noise, APU apu) {
-        super(apu);
+    public StatusRegister(PulseChannel pulse1, PulseChannel pulse2, TriangleChannel triangle, NoiseChannel noise) {
+        super((byte)0);
         this.pulse1 = pulse1;
         this.pulse2 = pulse2;
         this.triangle = triangle;

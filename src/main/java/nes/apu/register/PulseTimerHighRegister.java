@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.register;
 
 import nes.apu.channel.PulseChannel;
 
@@ -6,8 +6,8 @@ public class PulseTimerHighRegister extends TimerHighRegister {
 
     private final PulseChannel pulse;
 
-    PulseTimerHighRegister(PulseChannel channel, APU apu) {
-        super(channel, apu);
+    public PulseTimerHighRegister(PulseChannel channel) {
+        super(channel);
         pulse = channel;
     }
 

@@ -1,13 +1,14 @@
-package nes.apu;
+package nes.apu.register;
 
+import common.ByteRegister;
 import nes.apu.channel.Channel;
 
-public class TimerLowRegister extends APURegister {
+public class TimerLowRegister extends ByteRegister {
 
     private final Channel pulse;
 
-    TimerLowRegister(Channel pulse, APU apu) {
-        super(apu);
+    public TimerLowRegister(Channel pulse) {
+        super((byte)0);
         this.pulse = pulse;
     }
 

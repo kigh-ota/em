@@ -1,13 +1,14 @@
-package nes.apu;
+package nes.apu.register;
 
+import common.ByteRegister;
 import nes.apu.channel.ChannelWithLengthCounter;
 
-public class TimerHighRegister extends APURegister {
+public class TimerHighRegister extends ByteRegister {
 
     protected final ChannelWithLengthCounter channel;
 
-    TimerHighRegister(ChannelWithLengthCounter channel, APU apu) {
-        super(apu);
+    TimerHighRegister(ChannelWithLengthCounter channel) {
+        super((byte)0);
         this.channel = channel;
     }
 

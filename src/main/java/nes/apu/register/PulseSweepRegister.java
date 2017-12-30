@@ -1,15 +1,16 @@
-package nes.apu;
+package nes.apu.register;
 
 import common.BinaryUtil;
+import common.ByteRegister;
 import nes.apu.channel.Sweep;
 
 // Sweep
-public class PulseSweepRegister extends APURegister {
+public class PulseSweepRegister extends ByteRegister {
 
     private final Sweep sweep;
 
-    PulseSweepRegister(Sweep sweep, APU apu) {
-        super(apu);
+    public PulseSweepRegister(Sweep sweep) {
+        super((byte)0);
         this.sweep = sweep;
     }
 

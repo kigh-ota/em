@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import nes.apu.channel.NoiseChannel;
 import nes.apu.channel.PulseChannel;
 import nes.apu.channel.TriangleChannel;
+import nes.apu.register.*;
 import nes.cpu.CPU;
 
 import javax.sound.sampled.*;
@@ -55,25 +56,25 @@ public class APU {
         triangle = new TriangleChannel();
         noise = new NoiseChannel();
 
-        regSQ1_VOL = new PulseVolumeRegister(pulse1, this);
-        regSQ1_SWEEP = new PulseSweepRegister(pulse1.getSweep(), this);
-        regSQ1_LO = new TimerLowRegister(pulse1, this);
-        regSQ1_HI = new PulseTimerHighRegister(pulse1, this);
+        regSQ1_VOL = new PulseVolumeRegister(pulse1);
+        regSQ1_SWEEP = new PulseSweepRegister(pulse1.getSweep());
+        regSQ1_LO = new TimerLowRegister(pulse1);
+        regSQ1_HI = new PulseTimerHighRegister(pulse1);
 
-        regSQ2_VOL = new PulseVolumeRegister(pulse2, this);
-        regSQ2_SWEEP = new PulseSweepRegister(pulse2.getSweep(), this);
-        regSQ2_LO = new TimerLowRegister(pulse2, this);
-        regSQ2_HI = new PulseTimerHighRegister(pulse2, this);
+        regSQ2_VOL = new PulseVolumeRegister(pulse2);
+        regSQ2_SWEEP = new PulseSweepRegister(pulse2.getSweep());
+        regSQ2_LO = new TimerLowRegister(pulse2);
+        regSQ2_HI = new PulseTimerHighRegister(pulse2);
 
-        regTRI_LINEAR = new TriangleLinearRegister(triangle, this);
-        regTRI_LO = new TimerLowRegister(triangle, this);
-        regTRI_HI = new TriangleTimerHighRegister(triangle, this);
+        regTRI_LINEAR = new TriangleLinearRegister(triangle);
+        regTRI_LO = new TimerLowRegister(triangle);
+        regTRI_HI = new TriangleTimerHighRegister(triangle);
 
         regNOISE_VOL = new NoiseVolumeRegister(noise);
         regNOISE_LO = new NoisePeriodRegister(noise);
         regNOISE_HI = new NoiseLengthCounterRegister(noise);
 
-        regAPUSTATUS = new StatusRegister(pulse1, pulse2, triangle, noise,this);
+        regAPUSTATUS = new StatusRegister(pulse1, pulse2, triangle, noise);
 
         frameCounter = new FrameCounter();
     }

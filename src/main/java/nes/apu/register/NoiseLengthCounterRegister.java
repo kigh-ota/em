@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.register;
 
 import common.ByteRegister;
 import nes.apu.channel.NoiseChannel;

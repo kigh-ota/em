@@ -1,14 +1,15 @@
-package nes.apu;
+package nes.apu.register;
 
 import common.BinaryUtil;
+import common.ByteRegister;
 import nes.apu.channel.TriangleChannel;
 
-public class TriangleLinearRegister extends APURegister {
+public class TriangleLinearRegister extends ByteRegister {
 
     private final TriangleChannel triangle;
 
-    TriangleLinearRegister(TriangleChannel triangle, APU apu) {
-        super(apu);
+    public TriangleLinearRegister(TriangleChannel triangle) {
+        super((byte)0);
         this.triangle = triangle;
     }
 
