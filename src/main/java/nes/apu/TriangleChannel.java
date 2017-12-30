@@ -2,7 +2,7 @@ package nes.apu;
 
 import lombok.Getter;
 
-public class TriangleChannel extends Channel {
+public class TriangleChannel extends ChannelWithLengthCounter {
 
     private int phase;
 
@@ -26,8 +26,13 @@ public class TriangleChannel extends Channel {
     }
 
     @Override
-    int get() {
-        return (enabled && !lengthCounter.isMuting() && !linearCounter.isMuting()) ? WAVEFORM[phase] : 0;
+    protected int getSignalInternal() {
+        return WAVEFORM[phase];
+    }
+
+    @Override
+    protected boolean isMuted() {
+        return super.isMuted() || linearCounter.isMuting();
     }
 
     @Override

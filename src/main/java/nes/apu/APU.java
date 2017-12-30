@@ -20,6 +20,11 @@ public class APU {
 
     private SourceDataLine line;
 
+    private final PulseChannel pulse1;
+    private final PulseChannel pulse2;
+    private final TriangleChannel triangle;
+    private final NoiseChannel noise;
+
     public final PulseVolumeRegister regSQ1_VOL; // $4000
     public final PulseSweepRegister regSQ1_SWEEP; // $4001
     public final TimerLowRegister regSQ1_LO; // $4002
@@ -35,34 +40,43 @@ public class APU {
     public final TimerLowRegister regTRI_LO; // $400A
     public final TriangleTimerHighRegister regTRI_HI; // $400B
 
-    public final ByteRegister regNOISE_VOL = new ByteRegister((byte)0); // $400C
+    public final NoiseVolumeRegister regNOISE_VOL; // $400C
     public final ByteRegister regUNUSED2 = new ByteRegister((byte)0); // $400D
-    public final ByteRegister regNOISE_LO = new ByteRegister((byte)0); // $400E
-    public final ByteRegister regNOISE_HI = new ByteRegister((byte)0); // $400F
+    public final NoisePeriodRegister regNOISE_LO; // $400E
+    public final NoiseLengthCounterRegister regNOISE_HI; // $400F
 
     public final ByteRegister regDMC_FREQ = new ByteRegister((byte)0); // $4010
     public final ByteRegister regDMC_RAW = new ByteRegister((byte)0); // $4011
     public final ByteRegister regDMC_START = new ByteRegister((byte)0); // $4012
     public final ByteRegister regDMC_LEN = new ByteRegister((byte)0); // $4013
+
     public final StatusRegister regAPUSTATUS; // $4015
 
     public APU() {
         pulse1 = new PulseChannel();
         pulse2 = new PulseChannel();
         triangle = new TriangleChannel();
+        noise = new NoiseChannel();
 
         regSQ1_VOL = new PulseVolumeRegister(pulse1, this);
         regSQ1_SWEEP = new PulseSweepRegister(pulse1.getSweep(), this);
         regSQ1_LO = new TimerLowRegister(pulse1, this);
         regSQ1_HI = new PulseTimerHighRegister(pulse1, this);
+
         regSQ2_VOL = new PulseVolumeRegister(pulse2, this);
         regSQ2_SWEEP = new PulseSweepRegister(pulse2.getSweep(), this);
         regSQ2_LO = new TimerLowRegister(pulse2, this);
         regSQ2_HI = new PulseTimerHighRegister(pulse2, this);
+
         regTRI_LINEAR = new TriangleLinearRegister(triangle, this);
         regTRI_LO = new TimerLowRegister(triangle, this);
         regTRI_HI = new TriangleTimerHighRegister(triangle, this);
-        regAPUSTATUS = new StatusRegister(pulse1, pulse2, triangle, this);
+
+        regNOISE_VOL = new NoiseVolumeRegister(noise);
+        regNOISE_LO = new NoisePeriodRegister(noise);
+        regNOISE_HI = new NoiseLengthCounterRegister(noise);
+
+        regAPUSTATUS = new StatusRegister(pulse1, pulse2, triangle, noise,this);
     }
 
     private static final int SAMPLE_RATE = 22050;
@@ -94,10 +108,6 @@ public class APU {
 
     private long cycle;
     private int sample;
-
-    private final PulseChannel pulse1;
-    private final PulseChannel pulse2;
-    private final TriangleChannel triangle;
 
     /**
      * 各チャネル
@@ -138,6 +148,7 @@ public class APU {
             pulse1.clockTimer();
             pulse2.clockTimer();
             triangle.clockTimer();
+            noise.clockTimer();
         }
 
         FrameCounterMode frameCounterMode = getFrameCounterMode();
@@ -150,23 +161,27 @@ public class APU {
                     // 1 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    noise.clockEnvelope();
                     triangle.clockLinearCounter();
                     break;
                 case 14913:
                     // 2 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
-                    pulse1.clockSweep();
-                    pulse2.clockSweep();
+                    noise.clockEnvelope();
+                    triangle.clockLinearCounter();
                     pulse1.clockLengthCounter();
                     pulse2.clockLengthCounter();
                     triangle.clockLengthCounter();
-                    triangle.clockLinearCounter();
+                    noise.clockLengthCounter();
+                    pulse1.clockSweep();
+                    pulse2.clockSweep();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    noise.clockEnvelope();
                     triangle.clockLinearCounter();
                     break;
                 case 29828:
@@ -176,12 +191,14 @@ public class APU {
                     // 4 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
-                    pulse1.clockSweep();
-                    pulse2.clockSweep();
+                    noise.clockEnvelope();
+                    triangle.clockLinearCounter();
                     pulse1.clockLengthCounter();
                     pulse2.clockLengthCounter();
                     triangle.clockLengthCounter();
-                    triangle.clockLinearCounter();
+                    noise.clockLengthCounter();
+                    pulse1.clockSweep();
+                    pulse2.clockSweep();
                     break;
             }
         } else {
@@ -190,38 +207,48 @@ public class APU {
                     // 1 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    noise.clockEnvelope();
                     triangle.clockLinearCounter();
                     break;
                 case 14913:
                     // 2 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    noise.clockEnvelope();
+                    triangle.clockLinearCounter();
+                    pulse1.clockLengthCounter();
+                    pulse2.clockLengthCounter();
+                    triangle.clockLengthCounter();
+                    noise.clockLengthCounter();
                     pulse1.clockSweep();
                     pulse2.clockSweep();
-                    triangle.clockLengthCounter();
-                    triangle.clockLinearCounter();
                     break;
                 case 22371:
                     // 3 envelope & triangles's linear
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    noise.clockEnvelope();
                     triangle.clockLinearCounter();
                     break;
                 case 37281:
                     // 4 envelope & triangles's linear, length counter & sweep
                     pulse1.clockEnvelope();
                     pulse2.clockEnvelope();
+                    noise.clockEnvelope();
+                    triangle.clockLinearCounter();
+                    pulse1.clockLengthCounter();
+                    pulse2.clockLengthCounter();
+                    triangle.clockLengthCounter();
+                    noise.clockLengthCounter();
                     pulse1.clockSweep();
                     pulse2.clockSweep();
-                    triangle.clockLengthCounter();
-                    triangle.clockLinearCounter();
                     break;
             }
         }
 
         if (cycle % (getBaseFrequency() / SAMPLE_RATE) == 0) {
             // mix pulse1 & pulse2
-            buffer[sample % BUFFER_LENGTH] = (byte)(mixPulse() + mixTriangleNoiseDMC());
+            buffer[sample % BUFFER_LENGTH] = (byte)(mixPulse()+ mixTriangleNoiseDMC());
 //            buffer[sample % BUFFER_LENGTH] = (byte)(mixTriangleNoiseDMC());
 //            log.warn("{}", buffer[sample % BUFFER_LENGTH]);
             sample++;
@@ -245,7 +272,7 @@ public class APU {
     }
 
     private byte mixPulse() {
-        int pulse = pulse1.get() + pulse2.get();
+        int pulse = pulse1.getSignal() + pulse2.getSignal();
         if (pulse == 0) {
             return 0;
         }
@@ -254,11 +281,11 @@ public class APU {
     }
 
     private byte mixTriangleNoiseDMC() {
-        int tnd = triangle.get();
+        int tnd = triangle.getSignal() + noise.getSignal();
         if (tnd == 0) {
             return 0;
         }
-        double level = 159.79 / ( 1.0 / (triangle.get() / 8227.0) + 100.0 );
+        double level = 159.79 / ( 1.0 / (triangle.getSignal() / 8227.0 + noise.getSignal() / 12241.0) + 100.0 );
         return (byte)(255 * level);
     }
 

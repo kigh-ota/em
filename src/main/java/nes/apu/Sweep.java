@@ -33,7 +33,7 @@ public class Sweep {
             int targetPeriod = calculateTargetPeriod();
             muting = targetPeriod >= 0x800;
             if (!muting) {
-                pulse.setTimerReset(targetPeriod);
+                pulse.setTimerPeriod(targetPeriod);
             }
         }
         if (divider == 0 || reloadFlag) {
@@ -45,7 +45,7 @@ public class Sweep {
     }
 
     private int calculateTargetPeriod() {
-        int base = pulse.getTimerReset();
+        int base = pulse.getTimerPeriod();
         int diff = base >> shiftCount;
         return negateFlag ? base - diff : base + diff;
     }

@@ -7,12 +7,14 @@ public class StatusRegister extends APURegister {
     PulseChannel pulse1;
     PulseChannel pulse2;
     TriangleChannel triangle;
+    NoiseChannel noise;
 
-    public StatusRegister(PulseChannel pulse1, PulseChannel pulse2, TriangleChannel triangle, APU apu) {
+    public StatusRegister(PulseChannel pulse1, PulseChannel pulse2, TriangleChannel triangle, NoiseChannel noise, APU apu) {
         super(apu);
         this.pulse1 = pulse1;
         this.pulse2 = pulse2;
         this.triangle = triangle;
+        this.noise = noise;
     }
 
     @Override
@@ -21,6 +23,7 @@ public class StatusRegister extends APURegister {
         pulse1.setEnabled(BinaryUtil.getBit(value, 0));
         pulse2.setEnabled(BinaryUtil.getBit(value, 1));
         triangle.setEnabled(BinaryUtil.getBit(value, 2));
+        noise.setEnabled(BinaryUtil.getBit(value, 3));
     }
 
     // TODO implement get()

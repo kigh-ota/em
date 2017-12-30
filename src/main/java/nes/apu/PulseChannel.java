@@ -2,22 +2,21 @@ package nes.apu;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.Map;
 
 @Slf4j
-public class PulseChannel extends Channel {
+public class PulseChannel extends ChannelWithEnvelope {
 
-    private boolean on; // sequencer
     private int sequencerPhase; // 0-7, proceeds downward
-    private boolean useConstantVolume; // constant volume or envelope
-    @Getter private int volume; // 0-15, also used as the envelope divider period
+
+    @Setter
     private int duty; // 0-3
 
-    // Gates
-    @Getter private final Envelope envelope;
-    @Getter private final Sweep sweep;
+    @Getter
+    private final Sweep sweep;
 
     private static final Map<Integer, Boolean[]> DUTY_TO_WAVEFORM;
 
@@ -31,28 +30,27 @@ public class PulseChannel extends Channel {
     }
 
     PulseChannel() {
-        envelope = new Envelope(this);
+        super();
         sweep = new Sweep(this);
     }
 
     @Override
     void reset() {
         super.reset();
-        on = false;
         sequencerPhase = 0;
-        volume = 0;
         duty = 0;
 
-        envelope.reset();
         sweep.reset();
     }
 
     @Override
-    int get() {
-        if (!on) {
-            return 0;
-        }
-        return useConstantVolume ? volume : envelope.getDecayLevel();
+    protected int getSignalInternal() {
+        return DUTY_TO_WAVEFORM.get(duty)[sequencerPhase] ? getEnvelopedVolume() : 0;
+    }
+
+    @Override
+    protected boolean isMuted() {
+        return super.isMuted() || timerPeriod < 8 || sweep.isMuting();
     }
 
     void resetSequencerPhase() {
@@ -61,33 +59,11 @@ public class PulseChannel extends Channel {
 
     @Override
     protected void clockSequencer() {
-        if (!enabled || timerReset < 8 || sweep.isMuting() || lengthCounter.isMuting()) {
-            on = false;
-        } else {
-            on = DUTY_TO_WAVEFORM.get(duty)[sequencerPhase];
-        }
         if (sequencerPhase == 0) {
             sequencerPhase = 7;
         } else {
             sequencerPhase--;
         }
-    }
-
-    public void setVolume(int volume) {
-        this.volume = volume;
-    }
-
-    public void setDuty(int duty) {
-        this.duty = duty;
-    }
-
-    public void setUseConstantVolume(boolean useConstantVolume) {
-        this.useConstantVolume = useConstantVolume;
-    }
-
-    // Envelope
-    void clockEnvelope() {
-        envelope.clock();
     }
 
     // Sweep

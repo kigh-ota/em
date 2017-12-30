@@ -5,29 +5,21 @@ import lombok.Setter;
 
 public abstract class Channel {
 
-    Channel() {
-        lengthCounter = new LengthCounter(this);
-    }
-
-    @Getter
-    protected LengthCounter lengthCounter;
-
-    @Getter
-    protected boolean lengthCounterHalt; // also used as the envelop loop flag
+    Channel() { }
 
     @Setter
     @Getter
     protected boolean enabled;
 
-    protected int timer; // 11 bit, reset when HI written
+    protected int timer; // for adjusting frequency. 11 bit, reset when HI written
 
     @Getter
     @Setter
-    protected int timerReset;
+    protected int timerPeriod;
 
     void clockTimer() {
         if (timer == 0) {
-            timer = timerReset;
+            timer = timerPeriod;
             clockSequencer();
         } else {
             timer--;
@@ -36,25 +28,37 @@ public abstract class Channel {
 
     void reset() {
         timer = 0;
-        timerReset = 0;
-        lengthCounter.reset();
+        timerPeriod = 0;
+        enabled = false;
     }
 
     /**
      *
      * @return 0-15
      */
-    abstract int get();
+    final int getSignal() {
+        if (isMuted()) {
+            return 0;
+        }
+        return getSignalInternal();
+    };
+
+    // override to give waveform
+    abstract protected int getSignalInternal();
+
+    // override to give mute condition
+    protected boolean isMuted() {
+        return !enabled;
+    }
 
     abstract protected void clockSequencer();
-
 
     /**
      *
      * @param value 0-255
      */
     void setTimerLow(int value) {
-        timerReset = (timerReset & 0b11100000000) | value;
+        timerPeriod = (timerPeriod & 0b11100000000) | value;
     }
 
     /**
@@ -62,16 +66,7 @@ public abstract class Channel {
      * @param value 0-7
      */
     void setTimerHigh(int value) {
-        timerReset = (timerReset & 0b00011111111) | (value << 8);
-    }
-
-    // Length Counter
-    void clockLengthCounter() {
-        lengthCounter.clock();
-    }
-
-    public void setLengthCounterHalt(boolean flag) {
-        this.lengthCounterHalt = flag;
+        timerPeriod = (timerPeriod & 0b00011111111) | (value << 8);
     }
 
 }

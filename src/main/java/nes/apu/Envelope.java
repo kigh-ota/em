@@ -5,7 +5,7 @@ import lombok.Setter;
 
 public class Envelope {
 
-    private final PulseChannel pulse;
+    private final ChannelWithEnvelope channel;
 
     @Setter
     private boolean startFlag;
@@ -15,8 +15,8 @@ public class Envelope {
 
     private int divider;
 
-    Envelope(PulseChannel pulse) {
-        this.pulse = pulse;
+    Envelope(ChannelWithEnvelope channel) {
+        this.channel = channel;
     }
 
     void reset() {
@@ -36,7 +36,7 @@ public class Envelope {
 
     private void clockDivider() {
         if (divider == 0) {
-            divider = pulse.getVolume();
+            divider = channel.getVolume();
             clockDecayLevelCounter();
         } else {
             divider--;
@@ -45,13 +45,12 @@ public class Envelope {
 
     private void clockDecayLevelCounter() {
         if (decayLevel == 0) {
-            if (pulse.isLengthCounterHalt()) {
+            if (channel.isLengthCounterHalt()) {
                 decayLevel = 15;
             }
         } else {
             decayLevel--;
         }
     }
-
 
 }

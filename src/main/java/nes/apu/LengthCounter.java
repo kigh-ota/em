@@ -21,11 +21,11 @@ public class LengthCounter {
             32, 30
     };
 
-    private final Channel channel;
+    private final ChannelWithLengthCounter channel;
 
     private int value;
 
-    LengthCounter(Channel channel) {
+    LengthCounter(ChannelWithLengthCounter channel) {
         this.channel = channel;
     }
 

@@ -1,28 +1,28 @@
 package nes;
 
+import nes.apu.APU;
 import nes.cpu.CPU;
 import nes.ppu.PPU;
+import nes.screen.InfoScreen;
 import nes.screen.MainScreen;
-import nes.screen.MainScreenImpl;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 public class NesEmulator {
-    public void start() {
-//        NesData nesData = loadRom(System.getProperty("user.home") + "/sample1.nes");
-        NesData nesData = loadRom(System.getProperty("user.home") + "/color_test.nes");
-//        NesData nesData = loadRom(System.getProperty("user.home") + "/sprite_ram.nes");
+    public void start(String romFileName) {
+        NesData nesData = loadRom(romFileName);
 
         Controller controller1 = new Controller();
 
-        MainScreen mainScreen = new MainScreenImpl(controller1);
+        MainScreen mainScreen = new MainScreen(controller1);
+        InfoScreen infoScreen = new InfoScreen();
 
-        PPU ppu = new PPU(nesData.characterRom, nesData.mirroring, mainScreen);
-        CPU cpu = new CPU(ppu, nesData.programRom, controller1);
+        PPU ppu = new PPU(nesData.characterRom, nesData.mirroring, mainScreen, infoScreen);
+        APU apu = new APU();
+        CPU cpu = new CPU(ppu, apu, nesData.programRom, controller1);
         ppu.setCpu(cpu);
-
 
 //        startScreen(ppu, cpu);
         new Thread(ppu).start();

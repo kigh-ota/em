@@ -37,3 +37,9 @@ tasks.withType(JavaExec) {
         loglevel: System.getProperty('loglevel', 'INFO')
     ]
 }
+
+run {
+    if (project.hasProperty('args')) {
+        args(project.args.split('\\s+'))
+    }
+}

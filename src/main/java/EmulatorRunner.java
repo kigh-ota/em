@@ -12,6 +12,6 @@ public class EmulatorRunner {
 //        TD4Emulator td4Simulator = new TD4Emulator();
 //        td4Simulator.start(TD4Emulator.ClockType.FAST);
 //        new NesEmulator().start();
-        new NesEmulatorSingleThread().start();
+        new NesEmulatorSingleThread().start(args[0]);
     }
 }

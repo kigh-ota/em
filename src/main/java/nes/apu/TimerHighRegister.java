@@ -2,9 +2,9 @@ package nes.apu;
 
 public class TimerHighRegister extends APURegister {
 
-    protected final Channel channel;
+    protected final ChannelWithLengthCounter channel;
 
-    TimerHighRegister(Channel channel, APU apu) {
+    TimerHighRegister(ChannelWithLengthCounter channel, APU apu) {
         super(apu);
         this.channel = channel;
     }
