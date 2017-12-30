@@ -2,10 +2,12 @@ package nes.apu;
 
 import common.ByteRegister;
 import lombok.extern.slf4j.Slf4j;
+import nes.apu.channel.NoiseChannel;
+import nes.apu.channel.PulseChannel;
+import nes.apu.channel.TriangleChannel;
 import nes.cpu.CPU;
 
 import javax.sound.sampled.*;
-import java.util.Random;
 
 @Slf4j
 public class APU {
@@ -102,8 +104,6 @@ public class APU {
         freqParam = 0.7;
     }
 
-    private Random random = new Random();
-
     private static final int BASE_FREQ = 1789773; // Hz
     private static final int BUFFER_LENGTH = 110;
 
@@ -114,34 +114,6 @@ public class APU {
     private long cycle;
     private int sample;
 
-    /**
-     * 各チャネル
-     * - 可変レートタイマー
-     * - フレームカウンタからのクロックで駆動される変調器
-     *
-     * STATUS($4015)で各チャネルをON/OFFできる
-     * 各チャネルの出力は非線形ミキシングされる
-     *
-     * 矩形波・三角波・雑音：
-     * - すべてのlength counterが非ゼロのときに波形を再生する
-     *
-     * 矩形波：
-     * - freqがある閾値以上の場合に再生しない
-     * - sweep towards lower freq.
-     * t = ($4003:2-0)($4002)の11bit
-     * freq = 1.789773MHz / (16 * (t + 1))
-     *   ただしt<8なら再生しない
-     * duty = ($4000:8-7)の2bit
-     *   0: 01000000
-     *   1: 01100000
-     *   2: 01111000
-     *   3: 10011111
-     * constant volume flag = $4000:4 (0: エンベロープ/1: 定音量)
-     * V = $4000:3-0
-     * エンベロープ
-     *  start flag: offならdividerがクロック
-     *            : onならoffにして、decay level counterが15になる
-     */
     public void runStep() {
         runStepInner();
         cycle++;

@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.channel;
 
 import com.google.common.collect.ImmutableMap;
 import lombok.Getter;
@@ -29,13 +29,13 @@ public class PulseChannel extends ChannelWithEnvelope {
         DUTY_TO_WAVEFORM = builder.build();
     }
 
-    PulseChannel() {
+    public PulseChannel() {
         super();
         sweep = new Sweep(this);
     }
 
     @Override
-    void reset() {
+    public void reset() {
         super.reset();
         sequencerPhase = 0;
         duty = 0;
@@ -53,7 +53,7 @@ public class PulseChannel extends ChannelWithEnvelope {
         return super.isMuted() || timerPeriod < 8 || sweep.isMuting();
     }
 
-    void resetSequencerPhase() {
+    public void resetSequencerPhase() {
         sequencerPhase = 0;
     }
 
@@ -67,7 +67,7 @@ public class PulseChannel extends ChannelWithEnvelope {
     }
 
     // Sweep
-    void clockSweep() {
+    public void clockSweep() {
         sweep.clock();
     }
 

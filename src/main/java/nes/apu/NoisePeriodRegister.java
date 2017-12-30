@@ -2,6 +2,7 @@ package nes.apu;
 
 import common.BinaryUtil;
 import common.ByteRegister;
+import nes.apu.channel.NoiseChannel;
 
 public class NoisePeriodRegister extends ByteRegister {
 

@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.channel;
 
 public class LengthCounter {
 
@@ -48,7 +48,7 @@ public class LengthCounter {
         return value == 0;
     }
 
-    void setValue(int key) {
+    public void setValue(int key) {
         if (!channel.isEnabled()) {
             return;
         }

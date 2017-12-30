@@ -1,6 +1,9 @@
 package nes.apu;
 
 import common.BinaryUtil;
+import nes.apu.channel.NoiseChannel;
+import nes.apu.channel.PulseChannel;
+import nes.apu.channel.TriangleChannel;
 
 public class StatusRegister extends APURegister {
 

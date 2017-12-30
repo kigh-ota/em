@@ -1,6 +1,7 @@
 package nes.apu;
 
 import common.BinaryUtil;
+import nes.apu.channel.PulseChannel;
 
 // Duty, Length counter halt, Volume/Envelope flag, Volume
 public class PulseVolumeRegister extends APURegister {

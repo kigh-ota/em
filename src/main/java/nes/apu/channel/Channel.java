@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.channel;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +17,7 @@ public abstract class Channel {
     @Setter
     protected int timerPeriod;
 
-    void clockTimer() {
+    public void clockTimer() {
         if (timer == 0) {
             timer = timerPeriod;
             clockSequencer();
@@ -36,7 +36,7 @@ public abstract class Channel {
      *
      * @return 0-15
      */
-    final int getSignal() {
+    public final int getSignal() {
         if (isMuted()) {
             return 0;
         }
@@ -57,7 +57,7 @@ public abstract class Channel {
      *
      * @param value 0-255
      */
-    void setTimerLow(int value) {
+    public void setTimerLow(int value) {
         timerPeriod = (timerPeriod & 0b11100000000) | value;
     }
 
@@ -65,7 +65,7 @@ public abstract class Channel {
      *
      * @param value 0-7
      */
-    void setTimerHigh(int value) {
+    public void setTimerHigh(int value) {
         timerPeriod = (timerPeriod & 0b00011111111) | (value << 8);
     }
 

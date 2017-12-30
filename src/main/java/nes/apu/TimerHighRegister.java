@@ -1,5 +1,7 @@
 package nes.apu;
 
+import nes.apu.channel.ChannelWithLengthCounter;
+
 public class TimerHighRegister extends APURegister {
 
     protected final ChannelWithLengthCounter channel;

@@ -1,5 +1,7 @@
 package nes.apu;
 
+import nes.apu.channel.PulseChannel;
+
 public class PulseTimerHighRegister extends TimerHighRegister {
 
     private final PulseChannel pulse;

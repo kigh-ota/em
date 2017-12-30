@@ -1,5 +1,7 @@
 package nes.apu;
 
+import nes.apu.channel.Channel;
+
 public class TimerLowRegister extends APURegister {
 
     private final Channel pulse;

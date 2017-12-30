@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.channel;
 
 import lombok.Getter;
 
@@ -14,12 +14,12 @@ public class TriangleChannel extends ChannelWithLengthCounter {
     @Getter
     private final LinearCounter linearCounter;
 
-    TriangleChannel() {
+    public TriangleChannel() {
         linearCounter = new LinearCounter(this);
     }
 
     @Override
-    void reset() {
+    public void reset() {
         super.reset();
         phase = 0;
         linearCounter.reset();
@@ -44,7 +44,7 @@ public class TriangleChannel extends ChannelWithLengthCounter {
         }
     }
 
-    void clockLinearCounter() {
+    public void clockLinearCounter() {
         linearCounter.clock();
     }
 

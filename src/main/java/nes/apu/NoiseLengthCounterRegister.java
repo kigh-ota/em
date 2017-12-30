@@ -1,6 +1,7 @@
 package nes.apu;
 
 import common.ByteRegister;
+import nes.apu.channel.NoiseChannel;
 
 public class NoiseLengthCounterRegister extends ByteRegister {
 

@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.channel;
 
 import lombok.Getter;
 
@@ -22,7 +22,7 @@ public abstract class ChannelWithLengthCounter extends Channel {
     }
 
     // Length Counter
-    void clockLengthCounter() {
+    public void clockLengthCounter() {
         lengthCounter.clock();
     }
 

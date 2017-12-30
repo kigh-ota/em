@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.channel;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +33,7 @@ public abstract class ChannelWithEnvelope extends ChannelWithLengthCounter {
     }
 
     // Envelope
-    void clockEnvelope() {
+    public void clockEnvelope() {
         envelope.clock();
     }
 }

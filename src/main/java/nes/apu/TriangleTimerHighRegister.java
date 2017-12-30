@@ -1,5 +1,7 @@
 package nes.apu;
 
+import nes.apu.channel.TriangleChannel;
+
 public class TriangleTimerHighRegister extends TimerHighRegister {
 
     private final TriangleChannel triangle;

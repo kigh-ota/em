@@ -1,6 +1,7 @@
 package nes.apu;
 
 import common.BinaryUtil;
+import nes.apu.channel.Sweep;
 
 // Sweep
 public class PulseSweepRegister extends APURegister {

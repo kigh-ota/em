@@ -1,4 +1,4 @@
-package nes.apu;
+package nes.apu.channel;
 
 import lombok.Setter;
 

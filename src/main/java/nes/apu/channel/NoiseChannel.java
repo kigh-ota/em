@@ -1,11 +1,11 @@
-package nes.apu;
+package nes.apu.channel;
 
 import common.BinaryUtil;
 import lombok.Setter;
 
 public class NoiseChannel extends ChannelWithEnvelope {
 
-    NoiseChannel() {
+    public NoiseChannel() {
         super();
         shiftRegister = 1;
     }
@@ -16,7 +16,7 @@ public class NoiseChannel extends ChannelWithEnvelope {
     private int shiftRegister;
 
     @Override
-    void reset() {
+    public void reset() {
         super.reset();
         modeFlag = false;
     }
@@ -47,7 +47,7 @@ public class NoiseChannel extends ChannelWithEnvelope {
      *
      * @param key 0-15
      */
-    void setNoisePeriod(int key) {
+    public void setNoisePeriod(int key) {
         timerPeriod = PERIOD[key];
     }
 }
