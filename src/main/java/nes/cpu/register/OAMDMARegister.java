@@ -20,7 +20,7 @@ public class OAMDMARegister implements ByteRegister {
         final int base = Byte.toUnsignedInt(value) * 0x100;
         for (int offset = 0; offset < 0x100; offset++) {
             final int address = base + offset;
-            ppu.oam.set(cpu.memoryMapper.get(address), offset);
+            ppu.oam.set(cpu.read(address), offset);
         }
     }
 }

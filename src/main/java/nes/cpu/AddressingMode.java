@@ -72,8 +72,8 @@ enum AddressingMode {
         @Override
         Integer getAddress(Byte pointerLower, Byte pointerUpper, CPU cpu) {
             validateOperands(pointerLower, pointerUpper);
-            byte lower = cpu.memoryMapper.get(BinaryUtil.getAddress(pointerLower, pointerUpper));
-            byte upper = cpu.memoryMapper.get(BinaryUtil.getAddress(BinaryUtil.add(pointerLower, (byte)1).getOne(), pointerUpper));
+            byte lower = cpu.read(BinaryUtil.getAddress(pointerLower, pointerUpper));
+            byte upper = cpu.read(BinaryUtil.getAddress(BinaryUtil.add(pointerLower, (byte)1).getOne(), pointerUpper));
             return BinaryUtil.getAddress(lower, upper);
         }
     }, // (LOWER,UPPER) => value at (UPPER:LOWER):(UPPER:LOWER + 1%)
@@ -87,8 +87,8 @@ enum AddressingMode {
         @Override
         Integer getAddress(Byte operand1, Byte operand2, CPU cpu) {
             validateOperands(operand1, operand2);
-            byte lower = cpu.memoryMapper.get(BinaryUtil.getAddress(operand1, (byte)0));
-            byte upper = cpu.memoryMapper.get(BinaryUtil.getAddress(BinaryUtil.add(operand1, (byte)1).getOne(), (byte)0));
+            byte lower = cpu.read(BinaryUtil.getAddress(operand1, (byte)0));
+            byte upper = cpu.read(BinaryUtil.getAddress(BinaryUtil.add(operand1, (byte)1).getOne(), (byte)0));
             return BinaryUtil.getAddress(lower, upper) + Byte.toUnsignedInt(cpu.getY());
         }
     }; // (LOWER) => value at ((00:LOWER+1%):(00:LOWER) + Y)

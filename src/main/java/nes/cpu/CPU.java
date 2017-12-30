@@ -38,7 +38,7 @@ public class CPU implements Runnable {
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;
 
-    public final MemoryMapper memoryMapper;
+    private final MemoryMapper memoryMapper;
 
     private boolean flagNMI;
     // TODO handle IRQ
@@ -246,6 +246,22 @@ public class CPU implements Runnable {
             log.debug(sb.toString());
         }
         op.getInstruction().execute(address, value, this);
+    }
+
+    public byte read(int address) {
+        return memoryMapper.get(address);
+    }
+
+    public void write(byte value, int address) {
+        memoryMapper.set(value, address);
+    }
+
+    public byte increment(int address) {
+        return memoryMapper.increment(address);
+    }
+
+    public byte decrement(int address) {
+        return memoryMapper.decrement(address);
     }
 
     void setZeroFlag(ByteRegister reg) {

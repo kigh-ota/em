@@ -79,7 +79,7 @@ enum Instruction {
             if (address == null) {
                 cpu.setA(newValue);
             } else {
-                cpu.memoryMapper.set(newValue, address);
+                cpu.write(newValue, address);
             }
             cpu.setCarryFlag(BinaryUtil.getBit(oldValue, 7));
             cpu.setZeroFlag(newValue);
@@ -95,7 +95,7 @@ enum Instruction {
                 cpu.setA(newValue);
             } else {
                 // memory
-                cpu.memoryMapper.set(newValue, address);
+                cpu.write(newValue, address);
             }
             cpu.setCarryFlag(BinaryUtil.getBit(oldValue, 0));
             cpu.setZeroFlag(newValue);
@@ -111,7 +111,7 @@ enum Instruction {
                 cpu.setA(newValue);
             } else {
                 // memory
-                cpu.memoryMapper.set(newValue, address);
+                cpu.write(newValue, address);
             }
             cpu.setCarryFlag(BinaryUtil.getBit(oldValue, 7));
             cpu.setZeroFlag(newValue);
@@ -128,7 +128,7 @@ enum Instruction {
                 cpu.setA(newValue);
             } else {
                 // memory
-                cpu.memoryMapper.set(newValue, address);
+                cpu.write(newValue, address);
             }
             cpu.setCarryFlag(BinaryUtil.getBit(oldValue, 0));
             cpu.setZeroFlag(newValue);
@@ -498,17 +498,17 @@ enum Instruction {
     };
 
     void store(byte value, int address, CPU cpu) {
-        cpu.memoryMapper.set(value, address);
+        cpu.write(value, address);
     }
 
     void incrementMemory(int address, CPU cpu) {
-        byte value = cpu.memoryMapper.increment(address);
+        byte value = cpu.increment(address);
         cpu.setZeroFlag(value);
         cpu.setNegativeFlag(value);
     }
 
     void decrementMemory(int address, CPU cpu) {
-        byte value = cpu.memoryMapper.decrement(address);
+        byte value = cpu.decrement(address);
         cpu.setZeroFlag(value);
         cpu.setNegativeFlag(value);
     }
