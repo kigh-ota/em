@@ -9,11 +9,12 @@ import org.eclipse.collections.impl.tuple.Tuples;
 import static nes.ppu.PPU.NAMETABLE_MEMORY_SIZE;
 
 @Slf4j
-class MemoryMapper {
+public class MemoryMapper {
     private final PPU ppu;
 
+    public static final int PALETTE_RAM_OFFSET = 0x3F00;
+
     private static final int NAMETABLE_OFFSET = 0x2000;
-    static final int PALETTE_RAM_OFFSET = 0x3F00;
     private static final int SIZE = 0x4000;
 
     /**
@@ -54,7 +55,7 @@ class MemoryMapper {
         }
     }
 
-    byte get(int address) {
+    public byte get(int address) {
         if (log.isDebugEnabled()) {
             log.debug("Get: PPU {} (type={})", BinaryUtil.toHexString(address), getType(address));
         }
@@ -64,7 +65,7 @@ class MemoryMapper {
         return memory.get(offset);
     }
 
-    void set(byte value, int address) {
+    public void set(byte value, int address) {
         if (log.isDebugEnabled()) {
             log.debug("Set PPU {}={} (type={})", BinaryUtil.toHexString(address), BinaryUtil.toHexString(value), getType(address));
         }

@@ -6,6 +6,7 @@ import common.ByteRegister;
 import lombok.Getter;
 import lombok.Setter;
 import nes.cpu.CPU;
+import nes.ppu.register.*;
 import nes.screen.InfoScreen;
 import nes.screen.MainScreen;
 import nes.screen.MainScreenData;
@@ -52,7 +53,7 @@ public class PPU implements Runnable {
     public static final int OAM_SIZE = 0x100;
     static final int NAMETABLE_MEMORY_SIZE = 0x800;
 
-    final MemoryMapper memoryMapper;
+    public final MemoryMapper memoryMapper;
 
     final ByteArrayMemory characterRom;
     final ByteArrayMemory nametables;
@@ -72,7 +73,7 @@ public class PPU implements Runnable {
     @Getter
     private final Mirroring mirroring;
 
-    boolean addressLatch;
+    public boolean addressLatch;
 
     public PPU(ByteArrayMemory characterRom, Mirroring mirroring, MainScreen mainScreen, InfoScreen infoScreen) {
         memoryMapper = new MemoryMapper(this);

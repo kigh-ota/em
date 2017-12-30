@@ -1,6 +1,7 @@
-package nes.cpu;
+package nes.cpu.register;
 
 import common.ByteRegister;
+import nes.cpu.CPU;
 import nes.ppu.PPU;
 
 public class OAMDMARegister extends ByteRegister {

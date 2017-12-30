@@ -1,6 +1,7 @@
-package nes.ppu;
+package nes.ppu.register;
 
 import common.ByteRegister;
+import nes.ppu.ObjectAttributeMemory;
 
 public class OAMDataRegister extends ByteRegister {
 

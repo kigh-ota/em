@@ -1,12 +1,14 @@
-package nes.ppu;
+package nes.ppu.register;
 
 import common.BinaryUtil;
 import common.ByteRegister;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import nes.ppu.MemoryMapper;
+import nes.ppu.PPU;
 
 @Slf4j
-class AddressRegister extends ByteRegister {
+public class AddressRegister extends ByteRegister {
 
     final private PPU ppu;
 
@@ -16,7 +18,7 @@ class AddressRegister extends ByteRegister {
     @Getter
     private int tempAddress;
 
-    AddressRegister(PPU ppu) {
+    public AddressRegister(PPU ppu) {
         super((byte)0);
         this.ppu = ppu;
         tempAddress = 0;

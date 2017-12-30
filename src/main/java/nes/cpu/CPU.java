@@ -7,6 +7,9 @@ import common.IntegerRegister;
 import lombok.extern.slf4j.Slf4j;
 import nes.Controller;
 import nes.apu.APU;
+import nes.cpu.register.FlagRegister;
+import nes.cpu.register.JoystickRegister;
+import nes.cpu.register.OAMDMARegister;
 import nes.ppu.PPU;
 
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;
@@ -38,7 +41,7 @@ public class CPU implements Runnable {
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;
 
-    final MemoryMapper memoryMapper;
+    public final MemoryMapper memoryMapper;
 
     private boolean flagNMI;
     // TODO handle IRQ

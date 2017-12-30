@@ -1,6 +1,7 @@
-package nes.ppu;
+package nes.ppu.register;
 
 import common.ByteRegister;
+import nes.ppu.PPU;
 
 /**
  * https://wiki.nesdev.com/w/index.php/PPU_registers#Status_.28.242002.29_.3C_read
@@ -29,7 +30,7 @@ import common.ByteRegister;
 public class StatusRegister extends ByteRegister {
     final private PPU ppu;
 
-    StatusRegister(PPU ppu) {
+    public StatusRegister(PPU ppu) {
         super((byte)0);
         this.ppu = ppu;
     }
@@ -42,13 +43,13 @@ public class StatusRegister extends ByteRegister {
         return value;
     }
 
-    void setVBlank(boolean flag) {
+    public void setVBlank(boolean flag) {
         setBit(flag, 7);
     }
 
-    void setSprite0Hit(boolean flag) { setBit(flag, 6); }
+    public void setSprite0Hit(boolean flag) { setBit(flag, 6); }
 
-    void setSpriteOverflow(boolean flag) { setBit(flag, 5); }
+    public void setSpriteOverflow(boolean flag) { setBit(flag, 5); }
 
     @Override
     public boolean increment() {

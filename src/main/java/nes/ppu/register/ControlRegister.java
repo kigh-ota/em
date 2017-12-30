@@ -1,4 +1,4 @@
-package nes.ppu;
+package nes.ppu.register;
 
 import common.ByteRegister;
 
@@ -23,7 +23,7 @@ import common.ByteRegister;
  vertical blanking interval (0: off; 1: on)
  */
 public class ControlRegister extends ByteRegister {
-    ControlRegister() {
+    public ControlRegister() {
         super((byte) 0);
     }
 
@@ -31,11 +31,11 @@ public class ControlRegister extends ByteRegister {
         return getBit(2) ? 32 : 1;
     }
 
-    int getBackgroundPatternTable() {
+    public int getBackgroundPatternTable() {
         return getBit(4) ? 1 : 0;
     }
 
-    int getSpritePatternTable() { return getBit(3) ? 1 : 0; }
+    public int getSpritePatternTable() { return getBit(3) ? 1 : 0; }
 
     public enum SpriteSize { EIGHT_BY_EIGHT, EIGHT_BY_SIXTEEN };
 

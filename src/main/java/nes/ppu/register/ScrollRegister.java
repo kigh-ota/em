@@ -1,7 +1,8 @@
-package nes.ppu;
+package nes.ppu.register;
 
 import common.ByteRegister;
 import lombok.Getter;
+import nes.ppu.PPU;
 
 public class ScrollRegister extends ByteRegister {
 
@@ -10,7 +11,7 @@ public class ScrollRegister extends ByteRegister {
     @Getter private int x;
     @Getter private int y;
 
-    ScrollRegister(PPU ppu) {
+    public ScrollRegister(PPU ppu) {
         super((byte)0);
         this.ppu = ppu;
         x = 0;

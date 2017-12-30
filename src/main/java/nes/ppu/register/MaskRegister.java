@@ -1,4 +1,4 @@
-package nes.ppu;
+package nes.ppu.register;
 
 import common.ByteRegister;
 
@@ -16,16 +16,16 @@ import common.ByteRegister;
  |+-------- Emphasize green*
  +--------- Emphasize blue*
  */
-class MaskRegister extends ByteRegister {
-    MaskRegister(byte value) {
+public class MaskRegister extends ByteRegister {
+    public MaskRegister(byte value) {
         super(value);
     }
 
-    boolean enableBackground() {
+    public boolean enableBackground() {
         return getBit(3);
     }
 
-    boolean enableSprites() {
+    public boolean enableSprites() {
         return getBit(4);
     }
 }

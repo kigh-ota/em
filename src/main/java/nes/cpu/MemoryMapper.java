@@ -15,7 +15,7 @@ import static org.eclipse.collections.impl.tuple.Tuples.pair;
 
 @RequiredArgsConstructor
 @Slf4j
-class MemoryMapper {
+public class MemoryMapper {
     /**
      * https://wiki.nesdev.com/w/index.php/CPU_memory_map
      *
@@ -57,7 +57,7 @@ class MemoryMapper {
     private final PPU ppu;
     private final APU apu;
 
-    byte get(int address) {
+    public byte get(int address) {
         switch (getType(address)) {
             case REGISTER:
                 ByteRegister register = getReadableRegister(address);
