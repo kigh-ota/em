@@ -1,4 +1,4 @@
-package nes.cpu;
+package nes.cpu.register;
 
 import common.BinaryUtil;
 import common.IntegerRegister;

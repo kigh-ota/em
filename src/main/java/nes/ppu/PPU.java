@@ -54,7 +54,7 @@ public class PPU implements Runnable {
     public static final int OAM_SIZE = 0x100;
     static final int NAMETABLE_MEMORY_SIZE = 0x800;
 
-    public final MemoryMapper memoryMapper;
+    private final MemoryMapper memoryMapper;
 
     final ByteArrayMemory characterRom;
     final ByteArrayMemory nametables;
@@ -162,6 +162,14 @@ public class PPU implements Runnable {
                 frames++;
             }
         }
+    }
+
+    public byte read(int address) {
+        return memoryMapper.get(address);
+    }
+
+    public void write(byte value, int address) {
+        memoryMapper.set(value, address);
     }
 
     @Override

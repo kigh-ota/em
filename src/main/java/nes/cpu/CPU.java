@@ -7,6 +7,7 @@ import nes.apu.APU;
 import nes.cpu.register.FlagRegister;
 import nes.cpu.register.JoystickRegister;
 import nes.cpu.register.OAMDMARegister;
+import nes.cpu.register.ProgramCounter;
 import nes.ppu.PPU;
 
 import static nes.cpu.MemoryMapper.PROGRAM_OFFSET;

@@ -24,14 +24,14 @@ public class DataRegister implements ByteRegister {
         if (log.isDebugEnabled()) {
             log.debug("set PPU: addr={}", BinaryUtil.toHexString(address));
         }
-        ppu.memoryMapper.set(value, address);
+        ppu.write(value, address);
         ppu.regPPUADDR.incrementAddress();
     }
 
     @Override
     public byte get() {
         int address = ppu.regPPUADDR.getAddress();
-        byte value = ppu.memoryMapper.get(address);
+        byte value = ppu.read(address);
         byte ret = address < PALETTE_RAM_OFFSET ? readBuffer : value;
         readBuffer = value;
         log.debug("get PPU: addr={}, value={}", BinaryUtil.toHexString(address), BinaryUtil.toHexString(value));
