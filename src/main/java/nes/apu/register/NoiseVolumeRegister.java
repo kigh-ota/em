@@ -4,12 +4,11 @@ import common.BinaryUtil;
 import common.ByteRegister;
 import nes.apu.channel.NoiseChannel;
 
-public class NoiseVolumeRegister extends ByteRegister {
+public class NoiseVolumeRegister implements ByteRegister {
 
     private final NoiseChannel noise;
 
     public NoiseVolumeRegister(NoiseChannel noise) {
-        super((byte)0);
         this.noise = noise;
     }
 

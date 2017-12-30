@@ -9,14 +9,13 @@ import java.util.Map;
 
 import static nes.Controller.Button.*;
 
-public class JoystickRegister extends ByteRegister {
+public class JoystickRegister implements ByteRegister {
     private Controller controller;
     private boolean strobe;
     private Map<Controller.Button, Boolean> pressed;
     private Controller.Button readNext;
 
     public JoystickRegister(Controller controller) {
-        super((byte)0);
         strobe = false;
         pressed = new HashMap<>();
         pressed.put(null, true);

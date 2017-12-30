@@ -1,6 +1,7 @@
 package nes.apu;
 
 import common.ByteRegister;
+import common.ByteRegisterImpl;
 import lombok.extern.slf4j.Slf4j;
 import nes.apu.channel.NoiseChannel;
 import nes.apu.channel.PulseChannel;
@@ -32,19 +33,19 @@ public class APU {
     public final PulseTimerHighRegister regSQ2_HI; // $4007
 
     public final TriangleLinearRegister regTRI_LINEAR; // $4008
-    public final ByteRegister regUNUSED1 = new ByteRegister((byte)0); // $4009
+    public final ByteRegister regUNUSED1 = new ByteRegisterImpl((byte)0); // $4009
     public final TimerLowRegister regTRI_LO; // $400A
     public final TriangleTimerHighRegister regTRI_HI; // $400B
 
     public final NoiseVolumeRegister regNOISE_VOL; // $400C
-    public final ByteRegister regUNUSED2 = new ByteRegister((byte)0); // $400D
+    public final ByteRegister regUNUSED2 = new ByteRegisterImpl((byte)0); // $400D
     public final NoisePeriodRegister regNOISE_LO; // $400E
     public final NoiseLengthCounterRegister regNOISE_HI; // $400F
 
-    public final ByteRegister regDMC_FREQ = new ByteRegister((byte)0); // $4010
-    public final ByteRegister regDMC_RAW = new ByteRegister((byte)0); // $4011
-    public final ByteRegister regDMC_START = new ByteRegister((byte)0); // $4012
-    public final ByteRegister regDMC_LEN = new ByteRegister((byte)0); // $4013
+    public final ByteRegister regDMC_FREQ = new ByteRegisterImpl((byte)0); // $4010
+    public final ByteRegister regDMC_RAW = new ByteRegisterImpl((byte)0); // $4011
+    public final ByteRegister regDMC_START = new ByteRegisterImpl((byte)0); // $4012
+    public final ByteRegister regDMC_LEN = new ByteRegisterImpl((byte)0); // $4013
 
     public final StatusRegister regAPUSTATUS; // $4015
 

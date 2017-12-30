@@ -1,6 +1,6 @@
 package nes.ppu.register;
 
-import common.ByteRegister;
+import common.ByteRegisterImpl;
 
 /**
  7  bit  0
@@ -16,7 +16,7 @@ import common.ByteRegister;
  |+-------- Emphasize green*
  +--------- Emphasize blue*
  */
-public class MaskRegister extends ByteRegister {
+public class MaskRegister extends ByteRegisterImpl {
     public MaskRegister(byte value) {
         super(value);
     }

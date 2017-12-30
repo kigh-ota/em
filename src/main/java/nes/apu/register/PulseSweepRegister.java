@@ -5,12 +5,11 @@ import common.ByteRegister;
 import nes.apu.channel.Sweep;
 
 // Sweep
-public class PulseSweepRegister extends ByteRegister {
+public class PulseSweepRegister implements ByteRegister {
 
     private final Sweep sweep;
 
     public PulseSweepRegister(Sweep sweep) {
-        super((byte)0);
         this.sweep = sweep;
     }
 

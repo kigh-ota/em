@@ -3,13 +3,12 @@ package nes.ppu.register;
 import common.ByteRegister;
 import nes.ppu.ObjectAttributeMemory;
 
-public class OAMDataRegister extends ByteRegister {
+public class OAMDataRegister implements ByteRegister {
 
     private final ObjectAttributeMemory oam;
     private final ByteRegister regOAMADDR;
 
     public OAMDataRegister(ObjectAttributeMemory oam, ByteRegister regOAMADDR) {
-        super((byte)0);
         this.oam = oam;
         this.regOAMADDR = regOAMADDR;
     }

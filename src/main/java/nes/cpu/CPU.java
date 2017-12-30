@@ -1,9 +1,6 @@
 package nes.cpu;
 
-import common.BinaryUtil;
-import common.ByteArrayMemory;
-import common.ByteRegister;
-import common.IntegerRegister;
+import common.*;
 import lombok.extern.slf4j.Slf4j;
 import nes.Controller;
 import nes.apu.APU;
@@ -27,16 +24,16 @@ public class CPU implements Runnable {
     private final OperationFactory operationFactory;
 
     // https://wiki.nesdev.com/w/index.php/CPU_power_up_state
-    private final ByteRegister regA = new ByteRegister((byte)0);    // Accumulator
-    private final ByteRegister regX = new ByteRegister((byte)0);    // X Index
-    private final ByteRegister regY = new ByteRegister((byte)0);    // Y Index
-    private final ByteRegister regS = new ByteRegister((byte)0xFD);    // Stack Pointer
+    private final ByteRegister regA = new ByteRegisterImpl((byte)0);    // Accumulator
+    private final ByteRegister regX = new ByteRegisterImpl((byte)0);    // X Index
+    private final ByteRegister regY = new ByteRegisterImpl((byte)0);    // Y Index
+    private final ByteRegister regS = new ByteRegisterImpl((byte)0xFD);    // Stack Pointer
     private final FlagRegister regP = new FlagRegister((byte)0x34);
     private final IntegerRegister regPC = new ProgramCounter(PROGRAM_OFFSET, 16);
 
     final OAMDMARegister regOAMDMA; // $4014
     final ByteRegister regJOY1; // $4016
-    public final ByteRegister regJOY2 = new ByteRegister((byte)0); // $4017
+    public final ByteRegister regJOY2 = new ByteRegisterImpl((byte)0); // $4017
 
     final ByteArrayMemory ram;
     final ByteArrayMemory programRom;

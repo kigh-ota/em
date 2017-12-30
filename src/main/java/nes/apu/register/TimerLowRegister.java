@@ -3,12 +3,11 @@ package nes.apu.register;
 import common.ByteRegister;
 import nes.apu.channel.Channel;
 
-public class TimerLowRegister extends ByteRegister {
+public class TimerLowRegister implements ByteRegister {
 
     private final Channel pulse;
 
     public TimerLowRegister(Channel pulse) {
-        super((byte)0);
         this.pulse = pulse;
     }
 

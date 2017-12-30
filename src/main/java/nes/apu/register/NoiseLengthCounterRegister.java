@@ -3,12 +3,11 @@ package nes.apu.register;
 import common.ByteRegister;
 import nes.apu.channel.NoiseChannel;
 
-public class NoiseLengthCounterRegister extends ByteRegister {
+public class NoiseLengthCounterRegister implements ByteRegister {
 
     private final NoiseChannel noise;
 
     public NoiseLengthCounterRegister(NoiseChannel noise) {
-        super((byte)0);
         this.noise = noise;
     }
 

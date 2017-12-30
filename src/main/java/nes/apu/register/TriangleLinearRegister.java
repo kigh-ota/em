@@ -4,12 +4,11 @@ import common.BinaryUtil;
 import common.ByteRegister;
 import nes.apu.channel.TriangleChannel;
 
-public class TriangleLinearRegister extends ByteRegister {
+public class TriangleLinearRegister implements ByteRegister {
 
     private final TriangleChannel triangle;
 
     public TriangleLinearRegister(TriangleChannel triangle) {
-        super((byte)0);
         this.triangle = triangle;
     }
 

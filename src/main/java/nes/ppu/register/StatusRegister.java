@@ -1,6 +1,6 @@
 package nes.ppu.register;
 
-import common.ByteRegister;
+import common.ByteRegisterImpl;
 import nes.ppu.PPU;
 
 /**
@@ -27,7 +27,7 @@ import nes.ppu.PPU;
  * line); cleared after reading $2002 and at dot 1 of the
  * pre-render line.
  */
-public class StatusRegister extends ByteRegister {
+public class StatusRegister extends ByteRegisterImpl {
     final private PPU ppu;
 
     public StatusRegister(PPU ppu) {

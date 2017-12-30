@@ -1,14 +1,14 @@
 package nes.ppu.register;
 
 import common.BinaryUtil;
-import common.ByteRegister;
+import common.ByteRegisterImpl;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import nes.ppu.MemoryMapper;
 import nes.ppu.PPU;
 
 @Slf4j
-public class AddressRegister extends ByteRegister {
+public class AddressRegister extends ByteRegisterImpl {
 
     final private PPU ppu;
 

@@ -8,13 +8,12 @@ import nes.ppu.PPU;
 import static nes.ppu.MemoryMapper.PALETTE_RAM_OFFSET;
 
 @Slf4j
-public class DataRegister extends ByteRegister {
+public class DataRegister implements ByteRegister {
     private final PPU ppu;
 
     private byte readBuffer;
 
     public DataRegister(PPU ppu) {
-        super((byte)0);
         this.ppu = ppu;
         readBuffer = 0;
     }
@@ -40,13 +39,4 @@ public class DataRegister extends ByteRegister {
         return ret;
     }
 
-    @Override
-    public boolean increment() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean decrement() {
-        throw new UnsupportedOperationException();
-    }
 }

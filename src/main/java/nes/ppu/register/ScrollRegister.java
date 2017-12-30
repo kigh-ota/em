@@ -1,10 +1,10 @@
 package nes.ppu.register;
 
-import common.ByteRegister;
+import common.ByteRegisterImpl;
 import lombok.Getter;
 import nes.ppu.PPU;
 
-public class ScrollRegister extends ByteRegister {
+public class ScrollRegister extends ByteRegisterImpl {
 
     final private PPU ppu;
 
