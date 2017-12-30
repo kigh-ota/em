@@ -14,6 +14,7 @@ repositories {
 apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'org.junit.platform.gradle.plugin'
+apply plugin: 'pmd'
 
 mainClassName = 'EmulatorRunner'
 
